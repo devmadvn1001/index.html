@@ -136,14 +136,15 @@ function updateDTOffset() {
 }
 
 // ===== Hàm định dạng thời gian mm:ss:f (1 chữ số mili giây) =====
-function formatTime(ms) {
-    let totalSeconds = Math.floor(ms / 1000);
-    let milliseconds = Math.floor(ms % 1000);
+function formatTime(seconds) {
+    // seconds là số giây dạng số thực (ví dụ: 125.456)
+    let totalSeconds = Math.floor(seconds);
+    let milliseconds = Math.floor((seconds % 1) * 1000);
     
     // Đảm bảo mili giây luôn có 3 chữ số
     let msStr = milliseconds.toString().padStart(3, '0');
     
-    // Định dạng Giây:Mili
+    // Định dạng: Giây:Mili (bỏ phần tính phút)
     return `${totalSeconds}:${msStr}`;
 }
 
