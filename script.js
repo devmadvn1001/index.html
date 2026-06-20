@@ -1,8 +1,8 @@
 // ===== Lấy tham số từ URL =====
 const urlParams = new URLSearchParams(window.location.search);
 
-// Tham số m: user (tên người dùng)
-const paramM = urlParams.get('m') || 'reg*napromos1';
+// Tham số m: JSON chứa hot_box_str, latest_viewers_str
+const paramM = urlParams.get('m') || '';
 
 // Tham số r: chuỗi chứa coins, can_open, latest_viewers_str, end_time
 const paramR = urlParams.get('r') || '';
@@ -10,12 +10,25 @@ const paramR = urlParams.get('r') || '';
 // Tham số link: link tiktok (nếu có)
 const tiktokLink = urlParams.get('link') || '';
 
+// ===== Parse tham số m (JSON) =====
+let mData = {};
+try {
+    if (paramM) {
+        mData = JSON.parse(paramM);
+    }
+} catch (e) {
+    mData = {};
+}
+const hotBoxStr = mData.hot_box_str || '🏅🇩🇪';
+const latestViewersFromM = mData.latest_viewers_str || '';
+
 // ===== Parse tham số r =====
-// Định dạng: coins|can_open|latest_viewers_str|end_time
+// Định dạng: coins|can_open|latest_viewers_str|end_time|user
 let coins = 80;
 let canOpen = 25;
 let latestViewersStr = '';
 let endTime = 0; // end_time (giây)
+let userName = '';
 
 if (paramR) {
     const parts = paramR.split('|');
@@ -23,6 +36,11 @@ if (paramR) {
     if (parts.length >= 2 && parts[1]) canOpen = parseInt(parts[1]) || 0;
     if (parts.length >= 3) latestViewersStr = parts[2] || '';
     if (parts.length >= 4) endTime = parseInt(parts[3]) || 0;
+    if (parts.length >= 5) userName = parts[4] || '';
+}
+// Ưu tiên latest_viewers_str từ m nếu có (viewer count thực tế)
+if (latestViewersFromM) {
+    latestViewersStr = latestViewersFromM;
 }
 
 // ===== Biến toàn cục =====
@@ -38,13 +56,35 @@ const viewCountEl = document.getElementById('viewCount');
 const peopleCountEl = document.getElementById('peopleCount');
 const dTEl = document.getElementById('d-t');
 const usfEl = document.querySelector('.usf b');
+const hotBoxFlagEl = document.getElementById('hotBoxFlag');
+const viewerDisplayEl = document.getElementById('viewerDisplay');
+
+// ===== Hàm chuyển end_time (giây) thành hh:mm:ss =====
+function formatEndTimeHHMMSS(timestampSec) {
+    if (!timestampSec) return '--:--:--';
+    const d = new Date(timestampSec * 1000);
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const s = String(d.getSeconds()).padStart(2, '0');
+    return h + ':' + m + ':' + s;
+}
 
 // ===== Khởi tạo giá trị từ URL params =====
-if (usfEl) usfEl.textContent = '@' + paramM;
+if (usfEl) usfEl.textContent = '@' + userName;
 if (viewCountEl) viewCountEl.textContent = coins;
 if (peopleCountEl) peopleCountEl.textContent = canOpen;
-if (latestViewersStr && currentTimeEl) {
-    currentTimeEl.textContent = latestViewersStr;
+
+// Hiển thị hot_box_str (🏅🇹🇭) tại vị trí cờ
+if (hotBoxFlagEl) hotBoxFlagEl.textContent = hotBoxStr;
+
+// Hiển thị latest_viewers_str tại vị trí viewerDisplay
+if (viewerDisplayEl && latestViewersStr) {
+    viewerDisplayEl.textContent = '\u00A0 - \u00A0👀\u00A0' + latestViewersStr;
+}
+
+// Hiển thị end_time dạng hh:mm:ss tại currentTime
+if (currentTimeEl) {
+    currentTimeEl.textContent = formatEndTimeHHMMSS(endTime);
 }
 
 // ===== Hàm cập nhật hiển thị d-t (tổng offset) =====
@@ -111,15 +151,9 @@ function updateClock() {
     }
 }
 
-// ===== Cập nhật thời gian hiện tại (nếu không có latestViewersStr) =====
+// ===== Cập nhật thời gian hiện tại - không còn dùng vì currentTime hiển thị end_time =====
 function updateCurrentTime() {
-    if (latestViewersStr) return; // Nếu có latestViewersStr từ param thì giữ nguyên
-    if (!currentTimeEl) return;
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
-    currentTimeEl.textContent = h + ':' + m + ':' + s;
+    // currentTime giờ hiển thị end_time từ URL, không tự cập nhật
 }
 
 // ===== Điều chỉnh thời gian (offset) =====
@@ -229,11 +263,8 @@ document.getElementById('modal').addEventListener('click', function (e) {
 
 // ===== Khởi tạo =====
 updateClock();
-updateCurrentTime();
 updateDTOffset();
 
 // Cập nhật đồng hồ mỗi 10ms để hiển thị mili giây mượt
 setInterval(updateClock, 10);
 
-// Cập nhật thời gian hiện tại mỗi giây
-setInterval(updateCurrentTime, 1000);
