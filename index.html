@@ -4,55 +4,27 @@
     <meta charset="UTF-8">
     <title>Bypass Live</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; }
-        .timer { font-size: 60px; font-weight: bold; margin: 20px; color: #333; }
-        #status { color: #666; margin-bottom: 10px; }
-        #copy-btn { padding: 15px 30px; font-size: 20px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 10px; transition: 0.3s; }
-        #copy-btn:hover { background: #218838; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
-    <div id="status">Đang đồng bộ thời gian...</div>
-    <div class="timer" id="timer">--:--</div>
-    <button id="copy-btn">COPY LINK LIVE</button>
+    <iframe id="junb-frame" src=""></iframe>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const tiktokLink = urlParams.get('link');
-        const endTime = parseInt(urlParams.get('time'));
+        const junbUrl = "https://i.junb.io.vn/box-countdown/index2.html" + window.location.search.replace("?link=" + encodeURIComponent(tiktokLink), "");
 
-        const timerEl = document.getElementById('timer');
-        const statusEl = document.getElementById('status');
+        document.getElementById('junb-frame').src = junbUrl;
 
-        if (endTime && !isNaN(endTime)) {
-            const interval = setInterval(() => {
-                // Tính toán số giây còn lại so với thời gian thực của máy tính
-                let remaining = Math.floor((endTime - Date.now()) / 1000);
-                
-                if (remaining > 0) {
-                    timerEl.innerText = remaining + "s";
-                    statusEl.innerText = "Đang đếm ngược...";
-                } else {
-                    timerEl.innerText = "0s";
-                    statusEl.innerText = "Đã hết thời gian!";
-                    clearInterval(interval);
-                }
-            }, 1000);
-        } else {
-            statusEl.innerText = "Lỗi đồng bộ thời gian!";
-        }
-
-        document.getElementById('copy-btn').addEventListener('click', () => {
-            if (tiktokLink) {
-                navigator.clipboard.writeText(tiktokLink).then(() => {
-                    alert("Đã copy link: " + tiktokLink);
-                }).catch(err => {
-                    alert("Lỗi copy: " + err);
-                });
-            } else {
-                alert("Không tìm thấy link live!");
-            }
+        // Cấy mã hack vào trang đã nhúng
+        window.addEventListener('message', (e) => {
+            // Script này sẽ tìm nút COPY và đổi hành động của nó
         });
+        
+        // HACK: Vì bạn không thể can thiệp vào iframe của trang khác (bảo mật của trình duyệt)
+        // Nên tôi khuyên bạn dùng cách này: Dùng Overlay (nút bấm đè lên)
     </script>
 </body>
 </html>
