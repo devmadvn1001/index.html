@@ -2,29 +2,25 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Bypass Live</title>
+    <title>LẤY LINK LIVE</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-        iframe { width: 100%; height: 100%; border: none; }
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #fff; font-family: Arial; }
+        #copy-btn { padding: 20px 40px; font-size: 24px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 10px; }
     </style>
 </head>
 <body>
-    <iframe id="junb-frame" src=""></iframe>
-
+    <button id="copy-btn">BẤM ĐỂ LẤY LINK LIVE</button>
+    <p id="msg"></p>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const tiktokLink = urlParams.get('link');
-        const junbUrl = "https://i.junb.io.vn/box-countdown/index2.html" + window.location.search.replace("?link=" + encodeURIComponent(tiktokLink), "");
-
-        document.getElementById('junb-frame').src = junbUrl;
-
-        // Cấy mã hack vào trang đã nhúng
-        window.addEventListener('message', (e) => {
-            // Script này sẽ tìm nút COPY và đổi hành động của nó
-        });
-        
-        // HACK: Vì bạn không thể can thiệp vào iframe của trang khác (bảo mật của trình duyệt)
-        // Nên tôi khuyên bạn dùng cách này: Dùng Overlay (nút bấm đè lên)
+        const link = urlParams.get('link');
+        document.getElementById('copy-btn').onclick = () => {
+            if (link) {
+                navigator.clipboard.writeText(link);
+                document.getElementById('msg').innerText = "Đã Copy link thành công!";
+                alert("Link đã được copy, dán vào TikTok ngay!");
+            }
+        };
     </script>
 </body>
 </html>
