@@ -21,16 +21,17 @@
     <div class="container">
         <!-- Tên người dùng -->
         <div class="usf">
-            <b>@reg*napromos1</b>
+            <b id="usernameDisplay">@user</b>
         </div>
 
-        <!-- Thống kê -->
+        <!-- Thống kê: coins/can_open + hot_box + viewers -->
         <div class="stats">
             <div class="stat-item">
                 <span class="stat-icon">️</span>
                 <span id="viewCount">80</span>/<span id="peopleCount">25</span>
                 <span id="hotBoxFlag">🏅🇩🇪</span>
-                <span id="viewerDisplay" class="time-now">&nbsp; - &nbsp;👀&nbsp;159</span>
+                <span class="viewers-label">&nbsp; - &nbsp;👀&nbsp;</span>
+                <span id="viewersDisplay">159</span>
             </div>
         </div>
 
@@ -51,8 +52,8 @@
         <!-- Bộ đếm ngược -->
         <div class="cd" id="countdown">0</div>
 
-        <!-- Thời gian hiện tại -->
-        <div class="time-now" id="currentTime">20:35:47</div>
+        <!-- Thời gian kết thúc (end_time dạng hh:mm:ss) -->
+        <div class="end-time-label">⏳ Kết thúc lúc: <span id="endTimeDisplay">--:--:--</span></div>
 
         <!-- Trạng thái -->
         <div class="sm success-message" id="status">🎉 Rương đã mở!</div>
