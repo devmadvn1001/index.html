@@ -31,6 +31,20 @@ if (paramR) {
 let timeOffset = 0; // Tổng thời gian đã điều chỉnh (giây), dương = tăng, âm = giảm
 let link1 = null; // Link(1) người dùng nhập qua claimChangeBtn
 
+// ===== Khôi phục lịch sử từ localStorage =====
+try {
+    const savedOffset = localStorage.getItem('timeOffset');
+    if (savedOffset !== null) {
+        timeOffset = parseFloat(savedOffset) || 0;
+    }
+    const savedLink1 = localStorage.getItem('link1');
+    if (savedLink1) {
+        link1 = savedLink1;
+    }
+} catch (e) {
+    // localStorage không khả dụng
+}
+
 // ===== DOM refs =====
 const countdownEl = document.getElementById('countdown');
 const progressEl = document.getElementById('progress');
@@ -129,6 +143,10 @@ function updateClock() {
 // ===== Điều chỉnh thời gian (offset) =====
 function adjustTime(seconds) {
     timeOffset += seconds;
+    // Lưu vào localStorage
+    try {
+        localStorage.setItem('timeOffset', timeOffset);
+    } catch (e) {}
     updateDTOffset();
     // Cập nhật ngay đồng hồ
     updateClock();
@@ -170,12 +188,14 @@ document.getElementById('claimChangeBtn').addEventListener('click', function () 
     if (link1) {
         // Nếu đã có link(1), xóa link(1) đi
         link1 = null;
+        try { localStorage.removeItem('link1'); } catch (e) {}
         alert('Đã xoá link(1)!');
     } else {
         // Nếu chưa có link(1), cho phép nhập link mới
         var input = prompt('Nhập link(1):');
         if (input && input.trim() !== '') {
             link1 = input.trim();
+            try { localStorage.setItem('link1', link1); } catch (e) {}
             alert('Đã lưu link(1): ' + link1);
         }
     }
