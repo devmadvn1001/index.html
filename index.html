@@ -14,23 +14,17 @@
     <div class="timer" id="timer">--:--</div>
     <button id="copy-btn">COPY LINK LIVE</button>
 
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const tiktokLink = urlParams.get('link');
-        
-        // Giả lập đồng hồ đếm ngược (Bạn có thể thay đổi thời gian tùy ý)
-        let seconds = 30; 
-        const timerEl = document.getElementById('timer');
-        const interval = setInterval(() => {
-            seconds--;
-            timerEl.innerText = seconds > 0 ? seconds + "s" : "0s";
-            if (seconds <= 0) clearInterval(interval);
-        }, 1000);
+   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const tiktokLink = urlParams.get('link');
 
-        document.getElementById('copy-btn').onclick = () => {
-            navigator.clipboard.writeText(tiktokLink);
-            alert("Đã copy link: " + tiktokLink);
-        };
-    </script>
+    document.getElementById('copy-btn').addEventListener('click', () => {
+        if (tiktokLink) {
+            navigator.clipboard.writeText(tiktokLink).then(() => {
+                alert("Đã copy link live!");
+            });
+        }
+    });
+</script>
 </body>
 </html>
