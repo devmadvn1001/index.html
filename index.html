@@ -4,37 +4,55 @@
     <meta charset="UTF-8">
     <title>Bypass Live</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: white; }
-        .timer { font-size: 80px; font-weight: bold; color: #ff3b30; margin: 20px; }
-        #copy-btn { padding: 15px 50px; font-size: 24px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 10px; }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; }
+        .timer { font-size: 60px; font-weight: bold; margin: 20px; color: #333; }
+        #status { color: #666; margin-bottom: 10px; }
+        #copy-btn { padding: 15px 30px; font-size: 20px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 10px; transition: 0.3s; }
+        #copy-btn:hover { background: #218838; }
     </style>
 </head>
 <body>
-    <div id="status">Đang đợi live...</div>
-    <div class="timer" id="timer">30s</div>
+    <div id="status">Đang đồng bộ thời gian...</div>
+    <div class="timer" id="timer">--:--</div>
     <button id="copy-btn">COPY LINK LIVE</button>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const tiktokLink = urlParams.get('link');
-        
-        let seconds = 30;
-        const timerEl = document.getElementById('timer');
-        const interval = setInterval(() => {
-            seconds--;
-            timerEl.innerText = seconds + "s";
-            if (seconds <= 0) {
-                clearInterval(interval);
-                timerEl.innerText = "0s";
-            }
-        }, 1000);
+        const endTime = parseInt(urlParams.get('time'));
 
-        document.getElementById('copy-btn').onclick = () => {
+        const timerEl = document.getElementById('timer');
+        const statusEl = document.getElementById('status');
+
+        if (endTime && !isNaN(endTime)) {
+            const interval = setInterval(() => {
+                // Tính toán số giây còn lại so với thời gian thực của máy tính
+                let remaining = Math.floor((endTime - Date.now()) / 1000);
+                
+                if (remaining > 0) {
+                    timerEl.innerText = remaining + "s";
+                    statusEl.innerText = "Đang đếm ngược...";
+                } else {
+                    timerEl.innerText = "0s";
+                    statusEl.innerText = "Đã hết thời gian!";
+                    clearInterval(interval);
+                }
+            }, 1000);
+        } else {
+            statusEl.innerText = "Lỗi đồng bộ thời gian!";
+        }
+
+        document.getElementById('copy-btn').addEventListener('click', () => {
             if (tiktokLink) {
-                navigator.clipboard.writeText(tiktokLink);
-                alert("Đã Copy link Live!");
+                navigator.clipboard.writeText(tiktokLink).then(() => {
+                    alert("Đã copy link: " + tiktokLink);
+                }).catch(err => {
+                    alert("Lỗi copy: " + err);
+                });
+            } else {
+                alert("Không tìm thấy link live!");
             }
-        };
+        });
     </script>
 </body>
 </html>
