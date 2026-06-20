@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Bypass Live</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; }
+        .timer { font-size: 60px; font-weight: bold; margin: 20px; }
+        #copy-btn { padding: 15px 30px; font-size: 20px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div id="status">Đang đồng bộ thời gian...</div>
+    <div class="timer" id="timer">--:--</div>
+    <button id="copy-btn">COPY LINK LIVE</button>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const tiktokLink = urlParams.get('link');
+        
+        // Giả lập đồng hồ đếm ngược (Bạn có thể thay đổi thời gian tùy ý)
+        let seconds = 30; 
+        const timerEl = document.getElementById('timer');
+        const interval = setInterval(() => {
+            seconds--;
+            timerEl.innerText = seconds > 0 ? seconds + "s" : "0s";
+            if (seconds <= 0) clearInterval(interval);
+        }, 1000);
+
+        document.getElementById('copy-btn').onclick = () => {
+            navigator.clipboard.writeText(tiktokLink);
+            alert("Đã copy link: " + tiktokLink);
+        };
+    </script>
+</body>
+</html>
