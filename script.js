@@ -34,7 +34,6 @@ let link1 = null; // Link(1) người dùng nhập qua claimChangeBtn
 // ===== DOM refs =====
 const countdownEl = document.getElementById('countdown');
 const progressEl = document.getElementById('progress');
-const statusEl = document.getElementById('status');
 const endTimeDisplayEl = document.getElementById('endTimeDisplay');
 const viewCountEl = document.getElementById('viewCount');
 const peopleCountEl = document.getElementById('peopleCount');
@@ -109,7 +108,6 @@ function updateClock() {
     if (diffMs <= 0) {
         if (countdownEl) countdownEl.textContent = '00:00:0';
         if (progressEl) progressEl.style.width = '100%';
-        if (statusEl) statusEl.textContent = '🎉 Rương đã mở!';
         return;
     }
 
@@ -126,10 +124,6 @@ function updateClock() {
         progressEl.style.width = percent + '%';
     }
 
-    // Cập nhật trạng thái
-    if (statusEl) {
-        statusEl.textContent = '⏳ Đang đếm ngược...';
-    }
 }
 
 // ===== Điều chỉnh thời gian (offset) =====
