@@ -136,15 +136,15 @@ function updateDTOffset() {
 }
 
 // ===== Hàm định dạng thời gian mm:ss:f (1 chữ số mili giây) =====
-function formatTimeMMSSF(totalSeconds) {
-    const absSec = Math.abs(totalSeconds);
-    const minutes = Math.floor(absSec / 60);
-    const seconds = Math.floor(absSec % 60);
-    const milliseconds = Math.floor((absSec - Math.floor(absSec)) * 1000);
-    const mm = String(minutes).padStart(2, '0');
-    const ss = String(seconds).padStart(2, '0');
-    const f = String(Math.floor(milliseconds / 100));
-    return mm + ':' + ss + ':' + f;
+function formatTime(ms) {
+    let totalSeconds = Math.floor(ms / 1000);
+    let milliseconds = Math.floor(ms % 1000);
+    
+    // Đảm bảo mili giây luôn có 3 chữ số
+    let msStr = milliseconds.toString().padStart(3, '0');
+    
+    // Định dạng Giây:Mili
+    return `${totalSeconds}:${msStr}`;
 }
 
 // ===== Lấy thời gian hiện tại (ms) =====
