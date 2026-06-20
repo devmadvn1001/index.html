@@ -212,6 +212,17 @@ body {
     transform: scale(1.02);
 }
 
+/* Device ID */
+.device-id {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    cursor: default;
+    -webkit-user-select: all;
+    user-select: all;
+}
+
 /* Container ghi chú */
 .note-container {
     display: flex;

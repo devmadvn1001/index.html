@@ -31,19 +31,67 @@ if (paramR) {
 let timeOffset = 0; // Tổng thời gian đã điều chỉnh (giây), dương = tăng, âm = giảm
 let link1 = null; // Link(1) người dùng nhập qua claimChangeBtn
 
-// ===== Khôi phục lịch sử từ localStorage =====
-try {
-    const savedOffset = localStorage.getItem('timeOffset');
-    if (savedOffset !== null) {
-        timeOffset = parseFloat(savedOffset) || 0;
-    }
-    const savedLink1 = localStorage.getItem('link1');
-    if (savedLink1) {
-        link1 = savedLink1;
-    }
-} catch (e) {
-    // localStorage không khả dụng
+// ===== Device ID & localStorage =====
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0;
+        var v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
+
+var deviceId = '';
+
+// Khôi phục / tạo Device ID
+(function initDeviceId() {
+    try {
+        var testKey = '__test_ls__';
+        localStorage.setItem(testKey, '1');
+        localStorage.removeItem(testKey);
+
+        deviceId = localStorage.getItem('deviceId');
+        if (!deviceId) {
+            deviceId = generateUUID();
+            localStorage.setItem('deviceId', deviceId);
+        }
+    } catch (e) {
+        deviceId = 'local-' + generateUUID();
+    }
+})();
+
+// Hiển thị device ID
+var deviceIdEl = document.getElementById('deviceIdDisplay');
+if (deviceIdEl) {
+    deviceIdEl.textContent = 'ID: ' + deviceId.slice(0, 8) + '...';
+    deviceIdEl.title = deviceId; // Full ID khi hover
+}
+
+// Khôi phục cấu hình đã lưu
+(function loadSavedState() {
+    try {
+        var testKey = '__test_ls__';
+        localStorage.setItem(testKey, '1');
+        localStorage.removeItem(testKey);
+
+        var savedOffset = localStorage.getItem('timeOffset');
+        if (savedOffset !== null && savedOffset !== undefined) {
+            timeOffset = parseFloat(savedOffset);
+            if (isNaN(timeOffset)) timeOffset = 0;
+        }
+
+        var savedLink1 = localStorage.getItem('link1');
+        if (savedLink1 && savedLink1 !== 'null' && savedLink1 !== 'undefined') {
+            link1 = savedLink1;
+        }
+
+        var savedBgColor = localStorage.getItem('bgColor');
+        if (savedBgColor) {
+            document.body.style.backgroundColor = savedBgColor;
+        }
+    } catch (e) {
+        // localStorage không khả dụng, giữ giá trị mặc định
+    }
+})();
 
 // ===== DOM refs =====
 const countdownEl = document.getElementById('countdown');
@@ -143,9 +191,11 @@ function updateClock() {
 // ===== Điều chỉnh thời gian (offset) =====
 function adjustTime(seconds) {
     timeOffset += seconds;
+    // Làm tròn 2 chữ số thập phân để tránh sai số
+    timeOffset = Math.round(timeOffset * 100) / 100;
     // Lưu vào localStorage
     try {
-        localStorage.setItem('timeOffset', timeOffset);
+        localStorage.setItem('timeOffset', String(timeOffset));
     } catch (e) {}
     updateDTOffset();
     // Cập nhật ngay đồng hồ
@@ -195,7 +245,7 @@ document.getElementById('claimChangeBtn').addEventListener('click', function () 
         var input = prompt('Nhập link(1):');
         if (input && input.trim() !== '') {
             link1 = input.trim();
-            try { localStorage.setItem('link1', link1); } catch (e) {}
+            try { localStorage.setItem('link1', String(link1)); } catch (e) {}
             alert('Đã lưu link(1): ' + link1);
         }
     }
@@ -240,6 +290,7 @@ document.getElementById('btn-submit').addEventListener('click', function () {
     var end = parseFloat(document.getElementById('end_seconds').value) || 0;
     var color = document.getElementById('hex_background_color').value;
     document.body.style.backgroundColor = color;
+    try { localStorage.setItem('bgColor', color); } catch (e) {}
     var modal = document.getElementById('modal');
     if (modal) modal.style.display = 'none';
 });
