@@ -2,23 +2,37 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>LẤY LINK LIVE</title>
+    <title>Bypass Live</title>
     <style>
-        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #fff; font-family: Arial; }
-        #copy-btn { padding: 20px 40px; font-size: 24px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #1a1a1a; color: white; }
+        .timer { font-size: 80px; font-weight: bold; color: #ff3b30; margin: 20px; }
+        #copy-btn { padding: 15px 50px; font-size: 24px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 10px; }
     </style>
 </head>
 <body>
-    <button id="copy-btn">BẤM ĐỂ LẤY LINK LIVE</button>
-    <p id="msg"></p>
+    <div id="status">Đang đợi live...</div>
+    <div class="timer" id="timer">30s</div>
+    <button id="copy-btn">COPY LINK LIVE</button>
+
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const link = urlParams.get('link');
+        const tiktokLink = urlParams.get('link');
+        
+        let seconds = 30;
+        const timerEl = document.getElementById('timer');
+        const interval = setInterval(() => {
+            seconds--;
+            timerEl.innerText = seconds + "s";
+            if (seconds <= 0) {
+                clearInterval(interval);
+                timerEl.innerText = "0s";
+            }
+        }, 1000);
+
         document.getElementById('copy-btn').onclick = () => {
-            if (link) {
-                navigator.clipboard.writeText(link);
-                document.getElementById('msg').innerText = "Đã Copy link thành công!";
-                alert("Link đã được copy, dán vào TikTok ngay!");
+            if (tiktokLink) {
+                navigator.clipboard.writeText(tiktokLink);
+                alert("Đã Copy link Live!");
             }
         };
     </script>
