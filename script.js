@@ -56,15 +56,15 @@ function updateDTOffset() {
     dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
 }
 
-// ===== Hàm định dạng thời gian mm:ss:f (mili giây 1 chữ số) =====
-function formatTimeMMSSFFF(totalSeconds) {
+// ===== Hàm định dạng thời gian mm:ss:f (1 chữ số mili giây) =====
+function formatTimeMMSSF(totalSeconds) {
     const absSec = Math.abs(totalSeconds);
     const minutes = Math.floor(absSec / 60);
     const seconds = Math.floor(absSec % 60);
     const milliseconds = Math.floor((absSec - Math.floor(absSec)) * 1000);
     const mm = String(minutes).padStart(2, '0');
     const ss = String(seconds).padStart(2, '0');
-    const f = Math.floor(milliseconds / 100); // Lấy chữ số hàng trăm (1/10 giây)
+    const f = String(Math.floor(milliseconds / 100));
     return mm + ':' + ss + ':' + f;
 }
 
@@ -77,7 +77,7 @@ function getCurrentTimeMs() {
 function updateClock() {
     if (!endTime) {
         // Nếu không có end_time, hiển thị 00:00:00
-        if (countdownEl) countdownEl.textContent = '00:00:00';
+        if (countdownEl) countdownEl.textContent = '00:00:0';
         return;
     }
 
@@ -88,14 +88,14 @@ function updateClock() {
     const diffMs = adjustedEndMs - now;
 
     if (diffMs <= 0) {
-        if (countdownEl) countdownEl.textContent = '00:00:00';
+        if (countdownEl) countdownEl.textContent = '00:00:0';
         if (progressEl) progressEl.style.width = '100%';
         if (statusEl) statusEl.textContent = '🎉 Rương đã mở!';
         return;
     }
 
     const diffSeconds = diffMs / 1000;
-    if (countdownEl) countdownEl.textContent = formatTimeMMSSFFF(diffSeconds);
+    if (countdownEl) countdownEl.textContent = formatTimeMMSSF(diffSeconds);
 
     // Cập nhật thanh tiến trình
     if (progressEl && endTimeMs > 0) {
@@ -158,19 +158,6 @@ document.getElementById('claimBtn').addEventListener('click', function () {
     // Nếu có link(1), mở link(1) trong tab mới
     if (link1) {
         window.open(link1, '_blank');
-    }
-});
-
-// ===== Nút ? (claimCopyBtn) =====
-document.getElementById('claimCopyBtn').addEventListener('click', function () {
-    if (tiktokLink) {
-        navigator.clipboard.writeText(tiktokLink).then(function () {
-            alert('Đã sao chép: ' + tiktokLink);
-        }).catch(function () {
-            alert('Không thể sao chép');
-        });
-    } else {
-        alert('Không có link TikTok');
     }
 });
 
