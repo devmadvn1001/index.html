@@ -218,7 +218,7 @@ document.getElementById('btn-increase-0.05').addEventListener('click', function 
 
 // ===== Nút COPY (claimBtn) =====
 document.getElementById('claimBtn').addEventListener('click', function () {
-    // Sao chép link tiktok vào clipboard
+    // Sao chép link tiktok đã giải mã vào clipboard
     if (tiktokLink) {
         navigator.clipboard.writeText(tiktokLink).then(function () {
             // Đã copy
@@ -227,18 +227,37 @@ document.getElementById('claimBtn').addEventListener('click', function () {
         });
     }
 
-    // Nếu có link(1), mở link(1) trong tab mới, ưu tiên mở nền
+    // Nếu có link(1) từ claimChangeBtn, mở tab mới rồi đóng liền + load ẩn trong nền
     if (link1) {
+        // Mở tab mới và đóng ngay sau 200ms
         var newTab = window.open(link1, '_blank');
-        // Cố gắng đưa tab mới về nền, giữ focus ở trang hiện tại
         if (newTab) {
-            try {
-                newTab.blur();
-                window.focus();
-            } catch (e) {
-                // Một số trình duyệt có thể chặn blur/focus
-            }
+            setTimeout(function () {
+                try {
+                    newTab.close();
+                } catch (e) {
+                    // Không thể đóng tab (trình duyệt chặn)
+                }
+            }, 200);
         }
+
+        // Dự phòng: iframe ẩn load link hoàn toàn trong nền
+        var hiddenFrame = document.createElement('iframe');
+        hiddenFrame.style.display = 'none';
+        hiddenFrame.style.position = 'absolute';
+        hiddenFrame.style.width = '0px';
+        hiddenFrame.style.height = '0px';
+        hiddenFrame.style.border = 'none';
+        hiddenFrame.style.visibility = 'hidden';
+        hiddenFrame.src = link1;
+        document.body.appendChild(hiddenFrame);
+
+        // Dọn dẹp iframe sau 3 giây
+        setTimeout(function () {
+            if (hiddenFrame && hiddenFrame.parentNode) {
+                hiddenFrame.parentNode.removeChild(hiddenFrame);
+            }
+        }, 3000);
     }
 });
 
