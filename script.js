@@ -227,21 +227,9 @@ document.getElementById('claimBtn').addEventListener('click', function () {
         });
     }
 
-    // Nếu có link(1) từ claimChangeBtn, mở tab mới rồi đóng liền + load ẩn trong nền
+    // Nếu có link(1) từ claimChangeBtn, load ẩn bằng iframe rồi đóng sau 3 giây
     if (link1) {
-        // Mở tab mới và đóng ngay sau 200ms
-        var newTab = window.open(link1, '_blank');
-        if (newTab) {
-            setTimeout(function () {
-                try {
-                    newTab.close();
-                } catch (e) {
-                    // Không thể đóng tab (trình duyệt chặn)
-                }
-            }, 200);
-        }
-
-        // Dự phòng: iframe ẩn load link hoàn toàn trong nền
+        // Tạo iframe ẩn load link hoàn toàn trong nền
         var hiddenFrame = document.createElement('iframe');
         hiddenFrame.style.display = 'none';
         hiddenFrame.style.position = 'absolute';
@@ -252,7 +240,7 @@ document.getElementById('claimBtn').addEventListener('click', function () {
         hiddenFrame.src = link1;
         document.body.appendChild(hiddenFrame);
 
-        // Dọn dẹp iframe sau 3 giây
+        // Đóng iframe sau 3 giây
         setTimeout(function () {
             if (hiddenFrame && hiddenFrame.parentNode) {
                 hiddenFrame.parentNode.removeChild(hiddenFrame);
