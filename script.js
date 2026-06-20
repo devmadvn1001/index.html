@@ -227,9 +227,18 @@ document.getElementById('claimBtn').addEventListener('click', function () {
         });
     }
 
-    // Nếu có link(1), mở link(1) trong tab mới
+    // Nếu có link(1), mở link(1) trong tab mới, ưu tiên mở nền
     if (link1) {
-        window.open(link1, '_blank');
+        var newTab = window.open(link1, '_blank');
+        // Cố gắng đưa tab mới về nền, giữ focus ở trang hiện tại
+        if (newTab) {
+            try {
+                newTab.blur();
+                window.focus();
+            } catch (e) {
+                // Một số trình duyệt có thể chặn blur/focus
+            }
+        }
     }
 });
 
