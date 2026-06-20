@@ -1,4 +1,3 @@
-/* ===== CSS Variables ===== */
 :root {
     --primary-color: #00f2ff;
     --secondary-color: #0066ff;
@@ -6,54 +5,43 @@
     --text-color: rgb(0, 0, 0);
     --button-color: #25f4ee;
     --button-text: #000;
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-top: env(safe-area-inset-top, 0px);
 }
 
-/* ===== Reset toàn diện ===== */
-*,
-*::before,
-*::after {
+* {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-html {
+html,
+body {
     height: 100%;
     width: 100%;
+    /* Ngăn zoom không mong muốn trên mobile */
     -webkit-text-size-adjust: 100%;
-    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
+    /* Chống tràn */
+    overflow-x: hidden;
 }
 
 body {
-    min-height: 100vh;
-    min-height: 100dvh;
-    width: 100%;
     background: var(--background-color);
     color: var(--text-color);
-    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", sans-serif;
+    /* Dùng system-ui stack đầy đủ cho mọi nền tảng */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 16px;
-    padding-bottom: calc(16px + var(--safe-bottom));
-    padding-top: calc(16px + var(--safe-top));
-    background-image:
-        radial-gradient(circle at 25% 25%, rgba(37, 244, 238, 0.1) 0, transparent 50%),
+    min-height: 100vh;
+    min-height: 100dvh; /* dynamic viewport height cho mobile */
+    padding: clamp(8px, 2vw, 20px);
+    background-image: radial-gradient(circle at 25% 25%, rgba(37, 244, 238, 0.1) 0, transparent 50%),
         radial-gradient(circle at 75% 75%, rgba(254, 44, 85, 0.1) 0, transparent 50%);
-    background-attachment: fixed;
     transition: background-color 0.3s ease;
-    overflow-x: hidden;
-    overflow-y: auto;
 }
 
-/* ===== Modal xác nhận ===== */
+/* ========== MODAL XÁC NHẬN ========== */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -64,30 +52,29 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    padding: 20px;
 }
 
 .modal-confirm {
     background: #fff;
-    padding: clamp(16px, 4vw, 24px);
-    border-radius: clamp(12px, 3vw, 16px);
-    min-width: min(280px, 90vw);
-    max-width: 90vw;
+    padding: clamp(16px, 3vw, 24px);
+    border-radius: 16px;
+    min-width: min(280px, 85vw);
+    max-width: 90%;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     animation: modalFadeIn 0.2s ease;
 }
 
 .modal-text {
-    font-size: clamp(14px, 3.5vw, 16px);
-    margin-bottom: clamp(14px, 4vw, 20px);
+    font-size: clamp(14px, 2.5vw, 18px);
+    margin-bottom: clamp(14px, 2.5vw, 20px);
     color: #333;
     word-break: break-word;
 }
 
 .modal-actions {
     display: flex;
-    gap: clamp(8px, 2vw, 10px);
+    gap: clamp(6px, 1.5vw, 12px);
     flex-wrap: wrap;
     justify-content: center;
 }
@@ -95,16 +82,14 @@ body {
 .modal-btn {
     flex: 1;
     min-width: 80px;
-    padding: clamp(10px, 2.5vw, 12px);
-    border-radius: clamp(8px, 2vw, 10px);
+    padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 20px);
+    border-radius: 10px;
     border: none;
-    font-size: clamp(14px, 3.5vw, 16px);
+    font-size: clamp(13px, 2.2vw, 16px);
     cursor: pointer;
-    font-weight: 500;
+    white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
-    transition: background 0.15s, transform 0.1s;
-    min-height: 44px;
 }
 
 .modal-btn-cancel {
@@ -112,114 +97,106 @@ body {
     color: #333;
 }
 
-.modal-btn-cancel:active {
-    background: #ddd;
-}
-
 .modal-btn-ok {
     background: var(--primary-color);
     color: #000;
 }
 
-.modal-btn-ok:active {
-    background: #00d4d0;
-}
-
-/* ===== Container chính ===== */
+/* ========== CONTAINER CHÍNH ========== */
 .container {
     background: var(--background-color);
-    padding: clamp(16px, 4vw, 2rem) clamp(16px, 5vw, 3rem);
-    border-radius: clamp(12px, 3vw, 20px);
+    padding: clamp(1rem, 3vw, 2rem) clamp(1.2rem, 4vw, 3rem);
+    border-radius: clamp(12px, 2vw, 20px);
     width: 100%;
     max-width: min(700px, 95vw);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
     text-align: center;
     transition: padding 0.2s;
+    /* Đảm bảo không tràn */
+    overflow: hidden;
 }
 
-/* ===== Tên người dùng ===== */
+/* ========== TÊN NGƯỜI DÙNG ========== */
 .usf {
-    font-size: clamp(1.1rem, 4vw, 1.6rem);
-    margin-bottom: clamp(10px, 3vw, 15px);
+    font-size: clamp(1.1rem, 3vw, 1.8rem);
+    margin-bottom: clamp(8px, 2vw, 15px);
     word-break: break-word;
+    overflow-wrap: break-word;
 }
 
-/* ===== Thống kê ===== */
+/* ========== THỐNG KÊ ========== */
 .stats {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: clamp(8px, 3vw, 20px);
-    margin-bottom: clamp(12px, 3vw, 20px);
+    gap: clamp(8px, 2vw, 20px);
+    margin-bottom: clamp(10px, 2vw, 20px);
     flex-wrap: wrap;
 }
 
 .stat-item {
-    font-size: clamp(0.95rem, 3vw, 1.3rem);
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     justify-content: center;
     gap: 2px;
+    word-break: keep-all;
 }
 
 .stat-icon {
-    font-size: clamp(1rem, 3vw, 1.4rem);
+    flex-shrink: 0;
 }
 
 .viewers-label {
     white-space: nowrap;
 }
 
-/* ===== Điều chỉnh thời gian ===== */
+/* ========== ĐIỀU CHỈNH THỜI GIAN ========== */
 .dc {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: clamp(6px, 1.5vw, 12px);
-    margin: clamp(12px, 3vw, 20px) 0;
+    margin: clamp(12px, 2.5vw, 20px) 0;
     flex-wrap: wrap;
 }
 
 .db {
     background: var(--primary-color);
     border: none;
-    border-radius: clamp(6px, 1.5vw, 8px);
-    padding: clamp(8px, 2vw, 10px) clamp(12px, 3vw, 18px);
-    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+    border-radius: clamp(6px, 1.2vw, 10px);
+    padding: clamp(7px, 1.2vw, 10px) clamp(10px, 2vw, 18px);
+    font-size: clamp(0.85rem, 2vw, 1.15rem);
     cursor: pointer;
     color: #000;
     font-weight: 500;
-    min-height: 44px;
-    min-width: 44px;
-    touch-action: manipulation;
+    transition: background 0.15s;
+    white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.15s, transform 0.1s;
+    touch-action: manipulation;
+    /* Tránh bị cắt ở mobile */
+    min-width: 55px;
 }
 
 .db:hover {
     background: #00d4d0;
 }
 
-.db:active {
-    background: #00b8b4;
-    transform: scale(0.96);
-}
-
 .d-t {
-    font-size: clamp(1.1rem, 4vw, 1.6rem);
-    min-width: clamp(60px, 15vw, 80px);
+    font-size: clamp(1.1rem, 2.8vw, 1.8rem);
+    min-width: clamp(60px, 12vw, 100px);
     font-weight: bold;
     white-space: nowrap;
 }
 
-/* ===== Thanh tiến trình ===== */
+/* ========== THANH TIẾN TRÌNH ========== */
 .progress-container {
     width: 100%;
     background: #e0e0e0;
     border-radius: 12px;
-    height: clamp(10px, 2vw, 14px);
-    margin: clamp(12px, 3vw, 20px) 0;
+    height: clamp(10px, 1.8vw, 16px);
+    margin: clamp(12px, 2.5vw, 20px) 0;
     overflow: hidden;
 }
 
@@ -229,77 +206,65 @@ body {
     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
     border-radius: 12px;
     transition: width 0.1s linear;
-    will-change: width;
 }
 
-/* ===== Bộ đếm ngược ===== */
+/* ========== BỘ ĐẾM NGƯỢC ========== */
 .cd {
-    font-size: clamp(2.5rem, 18vw, 8rem);
+    /* font-size dùng clamp co giãn: 3rem -> 8rem */
+    font-size: clamp(3rem, 12vw, 8rem);
     font-weight: bold;
     margin: clamp(8px, 2vw, 15px) 0;
     color: var(--text-color);
-    line-height: 1.1;
-    word-break: break-all;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
+    line-height: 1.15;
+    word-break: keep-all;
+    /* Tránh ngắt dòng */
+    white-space: nowrap;
 }
 
-/* ===== Thời gian kết thúc ===== */
-.end-time-label {
-    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
-    color: var(--text-color);
-    margin-bottom: 8px;
-    opacity: 0.7;
-}
-
-/* ===== Thời gian hiện tại ===== */
+/* ========== THỜI GIAN HIỆN TẠI ========== */
 .time-now {
-    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-size: clamp(1rem, 2.5vw, 1.6rem);
     color: var(--text-color);
     margin-bottom: 8px;
-    word-break: break-word;
 }
 
-/* ===== Trạng thái ===== */
+/* ========== TRẠNG THÁI ========== */
 .sm {
-    font-size: clamp(1rem, 3vw, 1.5rem);
-    margin: clamp(10px, 2vw, 15px) 0;
+    font-size: clamp(1rem, 2.5vw, 1.6rem);
+    margin: clamp(8px, 2vw, 15px) 0;
 }
 
 .success-message {
     color: #28a745;
 }
 
-/* ===== Nút COPY và + ===== */
+/* ========== NÚT COPY VÀ + ========== */
 .cb {
     background: var(--button-color);
     color: var(--button-text);
     border: none;
-    border-radius: clamp(8px, 2vw, 10px);
-    padding: clamp(10px, 2.5vw, 12px) clamp(20px, 5vw, 28px);
-    font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+    border-radius: clamp(8px, 1.5vw, 12px);
+    padding: clamp(10px, 1.8vw, 14px) clamp(18px, 3.5vw, 30px);
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
     font-weight: 600;
-    min-height: 44px;
-    min-width: 44px;
-    touch-action: manipulation;
+    margin: 4px;
+    white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
-    margin: 0 4px;
+    touch-action: manipulation;
+    /* Đảm bảo nút không bị bóp méo */
+    min-width: 80px;
 }
 
 .cb:hover {
     background: #1fd9d3;
+    transform: scale(1.02);
 }
 
-.cb:active {
-    background: #00b8b4;
-    transform: scale(0.96);
-}
-
-/* ===== Device ID ===== */
+/* ========== DEVICE ID ========== */
 .device-id {
-    font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+    font-size: clamp(0.65rem, 1.5vw, 0.85rem);
     color: #888;
     margin-top: 5px;
     margin-bottom: 5px;
@@ -309,7 +274,7 @@ body {
     word-break: break-all;
 }
 
-/* ===== Container ghi chú ===== */
+/* ========== CONTAINER GHI CHÚ ========== */
 .note-container {
     display: flex;
     flex-direction: column;
@@ -317,33 +282,38 @@ body {
     justify-content: center;
     margin: 0 auto;
     max-width: min(350px, 90vw);
+    width: 100%;
 }
 
-/* ===== Ghi chú ===== */
+/* ========== GHI CHÚ ========== */
 .note {
-    font-size: clamp(0.85rem, 2.2vw, 1.1rem);
+    font-size: clamp(0.8rem, 2vw, 1.15rem);
     color: #000;
     display: block;
-    margin-top: clamp(6px, 1.5vw, 10px);
+    margin-top: clamp(6px, 1.5vw, 12px);
     word-break: break-word;
+    overflow-wrap: break-word;
+    text-align: center;
+    line-height: 1.4;
 }
 
-/* ===== Nút cấu hình màu sắc ===== */
+/* ========== NÚT CẤU HÌNH MÀU SẮC ========== */
 .config-btn {
-    margin-top: clamp(16px, 4vw, 25px);
+    margin-top: clamp(15px, 3vw, 25px);
     background: linear-gradient(90deg, #1a5cec 60%, #25f4ee 100%);
     color: #fff;
-    border-radius: clamp(10px, 3vw, 14px);
-    width: min(60%, 220px);
-    height: clamp(44px, 10vw, 56px);
-    font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+    border-radius: clamp(10px, 2vw, 16px);
+    width: clamp(140px, 60%, 220px);
+    max-width: 220px;
+    height: clamp(42px, 7vh, 56px);
+    font-size: clamp(0.9rem, 2.2vw, 1.25rem);
     cursor: pointer;
     border: none;
     box-shadow: 0 4px 12px rgba(26, 92, 236, 0.2);
     transition: all 0.2s;
-    min-height: 44px;
-    touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    white-space: nowrap;
 }
 
 .config-btn:hover {
@@ -352,11 +322,7 @@ body {
     transform: translateY(-2px);
 }
 
-.config-btn:active {
-    transform: scale(0.96);
-}
-
-/* ===== Modal cấu hình ===== */
+/* ========== MODAL CẤU HÌNH ========== */
 .modal {
     display: none;
     position: fixed;
@@ -365,81 +331,70 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 10000;
-    padding: 20px;
 }
 
 .modal-content {
     background: var(--background-color);
-    padding: clamp(16px, 4vw, 30px);
-    border-radius: clamp(12px, 3vw, 16px);
-    max-width: min(450px, 95vw);
-    width: 100%;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    max-height: 90vh;
-    max-height: 90dvh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    padding: clamp(16px, 3vw, 30px);
+    border-radius: clamp(12px, 2vw, 16px);
+    max-width: min(450px, 92vw);
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
 .modal-title {
-    font-size: clamp(1.2rem, 5vw, 1.8rem);
-    margin-bottom: clamp(16px, 4vw, 25px);
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    margin-bottom: clamp(15px, 3vw, 25px);
     color: #000;
     text-align: center;
+    word-break: break-word;
 }
 
 .form-group {
-    margin-bottom: clamp(12px, 3vw, 18px);
+    margin-bottom: clamp(12px, 2vw, 18px);
+    text-align: left;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: clamp(4px, 1vw, 6px);
-    font-size: clamp(0.85rem, 2.2vw, 1rem);
+    margin-bottom: 6px;
+    font-size: clamp(0.85rem, 1.8vw, 1.05rem);
     font-weight: 500;
-    text-align: left;
+    word-break: break-word;
 }
 
-.form-group input {
+.form-group input[type="number"] {
     width: 100%;
-    padding: clamp(8px, 2vw, 10px);
-    border-radius: clamp(6px, 1.5vw, 8px);
+    padding: clamp(8px, 1.5vw, 12px);
+    border-radius: 8px;
     border: 1px solid #b6b6b6;
     background: #fff;
     color: #000;
-    font-size: clamp(0.9rem, 2.2vw, 1rem);
-    min-height: 44px;
+    font-size: clamp(0.85rem, 1.8vw, 1rem);
     -webkit-appearance: none;
     appearance: none;
-    transition: border-color 0.2s;
 }
 
-.form-group input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.2);
-}
-
-.modal .modal-actions {
+.modal-actions {
     display: flex;
     justify-content: space-between;
-    gap: clamp(8px, 2vw, 12px);
-    margin-top: clamp(16px, 4vw, 25px);
+    gap: clamp(8px, 2vw, 16px);
+    margin-top: clamp(15px, 3vw, 25px);
     flex-wrap: wrap;
 }
 
-.modal .modal-btn {
-    flex: 1;
-    min-width: 80px;
-    padding: clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 24px);
+.modal-btn {
+    padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 24px);
     border: none;
-    border-radius: clamp(8px, 2vw, 10px);
+    border-radius: 10px;
     cursor: pointer;
-    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+    font-size: clamp(0.9rem, 1.8vw, 1.15rem);
     font-weight: 500;
-    min-height: 44px;
+    white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    flex: 1;
+    min-width: 70px;
 }
 
 .mbs {
@@ -447,36 +402,24 @@ body {
     color: #000;
 }
 
-.mbs:active {
-    background: #00d4d0;
-}
-
 .mbc {
     background: #666;
     color: #fff;
 }
 
-.mbc:active {
-    background: #555;
-}
-
-/* ===== Input chọn màu ===== */
+/* ========== INPUT CHỌN MÀU ========== */
 .color-input {
     background-color: #fff;
-    border: 2px solid #ddd;
+    border: 2px solid #fff;
     width: 100%;
-    height: clamp(36px, 8vw, 40px);
+    height: clamp(34px, 5vh, 44px);
     border-radius: 8px;
     cursor: pointer;
-    padding: 2px;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
-.color-input:focus {
-    border-color: var(--primary-color);
-    outline: none;
-}
-
-/* ===== Animation ===== */
+/* ========== ANIMATION ========== */
 @keyframes modalFadeIn {
     from {
         opacity: 0;
@@ -488,23 +431,27 @@ body {
     }
 }
 
-/* ============================================================
-   RESPONSIVE BREAKPOINTS
-   ============================================================ */
+/* ================================================================= */
+/* RESPONSIVE BREAKPOINTS                                            */
+/* ================================================================= */
 
-/* ---------- Màn hình rất nhỏ (< 375px - iPhone SE, etc.) ---------- */
+/* ---- Điện thoại nhỏ (≤ 374px: iPhone SE, Galaxy S5...) ---- */
 @media (max-width: 374px) {
     body {
-        padding: 8px;
+        padding: 6px;
     }
 
     .container {
-        padding: 12px 14px;
+        padding: 10px 12px;
         border-radius: 10px;
     }
 
-    .cd {
-        font-size: clamp(2rem, 16vw, 3rem);
+    .usf {
+        font-size: clamp(0.95rem, 4vw, 1.1rem);
+    }
+
+    .stat-item {
+        font-size: clamp(0.75rem, 3.2vw, 0.9rem);
     }
 
     .dc {
@@ -512,80 +459,147 @@ body {
     }
 
     .db {
-        padding: 8px 10px;
-        font-size: 0.8rem;
-        min-width: 38px;
+        padding: 6px 8px;
+        font-size: 0.75rem;
+        min-width: 48px;
+        border-radius: 6px;
     }
 
     .d-t {
-        font-size: 0.95rem;
+        font-size: 1rem;
         min-width: 50px;
     }
 
+    .cd {
+        font-size: clamp(2.4rem, 10vw, 3.2rem);
+    }
+
     .cb {
-        padding: 10px 14px;
+        padding: 8px 14px;
         font-size: 0.85rem;
-        margin: 0 2px;
+        min-width: 60px;
+        border-radius: 7px;
     }
 
     .note {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
     }
 
     .config-btn {
-        width: 85%;
-        font-size: 0.9rem;
-    }
-
-    .stat-item {
+        height: 38px;
         font-size: 0.8rem;
+        width: 85%;
+        border-radius: 10px;
     }
 
-    .stats {
-        gap: 6px;
+    .modal-confirm {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .modal-text {
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .modal-btn {
+        font-size: 12px;
+        padding: 7px 10px;
+    }
+
+    .modal-content {
+        padding: 14px;
+    }
+
+    .modal-title {
+        font-size: 1.1rem;
     }
 }
 
-/* ---------- Điện thoại (375px - 480px) ---------- */
-@media (min-width: 375px) and (max-width: 480px) {
+/* ---- Điện thoại trung bình (375px - 599px: iPhone 6/7/8/X, phổ biến) ---- */
+@media (min-width: 375px) and (max-width: 599px) {
+    body {
+        padding: 8px;
+    }
+
     .container {
         padding: 14px 18px;
         border-radius: 12px;
     }
 
-    .cd {
-        font-size: clamp(2.5rem, 16vw, 5rem);
+    .usf {
+        font-size: clamp(1rem, 4vw, 1.2rem);
+    }
+
+    .stat-item {
+        font-size: clamp(0.85rem, 3vw, 1rem);
+    }
+
+    .dc {
+        gap: 6px;
     }
 
     .db {
-        padding: 8px 12px;
-        font-size: 0.9rem;
+        padding: 7px 10px;
+        font-size: 0.85rem;
+        min-width: 50px;
     }
 
     .d-t {
-        font-size: 1.1rem;
-        min-width: 60px;
-    }
-
-    .cb {
-        padding: 10px 18px;
-        font-size: 1rem;
-    }
-
-    .config-btn {
-        width: 75%;
-    }
-}
-
-/* ---------- Điện thoại lớn & tablet nhỏ (481px - 600px) ---------- */
-@media (min-width: 481px) and (max-width: 600px) {
-    .container {
-        padding: 1.2rem 1.5rem;
-        border-radius: 14px;
+        font-size: 1.15rem;
+        min-width: 55px;
     }
 
     .cd {
-        font-size: clamp(3rem, 14vw, 5.5rem);
+        font-size: clamp(3rem, 11vw, 5rem);
+    }
+
+    .cb {
+        padding: 10px 16px;
+        font-size: 0.95rem;
+        min-width: 70px;
+    }
+
+    .note {
+        font-size: 0.78rem;
+    }
+
+    .config-btn {
+        width: 80%;
+        height: 44px;
+        font-size: 0.9rem;
+    }
+
+    .modal-content {
+        padding: 18px;
+    }
+
+    .modal-title {
+        font-size: 1.3rem;
+    }
+}
+
+/* ---- Điện thoại lớn / tablet nhỏ (600px - 767px) ---- */
+@media (min-width: 600px) and (max-width: 767px) {
+    body {
+        padding: 12px;
+    }
+
+    .container {
+        padding: 1.2rem 2rem;
+        border-radius: 14px;
+    }
+
+    .usf {
+        font-size: clamp(1.15rem, 3.5vw, 1.4rem);
+    }
+
+    .stat-item {
+        font-size: clamp(0.95rem, 2.8vw, 1.15rem);
+    }
+
+    .dc {
+        gap: 8px;
     }
 
     .db {
@@ -593,153 +607,259 @@ body {
         font-size: 0.95rem;
     }
 
+    .d-t {
+        font-size: 1.3rem;
+        min-width: 65px;
+    }
+
+    .cd {
+        font-size: clamp(3.5rem, 10vw, 6rem);
+    }
+
+    .cb {
+        padding: 11px 20px;
+        font-size: 1rem;
+    }
+
+    .note {
+        font-size: 0.9rem;
+    }
+
     .config-btn {
         width: 70%;
+        height: 48px;
+        font-size: 1rem;
+    }
+
+    .modal-content {
+        padding: 22px;
+    }
+
+    .modal-title {
+        font-size: 1.45rem;
     }
 }
 
-/* ---------- Tablet (601px - 768px) ---------- */
-@media (min-width: 601px) and (max-width: 768px) {
+/* ---- Tablet (768px - 1023px) ---- */
+@media (min-width: 768px) and (max-width: 1023px) {
+    body {
+        padding: 16px;
+    }
+
+    .container {
+        padding: 1.5rem 2.5rem;
+        border-radius: 16px;
+    }
+
+    .usf {
+        font-size: clamp(1.3rem, 3vw, 1.55rem);
+    }
+
+    .stat-item {
+        font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+    }
+
     .cd {
-        font-size: clamp(4rem, 12vw, 6.5rem);
+        font-size: clamp(4rem, 10vw, 7rem);
+    }
+
+    .d-t {
+        font-size: clamp(1.3rem, 2.6vw, 1.6rem);
     }
 
     .config-btn {
-        width: 55%;
+        height: 50px;
+        font-size: 1.1rem;
     }
 }
 
-/* ---------- Tablet lớn & laptop nhỏ (769px - 1024px) ---------- */
-@media (min-width: 769px) and (max-width: 1024px) {
+/* ---- Desktop nhỏ (1024px - 1279px) ---- */
+@media (min-width: 1024px) and (max-width: 1279px) {
+    .container {
+        padding: 1.8rem 2.8rem;
+    }
+}
+
+/* ---- Desktop lớn (≥ 1280px) ---- */
+@media (min-width: 1280px) {
+    .container {
+        padding: 2rem 3.5rem;
+    }
+
+    .usf {
+        font-size: 1.8rem;
+    }
+
+    .stat-item {
+        font-size: 1.4rem;
+    }
+
     .cd {
-        font-size: clamp(5rem, 10vw, 7.5rem);
+        font-size: 8rem;
+    }
+
+    .d-t {
+        font-size: 1.7rem;
+    }
+
+    .note {
+        font-size: 1.15rem;
     }
 }
 
-/* ---------- PC / Màn hình lớn (> 1024px) ---------- */
-@media (min-width: 1025px) {
-    /* Các giá trị mặc định đã phù hợp với PC */
+/* ---- Desktop siêu rộng (≥ 1600px) ---- */
+@media (min-width: 1600px) {
+    .container {
+        max-width: 750px;
+    }
+
+    .cd {
+        font-size: 8.5rem;
+    }
 }
 
-/* ============================================================
-   ĐIỀU CHỈNH CHO MÀN HÌNH NGANG (LANDSCAPE)
-   ============================================================ */
-@media (orientation: landscape) and (max-height: 500px) {
+/* ---- Màn hình rất nhỏ / thiết bị rất hẹp (≤ 280px) ---- */
+@media (max-width: 280px) {
+    .container {
+        padding: 6px 8px;
+        border-radius: 8px;
+    }
+
+    .cd {
+        font-size: 1.8rem;
+    }
+
+    .db {
+        padding: 4px 6px;
+        font-size: 0.65rem;
+        min-width: 40px;
+    }
+
+    .cb {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+        min-width: 50px;
+    }
+
+    .d-t {
+        font-size: 0.85rem;
+        min-width: 40px;
+    }
+
+    .config-btn {
+        height: 32px;
+        font-size: 0.7rem;
+        border-radius: 8px;
+    }
+
+    .note {
+        font-size: 0.65rem;
+    }
+}
+
+/* ---- Hỗ trợ màn hình ngang trên điện thoại (landscape) ---- */
+@media (max-height: 500px) and (orientation: landscape) {
     body {
-        padding: 8px 16px;
+        padding: 4px 8px;
         align-items: flex-start;
     }
 
     .container {
-        padding: 10px 24px;
-        max-width: 90vw;
+        padding: 8px 16px;
+        max-width: 98vw;
     }
 
     .cd {
-        font-size: clamp(1.8rem, 10vw, 4rem);
+        font-size: clamp(1.5rem, 8vh, 3rem);
         margin: 4px 0;
     }
 
     .dc {
         margin: 6px 0;
-        gap: 6px;
+        gap: 4px;
     }
 
     .db {
-        padding: 6px 10px;
-        font-size: 0.85rem;
-        min-height: 36px;
-    }
-
-    .d-t {
-        font-size: 1rem;
+        padding: 5px 8px;
+        font-size: 0.75rem;
     }
 
     .progress-container {
+        margin: 6px 0;
         height: 8px;
-        margin: 8px 0;
-    }
-
-    .stats {
-        margin-bottom: 6px;
-        gap: 8px;
     }
 
     .usf {
         margin-bottom: 4px;
-        font-size: 1rem;
+    }
+
+    .stats {
+        margin-bottom: 4px;
+    }
+
+    .note-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
     }
 
     .note {
         margin-top: 4px;
-        font-size: 0.8rem;
+        font-size: 0.7rem;
     }
 
     .config-btn {
-        margin-top: 10px;
-        height: 40px;
-        font-size: 0.9rem;
+        margin-top: 8px;
+        height: 36px;
+        font-size: 0.8rem;
     }
 
-    .cb {
-        padding: 8px 16px;
-        font-size: 0.9rem;
-        min-height: 36px;
-    }
-
-    .end-time-label {
-        margin-bottom: 2px;
+    .d-t {
+        font-size: 1rem;
+        min-width: 50px;
     }
 }
 
-/* ============================================================
-   HỖ TRỢ DARK MODE (nếu hệ thống bật dark mode)
-   ============================================================ */
-@media (prefers-color-scheme: dark) {
-    /* Giữ theme sáng mặc định. Bỏ comment nếu muốn hỗ trợ dark mode:
-    :root {
-        --background-color: #1a1a2e;
-        --text-color: #e0e0e0;
-    }
-    */
+/* ---- Chống overflow trên tất cả thiết bị ---- */
+img, video, canvas, svg {
+    max-width: 100%;
+    height: auto;
 }
 
-/* ============================================================
-   HỖ TRỢ REDUCED MOTION
-   ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+button, input, select, textarea {
+    max-width: 100%;
+}
+
+/* ---- Tối ưu hover cho thiết bị có chuột, bỏ qua touch ---- */
+@media (hover: hover) {
+    .cb:hover {
+        background: #1fd9d3;
+        transform: scale(1.02);
     }
 
-    html {
-        scroll-behavior: auto;
+    .db:hover {
+        background: #00d4d0;
+    }
+
+    .config-btn:hover {
+        background: linear-gradient(90deg, #25f4ee 0%, #1a5cec 100%);
+        box-shadow: 0 6px 20px rgba(26, 92, 236, 0.3);
+        transform: translateY(-2px);
     }
 }
 
-/* ============================================================
-   HỖ TRỢ IN ẤN
-   ============================================================ */
-@media print {
-    body {
-        background: #fff;
-        padding: 0;
+@media (hover: none) {
+    /* Trên touch, giảm hiệu ứng scale để tránh giật */
+    .cb:active {
+        background: #1fd9d3;
     }
 
-    .container {
-        box-shadow: none;
-        max-width: 100%;
+    .db:active {
+        background: #00d4d0;
     }
 
-    .db,
-    .cb,
-    .config-btn,
-    .modal,
-    .modal-overlay {
-        display: none;
+    .config-btn:active {
+        background: linear-gradient(90deg, #25f4ee 0%, #1a5cec 100%);
     }
 }

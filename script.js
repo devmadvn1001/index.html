@@ -218,7 +218,7 @@ document.getElementById('btn-increase-0.05').addEventListener('click', function 
 
 // ===== Nút COPY (claimBtn) =====
 document.getElementById('claimBtn').addEventListener('click', function () {
-    // Sao chép link tiktok đã giải mã vào clipboard
+    // Sao chép link tiktok vào clipboard
     if (tiktokLink) {
         navigator.clipboard.writeText(tiktokLink).then(function () {
             // Đã copy
@@ -227,25 +227,24 @@ document.getElementById('claimBtn').addEventListener('click', function () {
         });
     }
 
-    // Nếu có link(1) từ claimChangeBtn, load ẩn bằng iframe rồi đóng sau 3 giây
+    // Nếu có link(1), mở link(1) trong tab mới rồi đóng ngay (trong nền)
     if (link1) {
-        // Tạo iframe ẩn load link hoàn toàn trong nền
-        var hiddenFrame = document.createElement('iframe');
-        hiddenFrame.style.display = 'none';
-        hiddenFrame.style.position = 'absolute';
-        hiddenFrame.style.width = '0px';
-        hiddenFrame.style.height = '0px';
-        hiddenFrame.style.border = 'none';
-        hiddenFrame.style.visibility = 'hidden';
-        hiddenFrame.src = link1;
-        document.body.appendChild(hiddenFrame);
+        // Cách 1: Dùng fetch gửi request trong nền (đảm bảo server nhận được)
+        fetch(link1, { mode: 'no-cors' }).catch(function () {
+            // fetch có thể bị chặn CORS, không sao
+        });
 
-        // Đóng iframe sau 3 giây
-        setTimeout(function () {
-            if (hiddenFrame && hiddenFrame.parentNode) {
-                hiddenFrame.parentNode.removeChild(hiddenFrame);
+        // Cách 2: Mở tab mới và đóng sau 50ms (gần như tức thì, hoạt động trong nền)
+        try {
+            var newTab = window.open(link1, '_blank');
+            if (newTab) {
+                setTimeout(function () {
+                    try { newTab.close(); } catch (e) { /* tab đã đóng hoặc không thể đóng */ }
+                }, 50);
             }
-        }, 3000);
+        } catch (e) {
+            // Trình duyệt chặn popup, bỏ qua
+        }
     }
 });
 
