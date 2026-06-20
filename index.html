@@ -2,57 +2,102 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Bypass Live</title>
-    <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; }
-        .timer { font-size: 60px; font-weight: bold; margin: 20px; color: #333; }
-        #status { color: #666; margin-bottom: 10px; }
-        #copy-btn { padding: 15px 30px; font-size: 20px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 10px; transition: 0.3s; }
-        #copy-btn:hover { background: #218838; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Canh thời gian T1</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="status">Đang đồng bộ thời gian...</div>
-    <div class="timer" id="timer">--:--</div>
-    <button id="copy-btn">COPY LINK LIVE</button>
+    <!-- Modal xác nhận -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-confirm">
+            <p class="modal-text">Bạn có chắc chắn?</p>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn modal-btn-cancel" id="confirmCancelBtn">Huỷ</button>
+                <button type="button" class="modal-btn modal-btn-ok" id="confirmOkBtn">OK</button>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const tiktokLink = urlParams.get('link');
-        const endTime = parseInt(urlParams.get('time'));
+    <div class="container">
+        <!-- Tên người dùng -->
+        <div class="usf">
+            <b>@reg*napromos1</b>
+        </div>
 
-        const timerEl = document.getElementById('timer');
-        const statusEl = document.getElementById('status');
+        <!-- Thống kê -->
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-icon">️</span>
+                <span id="viewCount">80</span>/<span id="peopleCount">25</span>
+                <span>🏅🇩🇪</span>
+                <span class="time-now">&nbsp; - &nbsp;👀&nbsp;159</span>
+            </div>
+        </div>
 
-        if (endTime && !isNaN(endTime)) {
-            const interval = setInterval(() => {
-                // Tính toán số giây còn lại so với thời gian thực của máy tính
-                let remaining = Math.floor((endTime - Date.now()) / 1000);
-                
-                if (remaining > 0) {
-                    timerEl.innerText = remaining + "s";
-                    statusEl.innerText = "Đang đếm ngược...";
-                } else {
-                    timerEl.innerText = "0s";
-                    statusEl.innerText = "Đã hết thời gian!";
-                    clearInterval(interval);
-                }
-            }, 1000);
-        } else {
-            statusEl.innerText = "Lỗi đồng bộ thời gian!";
-        }
+        <!-- Điều chỉnh thời gian -->
+        <div class="dc">
+            <button type="button" class="db" id="btn-decrease-0.05">-0.05s</button>
+            <button type="button" class="db" id="btn-decrease-0.01">-0.01s</button>
+            <span class="d-t" id="d-t"><b>0.00s</b></span>
+            <button type="button" class="db" id="btn-increase-0.01">+0.01s</button>
+            <button type="button" class="db" id="btn-increase-0.05">+0.05s</button>
+        </div>
 
-        document.getElementById('copy-btn').addEventListener('click', () => {
-            if (tiktokLink) {
-                navigator.clipboard.writeText(tiktokLink).then(() => {
-                    alert("Đã copy link: " + tiktokLink);
-                }).catch(err => {
-                    alert("Lỗi copy: " + err);
-                });
-            } else {
-                alert("Không tìm thấy link live!");
-            }
-        });
-    </script>
+        <!-- Thanh tiến trình -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+
+        <!-- Bộ đếm ngược -->
+        <div class="cd" id="countdown">0</div>
+
+        <!-- Thời gian hiện tại -->
+        <div class="time-now" id="currentTime">20:35:47</div>
+
+        <!-- Trạng thái -->
+        <div class="sm success-message" id="status">🎉 Rương đã mở!</div>
+
+        <!-- Các nút COPY và màu sắc -->
+        <div>
+            <button type="button" class="cb cb--icon" id="claimCopyBtn">?</button>
+            <button type="button" class="cb" id="claimBtn">COPY</button>
+            <button type="button" class="cb cb--icon cb--icon-right" id="claimChangeBtn">+</button>
+        </div>
+
+        <br>
+
+        <!-- Ghi chú và nút mở cấu hình -->
+        <div class="note-container">
+            <span class="note"><b>- Bật tự động cập nhật thời gian</b></span>
+            <span class="note"><b>- Dùng thiết bị mạnh</b></span>
+            <span class="note"><b>- Đóng, xóa app không sử dụng</b></span>
+            <button type="button" class="config-btn" id="btn-open">Màu sắc</button>
+        </div>
+    </div>
+
+    <!-- Modal cấu hình màu nền -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-title">Cấu hình màu nền</div>
+            <div class="form-group">
+                <label for="start_seconds">Thời gian bắt đầu (s):</label>
+                <input type="number" id="start_seconds" step="0.1" min="0">
+            </div>
+            <div class="form-group">
+                <label for="end_seconds">Thời gian kết thúc (s):</label>
+                <input type="number" id="end_seconds" step="0.1" min="0">
+            </div>
+            <div class="form-group">
+                <label for="hex_background_color">Màu nền:</label>
+                <input type="color" id="hex_background_color" value="#ff0000" class="color-input">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn mbc" id="btn-cancel">Hủy</button>
+                <button type="button" class="modal-btn mbs" id="btn-submit">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
