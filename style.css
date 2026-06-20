@@ -212,20 +212,6 @@ body {
     transform: scale(1.02);
 }
 
-/* Nút icon nhỏ (?, +) */
-.cb--icon {
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-right: 10px;
-}
-
-.cb--icon-right {
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-left: 10px;
-    margin-right: 0;
-}
-
 /* Container ghi chú */
 .note-container {
     display: flex;

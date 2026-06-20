@@ -56,7 +56,7 @@ function updateDTOffset() {
     dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
 }
 
-// ===== Hàm định dạng thời gian mm:ss:fff =====
+// ===== Hàm định dạng thời gian mm:ss:f (mili giây 1 chữ số) =====
 function formatTimeMMSSFFF(totalSeconds) {
     const absSec = Math.abs(totalSeconds);
     const minutes = Math.floor(absSec / 60);
@@ -64,8 +64,8 @@ function formatTimeMMSSFFF(totalSeconds) {
     const milliseconds = Math.floor((absSec - Math.floor(absSec)) * 1000);
     const mm = String(minutes).padStart(2, '0');
     const ss = String(seconds).padStart(2, '0');
-    const fff = String(milliseconds).padStart(2, '0');
-    return mm + ':' + ss + ':' + fff;
+    const f = Math.floor(milliseconds / 100); // Lấy chữ số hàng trăm (1/10 giây)
+    return mm + ':' + ss + ':' + f;
 }
 
 // ===== Lấy thời gian hiện tại (ms) =====
