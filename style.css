@@ -217,53 +217,55 @@ body {
     background: #f8fafc;
 }
 
-/* ======= CSS MỚI: THANH HIỂN THỊ CẤU HÌNH (DẠNG VIÊN THUỐC) ======= */
+/* ======= CSS MỚI: THANH HIỂN THỊ CẤU HÌNH (RỘNG RÃI - GIỐNG HÌNH 1) ======= */
 .active-config {
-    display: inline-flex; /* Ép nó ôm sát nội dung, không dàn full ngang */
+    display: flex; /* Dàn rộng ra cho thoáng */
     align-items: center;
     justify-content: center;
     gap: 12px;
     margin-top: 15px;
-    padding: 8px 18px;
-    background: #1e293b; /* Nền xám đen sang trọng */
-    border: none;
-    border-radius: 30px; /* Bo tròn mạnh thành viên thuốc */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 12px 16px;
+    background: #f8fafc; /* Nền xám sáng */
+    border: 1px solid #e2e8f0; /* Viền mờ tinh tế */
+    border-radius: 14px; 
     transition: all 0.2s;
+    width: 100%; /* Rộng bằng với các nút bên trên */
 }
 
 .config-color-dot {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.1); /* Viền mờ cho chấm màu nổi bật */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2); 
+    border: 1px solid #cbd5e1;
 }
 
 .config-text {
     font-size: 1rem;
     font-weight: 700;
-    color: #f8fafc; /* Chữ trắng xám */
-    letter-spacing: 0.5px;
+    color: #475569; /* Chữ xám đậm dễ đọc */
+    letter-spacing: 0;
 }
 
 .config-del-btn {
-    background: transparent;
+    background: #fee2e2; /* Nền đỏ nhạt */
     border: none;
-    color: #94a3b8; /* Chữ X xám mờ */
-    font-size: 1.1rem;
+    color: #ef4444; /* Dấu X màu đỏ */
+    font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
-    padding: 0;
+    padding: 4px 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.1s;
+    transition: all 0.1s;
+    margin-left: 5px; /* Tách nhẹ ra khỏi cụm chữ */
 }
 
-.config-del-btn:hover {
-    color: #ef4444; /* Khi hover vào nút X thì sáng màu đỏ lên */
+.config-del-btn:active {
+    transform: scale(0.9);
 }
-
 /* ======================================= */
 /* MODAL CẤU HÌNH NHÁY MÀU                 */
 /* ======================================= */
