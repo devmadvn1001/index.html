@@ -1,10 +1,10 @@
 :root {
-    --bg-color: #f4f6fa;
-    --text-dark: #1e2633;
-    --text-muted: #6b7280;
-    --btn-dark: #2d3748;
-    --btn-red: #e53e3e;
-    --btn-green: #38a169;
+    --bg-color: #f0f4f8; /* Nền xám xanh nhạt giống ảnh */
+    --text-main: #2c3e50; /* Màu chữ đen xám */
+    --text-muted: #596275;
+    --btn-dark: #2c3e50; /* Xanh đậm cho nút Copy */
+    --btn-red: #d9534f;
+    --btn-green: #28a745;
 }
 
 * {
@@ -20,9 +20,8 @@ html, body {
 }
 
 body {
-    /* Tạo hiệu ứng sáng ở giữa tỏa ra xung quanh giống ảnh */
-    background: radial-gradient(circle at 50% 50%, #ffffff 0%, var(--bg-color) 100%);
-    color: var(--text-dark);
+    background: var(--bg-color);
+    color: var(--text-main);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     display: flex;
     justify-content: center;
@@ -44,61 +43,61 @@ body {
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: background 0.2s;
+    transition: opacity 0.2s;
 }
 
-.settings-btn:hover {
-    background: #1a202c;
-}
+.settings-btn:hover { opacity: 0.85; }
 
+/* Bỏ viền trắng ngoài cùng */
 .container {
     text-align: center;
     width: 100%;
-    max-width: 600px;
+    max-width: 500px;
     padding: 20px;
+    background: transparent;
+    box-shadow: none;
 }
 
 /* Tên user */
 .usf {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: var(--text-dark);
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    color: var(--text-main);
 }
 
 /* Thống kê (Coins/View) */
 .stats {
-    font-size: 1.15rem;
-    color: var(--text-dark);
+    font-size: 1.25rem;
+    color: var(--text-main);
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 12px;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
+    font-weight: 500;
 }
 .divider {
     color: var(--text-muted);
     font-weight: 300;
 }
 
-/* Chữ số đếm ngược to ở giữa */
+/* Chữ số đếm ngược siêu to */
 .cd {
-    font-size: 7.5rem;
+    font-size: 8rem;
     font-weight: 900;
-    color: var(--text-dark);
-    margin: 5px 0;
+    color: var(--text-main);
+    margin: 10px 0;
     line-height: 1;
     letter-spacing: -3px;
+    text-shadow: 0 8px 20px rgba(0,0,0,0.08); /* Đổ bóng nhẹ cho chữ nổi lên */
 }
 
-/* Thời gian và Ping */
+/* Thời gian kết thúc */
 .time-info {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: var(--text-muted);
-    margin-bottom: 25px;
-}
-.ping-info {
-    margin-top: 5px;
+    margin-bottom: 30px;
 }
 
 /* Khu vực nút + / - thời gian */
@@ -106,39 +105,40 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 25px;
+    gap: 12px;
+    margin-bottom: 30px;
 }
 
 .db {
     border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 0.85rem;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 1rem;
     font-weight: 600;
     color: white;
     cursor: pointer;
-    min-width: 50px;
-    transition: opacity 0.2s;
+    min-width: 60px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.1s, box-shadow 0.2s;
 }
-.db:hover { opacity: 0.85; }
+.db:active { transform: scale(0.95); }
 
 .btn-red { background-color: var(--btn-red); }
 .btn-green { background-color: var(--btn-green); }
 
 .d-t {
-    font-size: 1.15rem;
-    font-weight: 700;
-    min-width: 60px;
-    color: var(--text-dark);
+    font-size: 1.3rem;
+    font-weight: 800;
+    min-width: 70px;
+    color: var(--text-main);
 }
 
 /* Nút COPY và Dấu + */
 .action-buttons {
     display: flex;
     justify-content: center;
-    gap: 12px;
-    margin-bottom: 25px;
+    gap: 15px;
+    margin-bottom: 30px;
 }
 
 .cb {
@@ -147,53 +147,53 @@ body {
     border: none;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    transition: transform 0.1s, background 0.2s;
+    box-shadow: 0 6px 12px rgba(44, 62, 80, 0.3);
+    transition: transform 0.1s, opacity 0.2s;
 }
-.cb:hover { background: #1a202c; }
+.cb:hover { opacity: 0.9; }
 .cb:active { transform: scale(0.95); }
 
 .main-btn {
-    padding: 14px 35px;
-    border-radius: 25px;
-    font-size: 1.1rem;
+    padding: 14px 40px;
+    border-radius: 30px;
+    font-size: 1.2rem;
 }
 
 .square-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    font-size: 1.4rem;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    font-size: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 /* Nút Canh theo màu sắc */
+.bottom-action { margin-top: 10px; }
 .color-btn {
-    background: #374151;
+    background: var(--btn-dark);
     color: white;
     border: none;
-    padding: 10px 24px;
+    padding: 12px 24px;
     border-radius: 8px;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s;
+    box-shadow: 0 4px 8px rgba(44, 62, 80, 0.2);
 }
-.color-btn:hover { opacity: 0.9; }
 
 /* Responsive cho điện thoại nhỏ */
 @media (max-width: 600px) {
-    .cd { font-size: 5.5rem; letter-spacing: -2px; }
-    .stats { font-size: 1rem; gap: 8px; }
-    .usf { font-size: 1.1rem; }
-    .dc { gap: 4px; }
-    .db { padding: 6px 8px; font-size: 0.8rem; min-width: 45px; }
+    .cd { font-size: 6rem; letter-spacing: -2px; }
+    .stats { font-size: 1.1rem; gap: 8px; }
+    .usf { font-size: 1.3rem; }
+    .dc { gap: 8px; }
+    .db { padding: 8px 12px; font-size: 0.9rem; min-width: 50px; }
 }
 
 /* ======================================= */
-/* GIỮ LẠI PHẦN HIỂN THỊ MODAL BẢN CŨ      */
+/* MODAL BẢN CŨ                            */
 /* ======================================= */
 .modal-overlay, .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 9999; }
 .modal-content, .modal-confirm { background: #fff; padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
