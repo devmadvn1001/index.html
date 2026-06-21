@@ -44,8 +44,9 @@ function updateConfigDisplayUI() {
     if (!activeConfigDisplay) return;
     if (colorConfig && colorConfig.active) {
         configColorDot.style.backgroundColor = colorConfig.color;
-        configText.textContent = `Từ ${colorConfig.start}s đến ${colorConfig.end}s`;
-        activeConfigDisplay.style.display = 'flex'; // Hiện thanh
+        // Đã đổi thành định dạng "0.6 ➔ 0.0" theo ý bạn
+        configText.textContent = `${colorConfig.start} ➔ ${colorConfig.end}`;
+        activeConfigDisplay.style.display = 'inline-flex'; // Đổi thành inline-flex để thanh thu gọn ôm sát chữ
     } else {
         activeConfigDisplay.style.display = 'none'; // Ẩn thanh
     }
@@ -319,7 +320,7 @@ document.getElementById('btn-submit').addEventListener('click', function () {
     if (modal) modal.style.display = 'none';
 });
 
-// ===== NÚT XÓA BỎ LỆNH NHÁY MÀU (MỚI THÊM) =====
+// ===== NÚT XÓA BỎ LỆNH NHÁY MÀU =====
 document.getElementById('configDelBtn').addEventListener('click', function() {
     colorConfig.active = false;
     try {
