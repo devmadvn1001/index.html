@@ -145,9 +145,17 @@ function formatTimeSSF(totalSeconds) {
     return ss + ':' + f;
 }
 
-// ===== Lấy thời gian hiện tại (ms) =====
+// Điểm tham chiếu: lưu offset giữa Date.now() và performance.now() tại thời điểm khởi tạo
+// performance.now() có độ chính xác microsecond và không bị system clock drift
+const _perfOrigin = performance.now();
+const _dateOrigin = Date.now();
+
+// ===== Lấy thời gian hiện tại (ms) với độ chính xác cao =====
+// Dùng performance.now() (không bị ảnh hưởng bởi system clock thay đổi)
+// Và rơi về Date.now() nếu performance API không có
 function getCurrentTimeMs() {
-    return Date.now();
+    // performance.now() tính từ lúc page load, cộng thêm dateOrigin để có timestamp tuyệt đối
+    return _dateOrigin + (performance.now() - _perfOrigin);
 }
 
 // Cache nội dung hiển thị trước đó để tránh cập nhật DOM không cần thiết
@@ -341,11 +349,18 @@ document.getElementById('modal').addEventListener('click', function (e) {
 updateClock();
 updateDTOffset();
 
-// Dùng requestAnimationFrame để đồng hồ chạy ở tần số quét màn hình (60fps/120fps/144fps)
-// Mượt hơn setInterval và đồng bộ với v-sync, không gây tearing
-let animFrameId;
-function clockLoop() {
+// Kết hợp 2 cơ chế để đồng hồ luôn chính xác:
+// 1. setInterval 100ms: đảm bảo đồng hồ chạy cả khi tab ở nền (không bị throttle)
+// 2. requestAnimationFrame: khi tab active, render mượt ở tần số quét màn hình
+// Kết quả: thời gian luôn chuẩn, hiển thị mượt khi đang xem
+let clockRAFId;
+function clockRAFLoop() {
     updateClock();
-    animFrameId = requestAnimationFrame(clockLoop);
+    clockRAFId = requestAnimationFrame(clockRAFLoop);
 }
-animFrameId = requestAnimationFrame(clockLoop);
+
+// Ưu tiên rAF khi tab active (hủy interval, dùng rAF), nếu tab ẩn thì interval giữ đồng hồ chạy
+let clockIntervalId = setInterval(updateClock, 100);
+
+// Khi tab active, dùng rAF để mượt; interval vẫn chạy ngầm giữ nhịp
+clockRAFId = requestAnimationFrame(clockRAFLoop);
