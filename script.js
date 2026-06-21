@@ -26,7 +26,7 @@ let timeOffset = 0;
 let link1 = null;
 
 // ============================================================== //
-// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) BẰNG CÁCH PING LIÊN TỤC   //
+// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) BẰNG SERVER BINANCE CỰC MẠNH //
 // ============================================================== //
 let isSyncOn = false;
 let networkTimeOffset = 0; 
@@ -35,17 +35,19 @@ let syncInterval = null;
 const btnSync = document.getElementById('btn-sync');
 const syncStatus = document.getElementById('sync-status');
 
-// Hàm PING server lấy giờ chuẩn
+// Hàm PING server lấy giờ chuẩn (Dùng Binance API chống lỗi chặn mạng)
 async function pingTimeServer() {
     if (!isSyncOn) return;
     try {
         const start = Date.now();
-        // Gọi API giờ quốc tế (bỏ qua cache để luôn lấy giờ mới nhất)
-        const res = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', { cache: 'no-store' });
+        // Sử dụng API của Binance: Nhanh, chính xác mili-giây, không bao giờ lỗi CORS
+        const res = await fetch('https://api.binance.com/api/v3/time', { cache: 'no-store' });
+        if (!res.ok) throw new Error('Mạng chập chờn');
+        
         const data = await res.json();
         const end = Date.now();
         
-        const serverTime = new Date(data.utc_datetime).getTime();
+        const serverTime = data.serverTime; // Binance trả về thẳng mili-giây
         const latency = (end - start) / 2; // Tính thời gian truyền đi 1 chiều
         
         // Tinh chỉnh độ lệch: (Giờ server thực tế + độ trễ mạng) - Giờ máy hiện tại
@@ -58,7 +60,7 @@ async function pingTimeServer() {
     } catch (error) {
         if (syncStatus) {
             syncStatus.textContent = 'LỖI PING';
-            syncStatus.style.color = '#ef4444'; // Báo lỗi nếu mạng lag không ping được
+            syncStatus.style.color = '#ef4444'; // Báo lỗi nếu rớt mạng
         }
     }
 }
@@ -88,7 +90,7 @@ if (btnSync) {
     });
 }
 
-// Viết lại hàm lấy thời gian: Tự động cộng/trừ sai số nếu bật Sync
+// Hàm lấy thời gian: Tự động cộng/trừ sai số nếu bật Sync
 function getCurrentTimeMs() {
     return Date.now() + (isSyncOn ? networkTimeOffset : 0);
 }
@@ -103,12 +105,10 @@ let colorConfig = {
 };
 let currentBgState = 'default';
 
-// DOM cho thanh trạng thái màu mới thêm
 const activeConfigDisplay = document.getElementById('activeConfigDisplay');
 const configColorDot = document.getElementById('configColorDot');
 const configText = document.getElementById('configText');
 
-// Hàm cập nhật Giao diện Thanh Trạng Thái Màu (Hiện/Ẩn)
 function updateConfigDisplayUI() {
     if (!activeConfigDisplay) return;
     if (colorConfig && colorConfig.active) {
@@ -120,7 +120,6 @@ function updateConfigDisplayUI() {
     }
 }
 
-// Hàm đổi màu nền & tự động chỉnh màu chữ
 function applyBackgroundColor(state, colorHex = '') {
     if (state === 'default') {
         document.body.style.backgroundColor = 'var(--bg-page)'; 
@@ -151,7 +150,6 @@ function applyBackgroundColor(state, colorHex = '') {
     updateDTOffset();
 }
 
-// ===== Khôi phục cấu hình đã lưu =====
 (function loadSavedState() {
     try {
         var testKey = '__test_ls__';
@@ -188,7 +186,6 @@ function applyBackgroundColor(state, colorHex = '') {
     } catch (e) {}
 })();
 
-// ===== DOM refs =====
 const countdownEl = document.getElementById('countdown');
 const endTimeDisplayEl = document.getElementById('endTimeDisplay');
 const viewCountEl = document.getElementById('viewCount');
@@ -198,7 +195,6 @@ const usernameDisplayEl = document.getElementById('usernameDisplay');
 const hotBoxFlagEl = document.getElementById('hotBoxFlag');
 const viewersDisplayEl = document.getElementById('viewersDisplay');
 
-// ===== Khởi tạo giá trị từ URL params =====
 if (usernameDisplayEl) usernameDisplayEl.textContent = paramM;
 if (viewCountEl) viewCountEl.textContent = coins;
 if (peopleCountEl) peopleCountEl.textContent = canOpen;
@@ -218,7 +214,6 @@ if (endTimeDisplayEl) {
     endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
 }
 
-// ===== Hàm cập nhật hiển thị d-t (tổng offset) =====
 function updateDTOffset() {
     if (!dTEl) return;
     const absVal = Math.abs(timeOffset);
@@ -227,10 +222,10 @@ function updateDTOffset() {
 
     if (timeOffset > 0) {
         sign = '+';
-        color = '#22c55e'; // Xanh lá
+        color = '#22c55e'; 
     } else if (timeOffset < 0) {
         sign = '-';
-        color = '#ef4444'; // Đỏ
+        color = '#ef4444'; 
     } else {
         sign = '+';
         color = getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#1e293b';
@@ -247,14 +242,12 @@ function formatTimeMMSSF(totalSeconds) {
     return String(seconds) + '.' + f;
 }
 
-// ===== TRỤC CHÍNH: CẬP NHẬT ĐỒNG HỒ VÀ KIỂM TRA MÀU =====
 function updateClock() {
     if (!endTime) {
         if (countdownEl) countdownEl.textContent = '00.0';
         return;
     }
 
-    // GỌI HÀM LẤY GIỜ MỚI THAY VÌ DATE.NOW()
     const now = getCurrentTimeMs();
     const endTimeMs = endTime * 1000;
     const adjustedEndMs = endTimeMs + timeOffset * 1000;
@@ -346,35 +339,29 @@ var confirmOkBtn = document.getElementById('confirmOkBtn');
 if (confirmCancelBtn) { confirmCancelBtn.addEventListener('click', function () { handleConfirm(false); }); }
 if (confirmOkBtn) { confirmOkBtn.addEventListener('click', function () { handleConfirm(true); }); }
 
-// ===== Bật modal cấu hình nháy màu =====
 document.getElementById('btn-open').addEventListener('click', function () {
     var modal = document.getElementById('modal');
     if (modal) modal.style.display = 'flex';
 });
 
-// ===== Tắt modal =====
 document.getElementById('btn-cancel').addEventListener('click', function () {
     var modal = document.getElementById('modal');
     if (modal) modal.style.display = 'none';
 });
 
-// ===== Nút LƯU CẤU HÌNH NHÁY MÀU =====
 document.getElementById('btn-submit').addEventListener('click', function () {
     const startVal = parseFloat(document.getElementById('start_seconds').value);
     const endVal = parseFloat(document.getElementById('end_seconds').value);
 
-    // Nạp dữ liệu
     colorConfig.start = isNaN(startVal) ? 0 : startVal;
     colorConfig.end = isNaN(endVal) ? 0 : endVal;
     colorConfig.color = document.getElementById('hex_background_color').value;
     colorConfig.active = true;
 
-    // Lưu vào Cache
     try {
         localStorage.setItem('colorConfig', JSON.stringify(colorConfig));
     } catch (e) {}
 
-    // Cập nhật giao diện thanh trạng thái mới
     updateConfigDisplayUI();
 
     currentBgState = 'default';
@@ -384,14 +371,13 @@ document.getElementById('btn-submit').addEventListener('click', function () {
     if (modal) modal.style.display = 'none';
 });
 
-// ===== NÚT XÓA BỎ LỆNH NHÁY MÀU =====
 document.getElementById('configDelBtn').addEventListener('click', function() {
     colorConfig.active = false;
     try {
         localStorage.setItem('colorConfig', JSON.stringify(colorConfig));
     } catch (e) {}
     
-    updateConfigDisplayUI(); // Ẩn thanh đi
+    updateConfigDisplayUI(); 
     
     currentBgState = 'default';
     applyBackgroundColor('default');
