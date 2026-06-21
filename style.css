@@ -6,8 +6,21 @@
     --btn-dark: #0f172a;        
     --btn-red: #ef4444;         
     --btn-green: #22c55e;       
-    --panel-bg: #f8fafc;        
+    --panel-bg: #f8fafc;
+    --border-color: #e2e8f0;    
 }
+
+/* ================= BẢNG MÀU DARK MODE ================= */
+body.dark-mode {
+    --bg-page: #0f172a;         
+    --card-bg: #1e293b;         
+    --text-main: #f8fafc;       
+    --text-muted: #94a3b8;      
+    --btn-dark: #334155;        
+    --panel-bg: #0f172a;
+    --border-color: #334155;    
+}
+/* ====================================================== */
 
 * {
     box-sizing: border-box;
@@ -31,17 +44,17 @@ body {
     align-items: center;
     min-height: 100vh;
     padding: 15px;
-    transition: background-color 0.1s ease; 
+    transition: background-color 0.2s ease, color 0.2s ease; 
 }
 
-/* ================= NÚT SYNC (GÓC TRÁI) ================= */
+/* NÚT SYNC (GÓC TRÁI) */
 .sync-btn {
     position: absolute;
     top: max(15px, 2vh);
     left: max(15px, 4vw);
     background: var(--card-bg);
     color: var(--text-main);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     padding: 8px 14px;
     border-radius: 20px;
     font-size: clamp(0.75rem, 2.5vw, 0.85rem);
@@ -57,6 +70,29 @@ body {
 .sync-btn:active { transform: scale(0.95); }
 .sync-icon { font-size: 1rem; }
 
+/* NÚT THEME SÁNG/TỐI (GÓC PHẢI) */
+.theme-btn {
+    position: absolute;
+    top: max(15px, 2vh);
+    right: max(15px, 4vw);
+    background: var(--card-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 100;
+}
+.theme-btn:active { transform: scale(0.95); }
+.theme-icon { font-size: 1rem; }
+
 /* KHUNG GIAO DIỆN CHÍNH */
 .app-card {
     background: var(--card-bg);
@@ -66,7 +102,7 @@ body {
     padding: 30px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
     text-align: center;
-    transition: background-color 0.1s ease;
+    transition: background-color 0.2s ease;
 }
 
 .user-profile {
@@ -99,12 +135,10 @@ body {
 }
 
 .badge-yellow { background: #fef3c7; color: #b45309; }
-.badge-gray { background: #f1f5f9; color: #475569; }
+.badge-gray { background: #e2e8f0; color: #334155; }
 .badge-blue { background: #e0f2fe; color: #0369a1; }
 
-.countdown-wrapper {
-    margin: 15px 0 25px 0;
-}
+.countdown-wrapper { margin: 15px 0 25px 0; }
 
 .cd {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -127,7 +161,7 @@ body {
 
 .controls-panel {
     background: var(--panel-bg);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     border-radius: 20px;
     padding: 12px 10px;
     display: flex;
@@ -135,6 +169,7 @@ body {
     align-items: center;
     width: 100%;
     margin-bottom: 25px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .controls-panel > button:nth-of-type(1) { margin-right: clamp(6px, 2vw, 14px); } 
@@ -191,10 +226,10 @@ body {
     border: none;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.25);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     transition: transform 0.1s, background 0.2s;
 }
-.cb:hover { background: #1e293b; }
+.cb:hover { opacity: 0.9; }
 .cb:active { transform: scale(0.95); }
 
 .main-btn {
@@ -219,7 +254,7 @@ body {
 .color-btn {
     background: transparent;
     color: var(--text-muted);
-    border: 2px dashed #cbd5e1;
+    border: 2px dashed var(--border-color);
     padding: 12px 24px;
     border-radius: 14px;
     font-size: 0.95rem;
@@ -231,7 +266,7 @@ body {
 .color-btn:hover {
     border-color: var(--text-muted);
     color: var(--text-main);
-    background: #f8fafc;
+    background: var(--panel-bg);
 }
 
 .active-config {
@@ -241,8 +276,8 @@ body {
     gap: 12px;
     margin-top: 15px;
     padding: 12px 16px;
-    background: #f8fafc; 
-    border: 1px solid #e2e8f0; 
+    background: var(--panel-bg); 
+    border: 1px solid var(--border-color); 
     border-radius: 14px; 
     transition: all 0.2s;
     width: 100%; 
@@ -253,13 +288,13 @@ body {
     height: 14px;
     border-radius: 50%;
     box-shadow: 0 1px 3px rgba(0,0,0,0.2); 
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--border-color);
 }
 
 .config-text {
     font-size: 1rem;
     font-weight: 700;
-    color: #475569; 
+    color: var(--text-main); 
     letter-spacing: 0;
 }
 
@@ -278,17 +313,15 @@ body {
     transition: all 0.1s;
     margin-left: 5px; 
 }
+.config-del-btn:active { transform: scale(0.9); }
 
-.config-del-btn:active {
-    transform: scale(0.9);
-}
-
-.modal-overlay, .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 9999; padding: 15px;}
-.modal-content, .modal-confirm { background: #fff; padding: 28px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); }
-.modal-title { font-size: 1.4rem; margin-bottom: 24px; font-weight: 800; color: #0f172a;}
+/* MODAL TỰ ĐỘNG CHUYỂN MÀU THEO GIAO DIỆN */
+.modal-overlay, .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 9999; padding: 15px;}
+.modal-content, .modal-confirm { background: var(--card-bg); padding: 28px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); transition: background-color 0.2s ease;}
+.modal-title { font-size: 1.4rem; margin-bottom: 24px; font-weight: 800; color: var(--text-main);}
 .form-group { margin-bottom: 18px; text-align: left; }
-.form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
-.form-group input[type="number"] { width: 100%; padding: 12px 16px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1.05rem; font-weight: 600; color: #1e293b; outline: none; transition: border 0.2s;}
+.form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-muted); font-size: 0.95rem;}
+.form-group input[type="number"] { width: 100%; padding: 12px 16px; border-radius: 12px; background: var(--bg-page); border: 2px solid var(--border-color); font-size: 1.05rem; font-weight: 600; color: var(--text-main); outline: none; transition: border 0.2s;}
 .form-group input[type="number"]:focus { border-color: #3b82f6; }
 .color-input { width: 100%; height: 48px; border: none; border-radius: 12px; cursor: pointer; padding: 0; overflow: hidden;}
 .color-input::-webkit-color-swatch-wrapper { padding: 0; }
@@ -296,34 +329,18 @@ body {
 .modal-actions { display: flex; gap: 12px; margin-top: 28px; }
 .modal-btn { flex: 1; padding: 14px; border-radius: 14px; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; transition: transform 0.1s; }
 .modal-btn:active { transform: scale(0.95); }
-.mbc, .modal-btn-cancel { background: #f1f5f9; color: #475569; }
-.mbs, .modal-btn-ok { background: #0f172a; color: #fff; }
+.mbc, .modal-btn-cancel { background: var(--panel-bg); color: var(--text-main); border: 1px solid var(--border-color); }
+.mbs, .modal-btn-ok { background: var(--btn-dark); color: white; }
 
-/* ÉP KHUNG NGANG BUNNG RỘNG TỐI ĐA TRÊN ĐIỆN THOẠI */
 @media screen and (max-width: 480px) {
-    body {
-        padding: 4px; 
-    }
-    .app-card {
-        padding: 24px 6px; 
-        border-radius: 18px; 
-    }
-    .controls-panel {
-        padding: 10px 4px; 
-    }
+    body { padding: 4px; }
+    .app-card { padding: 24px 6px; border-radius: 18px; }
+    .controls-panel { padding: 10px 4px; }
     .controls-panel > button:nth-of-type(1) { margin-right: 3px; } 
     .controls-panel > button:nth-of-type(2) { margin-right: 2px; }  
     .controls-panel > button:nth-of-type(3) { margin-left: 2px; }   
     .controls-panel > button:nth-of-type(4) { margin-left: 3px; }  
-    .db {
-        padding: 12px 0; 
-        font-size: 0.95rem; 
-    }
-    .offset-display {
-        min-width: 45px; 
-        margin: 0 1px;
-    }
-    .d-t {
-        font-size: 1.15rem;
-    }
+    .db { padding: 12px 0; font-size: 0.95rem; }
+    .offset-display { min-width: 45px; margin: 0 1px; }
+    .d-t { font-size: 1.15rem; }
 }
