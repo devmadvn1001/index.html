@@ -1,12 +1,12 @@
 :root {
-    --bg-page: #f1f5f9;         /* Nền ngoài cùng xám rất nhạt */
-    --card-bg: #ffffff;         /* Nền thẻ trắng tinh */
-    --text-main: #1e293b;       /* Chữ đen đậm */
-    --text-muted: #64748b;      /* Chữ xám phụ */
-    --btn-dark: #0f172a;        /* Xanh đen sang trọng */
-    --btn-red: #ef4444;         /* Đỏ tươi */
-    --btn-green: #22c55e;       /* Xanh lá tươi */
-    --panel-bg: #f8fafc;        /* Nền của thanh điều khiển +/- */
+    --bg-page: #f1f5f9;         
+    --card-bg: #ffffff;         
+    --text-main: #1e293b;       
+    --text-muted: #64748b;      
+    --btn-dark: #0f172a;        
+    --btn-red: #ef4444;         
+    --btn-green: #22c55e;       
+    --panel-bg: #f8fafc;        
 }
 
 * {
@@ -19,7 +19,7 @@ html, body {
     height: 100%;
     width: 100%;
     overflow-x: hidden;
-    touch-action: manipulation; /* Khóa zoom */
+    touch-action: manipulation; 
 }
 
 body {
@@ -31,14 +31,14 @@ body {
     align-items: center;
     min-height: 100vh;
     padding: 15px;
-    transition: background-color 0.1s ease; /* Chuyển màu nền mượt mà khi chớp */
+    transition: background-color 0.1s ease; 
 }
 
-/* KHUNG GIAO DIỆN CHÍNH (CARD) */
+/* KHUNG GIAO DIỆN CHÍNH (CARD) - ĐÃ NỚI RỘNG THÊM */
 .app-card {
     background: var(--card-bg);
     width: 100%;
-    max-width: 480px; /* Nhỏ gọn, vừa vặn như App Mobile */
+    max-width: 550px; /* Tăng độ rộng từ 480px lên 550px */
     border-radius: 28px;
     padding: 30px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
@@ -61,7 +61,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin-bottom: 25px;
     flex-wrap: wrap;
 }
@@ -86,15 +86,15 @@ body {
     margin: 10px 0 25px 0;
 }
 
-/* Đếm ngược siêu to */
+/* Đếm ngược siêu to - ĐÃ FIX LỖI BỊ BÓP LÙN */
 .cd {
-    font-size: clamp(4rem, 18vw, 7.5rem);
+    font-size: clamp(4.5rem, 16vw, 8rem);
     font-weight: 900;
     color: var(--text-main);
-    line-height: 1;
-    letter-spacing: -3px;
+    line-height: 1.1; /* Nới chiều cao dòng để không bị lùn số */
+    letter-spacing: -1px; /* Trả lại khoảng cách chữ tự nhiên */
     white-space: nowrap;
-    font-variant-numeric: tabular-nums; /* Giữ số không bị giật lắc ngang */
+    font-variant-numeric: tabular-nums; 
 }
 
 /* Giờ kết thúc */
@@ -105,7 +105,7 @@ body {
     margin-top: 8px;
 }
 
-/* Bảng điều khiển Thời gian (Nền xám ôm trọn các nút) */
+/* Bảng điều khiển Thời gian */
 .controls-panel {
     background: var(--panel-bg);
     border: 1px solid #e2e8f0;
@@ -114,7 +114,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: clamp(4px, 1vw, 8px);
+    gap: clamp(8px, 2vw, 16px); /* Nới rộng khoảng cách giữa CÁC NÚT */
     margin-bottom: 25px;
     flex-wrap: nowrap;
 }
@@ -123,8 +123,8 @@ body {
 .db {
     border: none;
     border-radius: 10px;
-    padding: clamp(10px, 2vw, 12px) clamp(6px, 1.5vw, 12px); 
-    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    padding: clamp(12px, 2.5vw, 14px) clamp(8px, 1.5vw, 14px); /* Làm nút to và dễ bấm hơn */
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
     font-weight: 700;
     color: white;
     cursor: pointer;
@@ -139,14 +139,15 @@ body {
 .btn-red { background-color: var(--btn-red); }
 .btn-green { background-color: var(--btn-green); }
 
-/* Hiển thị số 0.00s */
+/* Hiển thị số 0.00s ở giữa */
 .offset-display {
     min-width: clamp(60px, 12vw, 80px);
     text-align: center;
+    margin: 0 clamp(10px, 4vw, 25px); /* THÊM LỀ HAI BÊN ĐỂ ĐẨY NÚT RA XA CHO THOÁNG */
 }
 
 .d-t {
-    font-size: clamp(1rem, 3.5vw, 1.4rem);
+    font-size: clamp(1.1rem, 3.5vw, 1.5rem);
     font-weight: 800;
     color: var(--text-main);
     white-space: nowrap;
@@ -211,7 +212,7 @@ body {
 }
 
 /* ======================================= */
-/* MODAL BẢN MỚI (ĐẸP HƠN)                 */
+/* MODAL BẢN MỚI                           */
 /* ======================================= */
 .modal-overlay, .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 9999; padding: 15px;}
 .modal-content, .modal-confirm { background: #fff; padding: 28px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); }
