@@ -138,11 +138,10 @@ function updateDTOffset() {
 // ===== Hàm định dạng thời gian ss:f (1 chữ số 1/10 giây) =====
 function formatTimeMMSSF(totalSeconds) {
     const absSec = Math.abs(totalSeconds);
-    const seconds = Math.floor(absSec % 60);
+    const seconds = Math.floor(absSec);
     const milliseconds = Math.floor((absSec - Math.floor(absSec)) * 1000);
-    const ss = String(seconds).padStart(2, '0');
     const f = String(Math.floor(milliseconds / 100));
-    return ss + ':' + f;
+    return String(seconds) + ':' + f;
 }
 
 // ===== Lấy thời gian hiện tại (ms) =====
