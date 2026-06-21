@@ -25,6 +25,75 @@ if (paramR) {
 let timeOffset = 0;
 let link1 = null;
 
+// ============================================================== //
+// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) BẰNG CÁCH PING LIÊN TỤC   //
+// ============================================================== //
+let isSyncOn = false;
+let networkTimeOffset = 0; 
+let syncInterval = null;
+
+const btnSync = document.getElementById('btn-sync');
+const syncStatus = document.getElementById('sync-status');
+
+// Hàm PING server lấy giờ chuẩn
+async function pingTimeServer() {
+    if (!isSyncOn) return;
+    try {
+        const start = Date.now();
+        // Gọi API giờ quốc tế (bỏ qua cache để luôn lấy giờ mới nhất)
+        const res = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', { cache: 'no-store' });
+        const data = await res.json();
+        const end = Date.now();
+        
+        const serverTime = new Date(data.utc_datetime).getTime();
+        const latency = (end - start) / 2; // Tính thời gian truyền đi 1 chiều
+        
+        // Tinh chỉnh độ lệch: (Giờ server thực tế + độ trễ mạng) - Giờ máy hiện tại
+        networkTimeOffset = (serverTime + latency) - Date.now();
+        
+        if (syncStatus) {
+            syncStatus.textContent = 'ON';
+            syncStatus.style.color = '#22c55e'; // Xanh lá
+        }
+    } catch (error) {
+        if (syncStatus) {
+            syncStatus.textContent = 'LỖI PING';
+            syncStatus.style.color = '#ef4444'; // Báo lỗi nếu mạng lag không ping được
+        }
+    }
+}
+
+// Lắng nghe thao tác Bật / Tắt Sync
+if (btnSync) {
+    btnSync.addEventListener('click', function() {
+        if (isSyncOn) {
+            // TẮT SYNC
+            isSyncOn = false;
+            networkTimeOffset = 0;
+            clearInterval(syncInterval);
+            
+            syncStatus.textContent = 'OFF';
+            syncStatus.style.color = '#ef4444'; 
+        } else {
+            // BẬT SYNC
+            isSyncOn = true;
+            syncStatus.textContent = 'PING...';
+            syncStatus.style.color = '#f59e0b'; // Màu vàng cam đang load
+            
+            pingTimeServer(); // Ping phát đầu tiên ngay lập tức
+            
+            // Cài đặt ping liên tục mỗi 5 giây để luôn giữ sai số nhỏ nhất ở mức ms
+            syncInterval = setInterval(pingTimeServer, 5000);
+        }
+    });
+}
+
+// Viết lại hàm lấy thời gian: Tự động cộng/trừ sai số nếu bật Sync
+function getCurrentTimeMs() {
+    return Date.now() + (isSyncOn ? networkTimeOffset : 0);
+}
+
+
 // ===== CẤU HÌNH NHÁY MÀU NỀN =====
 let colorConfig = {
     active: false,
@@ -44,11 +113,10 @@ function updateConfigDisplayUI() {
     if (!activeConfigDisplay) return;
     if (colorConfig && colorConfig.active) {
         configColorDot.style.backgroundColor = colorConfig.color;
-        // Đổi lại thành định dạng "Từ x(s) đến y(s)"
         configText.textContent = `Từ ${colorConfig.start}s đến ${colorConfig.end}s`;
-        activeConfigDisplay.style.display = 'flex'; // Dùng 'flex' để bung rộng thanh ra
+        activeConfigDisplay.style.display = 'flex'; 
     } else {
-        activeConfigDisplay.style.display = 'none'; // Ẩn thanh
+        activeConfigDisplay.style.display = 'none'; 
     }
 }
 
@@ -114,7 +182,7 @@ function applyBackgroundColor(state, colorHex = '') {
             if (colorInput) colorInput.value = colorConfig.color;
         }
 
-        updateConfigDisplayUI(); // Gọi update UI thanh màu
+        updateConfigDisplayUI(); 
         applyBackgroundColor('default');
 
     } catch (e) {}
@@ -179,10 +247,6 @@ function formatTimeMMSSF(totalSeconds) {
     return String(seconds) + '.' + f;
 }
 
-function getCurrentTimeMs() {
-    return Date.now();
-}
-
 // ===== TRỤC CHÍNH: CẬP NHẬT ĐỒNG HỒ VÀ KIỂM TRA MÀU =====
 function updateClock() {
     if (!endTime) {
@@ -190,6 +254,7 @@ function updateClock() {
         return;
     }
 
+    // GỌI HÀM LẤY GIỜ MỚI THAY VÌ DATE.NOW()
     const now = getCurrentTimeMs();
     const endTimeMs = endTime * 1000;
     const adjustedEndMs = endTimeMs + timeOffset * 1000;
@@ -312,7 +377,6 @@ document.getElementById('btn-submit').addEventListener('click', function () {
     // Cập nhật giao diện thanh trạng thái mới
     updateConfigDisplayUI();
 
-    // Bắt buộc đẩy web về nền mặc định (Xám), nằm yên đó CHỜ ĐẾN ĐÚNG GIỜ MỚI NHÁY MÀU
     currentBgState = 'default';
     applyBackgroundColor('default');
 
@@ -329,7 +393,6 @@ document.getElementById('configDelBtn').addEventListener('click', function() {
     
     updateConfigDisplayUI(); // Ẩn thanh đi
     
-    // Ép web về mặc định ngay lập tức phòng khi nó đang trong khung giờ nháy
     currentBgState = 'default';
     applyBackgroundColor('default');
 });
