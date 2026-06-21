@@ -25,7 +25,7 @@ if (paramR) {
 let timeOffset = 0;
 let link1 = null;
 
-// ===== CẤU HÌNH NHÁY MÀU NỀN THEO THỜI GIAN =====
+// ===== CẤU HÌNH NHÁY MÀU NỀN =====
 let colorConfig = {
     active: false,
     start: 0.6,
@@ -34,20 +34,34 @@ let colorConfig = {
 };
 let currentBgState = 'default';
 
-// --- QUAN TRỌNG: Hàm này xử lý việc đổi màu nền và tự động chỉnh màu chữ ---
+// DOM cho thanh trạng thái màu mới thêm
+const activeConfigDisplay = document.getElementById('activeConfigDisplay');
+const configColorDot = document.getElementById('configColorDot');
+const configText = document.getElementById('configText');
+
+// Hàm cập nhật Giao diện Thanh Trạng Thái Màu (Hiện/Ẩn)
+function updateConfigDisplayUI() {
+    if (!activeConfigDisplay) return;
+    if (colorConfig && colorConfig.active) {
+        configColorDot.style.backgroundColor = colorConfig.color;
+        configText.textContent = `Từ ${colorConfig.start}s đến ${colorConfig.end}s`;
+        activeConfigDisplay.style.display = 'flex'; // Hiện thanh
+    } else {
+        activeConfigDisplay.style.display = 'none'; // Ẩn thanh
+    }
+}
+
+// Hàm đổi màu nền & tự động chỉnh màu chữ
 function applyBackgroundColor(state, colorHex = '') {
     if (state === 'default') {
-        // Trả về nền mặc định (Xám sáng)
-        document.body.style.backgroundColor = 'var(--bg-page)'; // Sử dụng biến màu nền của trang
+        document.body.style.backgroundColor = 'var(--bg-page)'; 
         document.documentElement.style.setProperty('--text-main', '#1e293b');
         document.documentElement.style.setProperty('--text-muted', '#64748b');
-        document.querySelector('.app-card').style.backgroundColor = 'var(--card-bg)'; // Trả màu nền card
+        document.querySelector('.app-card').style.backgroundColor = 'var(--card-bg)'; 
     } else if (state === 'flash') {
-        // Áp dụng màu nháy cho cả body và card để full màn hình
         document.body.style.backgroundColor = colorHex;
         document.querySelector('.app-card').style.backgroundColor = colorHex;
 
-        // Thuật toán YIQ tự động đổi màu chữ cho tương phản với màu nền
         let hex = colorHex.replace('#', '');
         if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
         if (hex.length === 6) {
@@ -57,20 +71,16 @@ function applyBackgroundColor(state, colorHex = '') {
             let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
 
             if (yiq < 128) {
-                // Nền tối -> Chữ đổi màu Trắng
                 document.documentElement.style.setProperty('--text-main', '#ffffff');
                 document.documentElement.style.setProperty('--text-muted', '#e2e8f0');
             } else {
-                // Nền sáng -> Chữ giữ màu Đen
                 document.documentElement.style.setProperty('--text-main', '#1e293b');
                 document.documentElement.style.setProperty('--text-muted', '#64748b');
             }
         }
     }
-    // Update màu chữ của cục +/- 0.00s ở giữa
     updateDTOffset();
 }
-// --------------------------------------------------------------------------
 
 // ===== Khôi phục cấu hình đã lưu =====
 (function loadSavedState() {
@@ -78,7 +88,6 @@ function applyBackgroundColor(state, colorHex = '') {
         var testKey = '__test_ls__';
         localStorage.setItem(testKey, '1');
         localStorage.removeItem(testKey);
-
         localStorage.removeItem('bgColor');
 
         var savedOffset = localStorage.getItem('timeOffset');
@@ -104,6 +113,7 @@ function applyBackgroundColor(state, colorHex = '') {
             if (colorInput) colorInput.value = colorConfig.color;
         }
 
+        updateConfigDisplayUI(); // Gọi update UI thanh màu
         applyBackgroundColor('default');
 
     } catch (e) {}
@@ -154,7 +164,6 @@ function updateDTOffset() {
         color = '#ef4444'; // Đỏ
     } else {
         sign = '+';
-        // Lấy tự động màu chữ chuẩn từ biến CSS
         color = getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#1e293b';
     }
 
@@ -185,7 +194,6 @@ function updateClock() {
     const adjustedEndMs = endTimeMs + timeOffset * 1000;
     const diffMs = adjustedEndMs - now;
 
-    // HẾT GIỜ (Về 0s)
     if (diffMs <= 0) {
         if (countdownEl) countdownEl.textContent = '00.0';
 
@@ -199,7 +207,6 @@ function updateClock() {
     const diffSeconds = diffMs / 1000;
     if (countdownEl) countdownEl.textContent = formatTimeMMSSF(diffSeconds);
 
-    // KIỂM TRA ĐIỀU KIỆN NHÁY MÀU
     if (colorConfig.active) {
         if (diffSeconds <= colorConfig.start && diffSeconds >= colorConfig.end) {
             if (currentBgState !== 'flash') {
@@ -301,12 +308,29 @@ document.getElementById('btn-submit').addEventListener('click', function () {
         localStorage.setItem('colorConfig', JSON.stringify(colorConfig));
     } catch (e) {}
 
+    // Cập nhật giao diện thanh trạng thái mới
+    updateConfigDisplayUI();
+
     // Bắt buộc đẩy web về nền mặc định (Xám), nằm yên đó CHỜ ĐẾN ĐÚNG GIỜ MỚI NHÁY MÀU
     currentBgState = 'default';
     applyBackgroundColor('default');
 
     var modal = document.getElementById('modal');
     if (modal) modal.style.display = 'none';
+});
+
+// ===== NÚT XÓA BỎ LỆNH NHÁY MÀU (MỚI THÊM) =====
+document.getElementById('configDelBtn').addEventListener('click', function() {
+    colorConfig.active = false;
+    try {
+        localStorage.setItem('colorConfig', JSON.stringify(colorConfig));
+    } catch (e) {}
+    
+    updateConfigDisplayUI(); // Ẩn thanh đi
+    
+    // Ép web về mặc định ngay lập tức phòng khi nó đang trong khung giờ nháy
+    currentBgState = 'default';
+    applyBackgroundColor('default');
 });
 
 document.getElementById('modal').addEventListener('click', function (e) {
