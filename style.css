@@ -86,15 +86,14 @@ body {
     margin: 15px 0 25px 0;
 }
 
-/* ĐẾM NGƯỢC SIÊU TO - FIX LỖI ÉP LÙN TRÊN IOS */
+/* ĐẾM NGƯỢC SIÊU TO */
 .cd {
-    /* MẸO: Ép dùng font Helvetica/Arial để số luôn cao và thon, không bị béo như font mặc định của iPhone */
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: clamp(4.5rem, 16vw, 8rem);
-    font-weight: 700; /* Giảm độ béo xuống một chút cho thanh thoát */
+    font-weight: 700; 
     color: var(--text-main);
     line-height: 1.1; 
-    letter-spacing: 1px; /* Khoảng cách các số vừa vặn */
+    letter-spacing: 1px; 
     white-space: nowrap;
     font-variant-numeric: tabular-nums; 
     margin: clamp(15px, 2vh, 25px) 0; 
@@ -117,10 +116,21 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5px; /* Ép toàn bộ các nút sát lại gần nhau hơn */
+    gap: 5px; /* Giữ 2 nút giữa và số 0.00 sát rịt lại với nhau */
     margin-bottom: 25px;
     flex-wrap: nowrap;
 }
+
+/* ======= ĐÂY LÀ PHẦN TÁCH NÚT RA HAI BÊN ======= */
+/* Đẩy nút -0.05 sang trái */
+.controls-panel .db:first-child {
+    margin-right: clamp(6px, 2vw, 14px); 
+}
+/* Đẩy nút +0.05 sang phải */
+.controls-panel .db:last-child {
+    margin-left: clamp(6px, 2vw, 14px); 
+}
+/* =============================================== */
 
 /* Nút bấm +/- */
 .db {
@@ -142,11 +152,11 @@ body {
 .btn-red { background-color: var(--btn-red); }
 .btn-green { background-color: var(--btn-green); }
 
-/* HIỂN THỊ SỐ 0.00S Ở GIỮA - KÉO CỰC KỲ SÁT VÀO 2 NÚT BÊN CẠNH */
+/* HIỂN THỊ SỐ 0.00S Ở GIỮA */
 .offset-display {
-    min-width: 60px; /* Vừa đủ ôm trọn chữ +0.00s */
+    min-width: 60px; 
     text-align: center;
-    margin: 0 2px; /* Kéo cực sát vào 2 nút -0.01 và +0.01 */
+    margin: 0 2px; /* Lề rất hẹp để ôm sát vào 2 nút 0.01 bên cạnh */
 }
 
 .d-t {
