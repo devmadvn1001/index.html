@@ -29,20 +29,20 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 15px;
+    padding: 10px; /* Thu hẹp lề để tăng không gian hiển thị cho màn hình nhỏ */
 }
 
 /* Nút Cài đặt góc trên phải */
 .settings-btn {
     position: absolute;
-    top: max(15px, 2vh);
-    right: max(15px, 4vw);
+    top: max(10px, 2vh);
+    right: max(10px, 3vw);
     background: var(--btn-dark);
     color: white;
     border: none;
-    padding: 8px 18px;
+    padding: 8px 16px;
     border-radius: 20px;
-    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+    font-size: clamp(0.7rem, 2.5vw, 0.85rem);
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -61,45 +61,48 @@ body {
 
 /* Tên user */
 .usf {
-    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    font-size: clamp(1.1rem, 4vw, 1.6rem);
     font-weight: 800;
-    margin-bottom: clamp(10px, 3vh, 15px);
+    margin-bottom: clamp(8px, 2vh, 15px);
     color: var(--text-main);
     word-break: break-word;
 }
 
 /* Thống kê (Coins/View) */
 .stats {
-    font-size: clamp(1rem, 3.5vw, 1.3rem);
+    font-size: clamp(0.9rem, 3vw, 1.3rem);
     color: var(--text-main);
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: clamp(8px, 2vw, 12px);
-    margin-bottom: clamp(15px, 4vh, 30px);
+    gap: clamp(6px, 1.5vw, 12px);
+    margin-bottom: clamp(10px, 3vh, 30px);
     font-weight: 500;
+    white-space: nowrap; /* Tránh rớt dòng màn hình hẹp */
 }
 .divider {
     color: var(--text-muted);
     font-weight: 300;
 }
 
-/* Chữ số đếm ngược siêu to */
+/* Chữ số đếm ngược siêu to - ĐÃ FIX TRIỆT ĐỂ LỖI MẤT GIÂY TRÊN 12 MINI */
 .cd {
-    font-size: clamp(4.5rem, 18vw, 8.5rem);
+    font-size: clamp(3rem, 16vw, 8.5rem); /* Nới rộng khoảng co giãn, bao trọn màn hình bé */
     font-weight: 900;
     color: var(--text-main);
     margin: clamp(5px, 2vh, 15px) 0;
     line-height: 1;
     letter-spacing: -2px;
     text-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    white-space: nowrap; /* ÉP BUỘC CHỮ KHÔNG BAO GIỜ RỚT DÒNG */
+    font-variant-numeric: tabular-nums; /* Giữ kích thước số luôn cố định, không giật lắc */
 }
 
 /* Thời gian kết thúc */
 .time-info {
-    font-size: clamp(0.95rem, 3vw, 1.15rem);
+    font-size: clamp(0.85rem, 2.5vw, 1.15rem);
     color: var(--text-muted);
-    margin-bottom: clamp(20px, 5vh, 35px);
+    margin-bottom: clamp(15px, 4vh, 35px);
 }
 
 /* Khu vực nút + / - thời gian */
@@ -108,20 +111,20 @@ body {
     justify-content: center;
     align-items: center;
     gap: clamp(2px, 1vw, 8px); 
-    margin-bottom: clamp(20px, 5vh, 35px);
+    margin-bottom: clamp(15px, 4vh, 35px);
     flex-wrap: nowrap; /* Cấm rớt dòng */
     width: 100%;
 }
 
 .db {
     border: none;
-    border-radius: 8px;
-    padding: clamp(8px, 1.5vw, 10px) clamp(5px, 1.5vw, 12px); 
-    font-size: clamp(0.75rem, 2.5vw, 1rem);
+    border-radius: 6px;
+    padding: clamp(6px, 1.2vw, 10px) clamp(4px, 1vw, 12px); 
+    font-size: clamp(0.7rem, 2.2vw, 1rem);
     font-weight: 600;
     color: white;
     cursor: pointer;
-    min-width: clamp(45px, 10vw, 60px);
+    min-width: clamp(35px, 8vw, 60px); /* Thu gọn nút lại cho vừa máy nhỏ */
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     transition: transform 0.1s, box-shadow 0.2s;
     white-space: nowrap; 
@@ -133,20 +136,21 @@ body {
 
 /* Chữ hiển thị độ lệch (0.00s) */
 .d-t {
-    font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+    font-size: clamp(0.9rem, 3vw, 1.4rem);
     font-weight: 800;
-    min-width: clamp(55px, 12vw, 75px);
+    min-width: clamp(45px, 10vw, 75px);
     color: var(--text-main);
-    margin: 0 clamp(4px, 1vw, 10px); 
+    margin: 0 clamp(2px, 1vw, 10px); 
     text-align: center;
+    white-space: nowrap;
 }
 
 /* Nút COPY và Dấu + */
 .action-buttons {
     display: flex;
     justify-content: center;
-    gap: clamp(10px, 3vw, 15px);
-    margin-bottom: clamp(20px, 5vh, 35px);
+    gap: clamp(8px, 2vw, 15px);
+    margin-bottom: clamp(15px, 4vh, 35px);
 }
 
 .cb {
@@ -162,30 +166,30 @@ body {
 .cb:active { transform: scale(0.95); }
 
 .main-btn {
-    padding: clamp(12px, 3.5vw, 14px) clamp(30px, 8vw, 40px);
+    padding: clamp(10px, 3vw, 14px) clamp(25px, 6vw, 40px);
     border-radius: 30px;
-    font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+    font-size: clamp(0.95rem, 3vw, 1.25rem);
 }
 
 .square-btn {
-    width: clamp(45px, 12vw, 52px);
-    height: clamp(45px, 12vw, 52px);
-    border-radius: 14px;
-    font-size: clamp(1.3rem, 4vw, 1.6rem);
+    width: clamp(40px, 10vw, 52px);
+    height: clamp(40px, 10vw, 52px);
+    border-radius: 12px;
+    font-size: clamp(1.2rem, 3.5vw, 1.6rem);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 /* Nút Canh theo màu sắc */
-.bottom-action { margin-top: 10px; }
+.bottom-action { margin-top: 5px; }
 .color-btn {
     background: var(--btn-dark);
     color: white;
     border: none;
-    padding: clamp(10px, 3vw, 12px) clamp(20px, 5vw, 24px);
+    padding: clamp(8px, 2.5vw, 12px) clamp(16px, 4vw, 24px);
     border-radius: 8px;
-    font-size: clamp(0.9rem, 3vw, 1.05rem);
+    font-size: clamp(0.85rem, 2.5vw, 1.05rem);
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(44, 62, 80, 0.2);
