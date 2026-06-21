@@ -89,12 +89,17 @@ body {
 /* Đếm ngược siêu to - ĐÃ FIX LỖI BỊ BÓP LÙN */
 .cd {
     font-size: clamp(4.5rem, 16vw, 8rem);
-    font-weight: 900;
+    font-weight: 800; /* Giảm độ béo của chữ từ 900 xuống 800 để trông thanh thoát hơn */
     color: var(--text-main);
-    line-height: 1.1; /* Nới chiều cao dòng để không bị lùn số */
-    letter-spacing: -1px; /* Trả lại khoảng cách chữ tự nhiên */
+    line-height: 1.2;
+    letter-spacing: 0; /* Xóa ép chữ ngang */
     white-space: nowrap;
     font-variant-numeric: tabular-nums; 
+    
+    /* MẸO CHÍNH: Kéo giãn chữ theo chiều dọc để khắc phục lỗi bóp lùn trên iOS */
+    display: inline-block;
+    transform: scaleY(1.15); /* Kéo chữ cao lên 15% */
+    margin: clamp(15px, 3vh, 25px) 0; /* Nới thêm không gian trên dưới để chữ không chạm viền */
 }
 
 /* Giờ kết thúc */
