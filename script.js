@@ -1,22 +1,16 @@
 // ===== Lấy tham số từ URL =====
 const urlParams = new URLSearchParams(window.location.search);
 
-// Tham số m: user (tên người dùng)
 const paramM = urlParams.get('m') || 'user';
-
-// Tham số r: chuỗi chứa coins|can_open|hot_box_str|latest_viewers_str|end_time
 const paramR = urlParams.get('r') || '';
-
-// Tham số link: link tiktok (nếu có)
 const tiktokLink = urlParams.get('link') || '';
 
 // ===== Parse tham số r =====
-// Định dạng: coins|can_open|hot_box_str|latest_viewers_str|end_time
 let coins = 80;
 let canOpen = 25;
 let hotBoxStr = '🏅🇩🇪';
 let latestViewersStr = '';
-let endTime = 0; // end_time (giây)
+let endTime = 0; 
 
 if (paramR) {
     const parts = paramR.split('|');
@@ -31,7 +25,34 @@ if (paramR) {
 let timeOffset = 0; 
 let link1 = null; 
 
-// Khôi phục cấu hình đã lưu
+// ===== HÀM ĐỔI MÀU NỀN & TỰ ĐỘNG CHỈNH MÀU CHỮ (TRẮNG/ĐEN) =====
+function setBgColor(color) {
+    document.body.style.backgroundColor = color;
+    try { localStorage.setItem('bgColor', color); } catch (e) {}
+    
+    // Thuật toán YIQ để tính độ sáng của màu nền
+    let hex = color.replace('#', '');
+    if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    if (hex.length === 6) {
+        let r = parseInt(hex.substr(0,2), 16);
+        let g = parseInt(hex.substr(2,2), 16);
+        let b = parseInt(hex.substr(4,2), 16);
+        let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+        
+        // Nếu nền tối (YIQ < 128) -> Chữ Trắng. Nếu nền sáng -> Chữ Đen xám.
+        if (yiq < 128) {
+            document.documentElement.style.setProperty('--text-main', '#ffffff');
+            document.documentElement.style.setProperty('--text-muted', '#e2e8f0');
+        } else {
+            document.documentElement.style.setProperty('--text-main', '#2c3e50');
+            document.documentElement.style.setProperty('--text-muted', '#596275');
+        }
+    }
+    // Gọi lại hàm này để cập nhật màu cho số 0.00s
+    updateDTOffset();
+}
+
+// ===== Khôi phục cấu hình đã lưu =====
 (function loadSavedState() {
     try {
         var testKey = '__test_ls__';
@@ -51,7 +72,7 @@ let link1 = null;
 
         var savedBgColor = localStorage.getItem('bgColor');
         if (savedBgColor) {
-            document.body.style.backgroundColor = savedBgColor;
+            setBgColor(savedBgColor); // Load lại màu nền và áp dụng đổi màu chữ
         }
     } catch (e) {}
 })();
@@ -73,7 +94,6 @@ if (peopleCountEl) peopleCountEl.textContent = canOpen;
 if (hotBoxFlagEl) hotBoxFlagEl.textContent = hotBoxStr;
 if (viewersDisplayEl) viewersDisplayEl.textContent = latestViewersStr;
 
-// Hàm định dạng timestamp (giây) thành hh:mm:ss
 function formatEndTimeHHMMSS(timestampSeconds) {
     if (!timestampSeconds) return '--:--:--';
     const date = new Date(timestampSeconds * 1000);
@@ -83,7 +103,6 @@ function formatEndTimeHHMMSS(timestampSeconds) {
     return h + ':' + m + ':' + s;
 }
 
-// Hiển thị thời gian kết thúc
 if (endTimeDisplayEl) {
     endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
 }
@@ -93,36 +112,35 @@ function updateDTOffset() {
     if (!dTEl) return;
     const absVal = Math.abs(timeOffset);
     let sign = '';
-    let color = '#2c3e50'; // Màu đen xám mặc định cho giá trị 0.00
+    let color = ''; 
 
     if (timeOffset > 0) {
         sign = '+';
-        color = '#28a745'; // Màu xanh lá khi giá trị dương (+)
+        color = '#28a745'; // Xanh lá
     } else if (timeOffset < 0) {
         sign = '-';
-        color = '#d9534f'; // Màu đỏ khi giá trị âm (-)
+        color = '#d9534f'; // Đỏ
     } else {
-        sign = '+'; // Hiển thị +0.00s khi bằng 0
+        sign = '+'; 
+        // Lấy tự động màu chữ chuẩn từ biến CSS (Trắng hoặc Đen) để không bị tàng hình
+        color = getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#2c3e50';
     }
 
     dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
 }
 
-// ===== Hàm định dạng thời gian ss.f =====
 function formatTimeMMSSF(totalSeconds) {
     const absSec = Math.abs(totalSeconds);
     const seconds = Math.floor(absSec);
     const milliseconds = Math.floor((absSec - Math.floor(absSec)) * 1000);
     const f = String(Math.floor(milliseconds / 100));
-    return String(seconds) + '.' + f; // Chuyển dấu : thành dấu .
+    return String(seconds) + '.' + f; 
 }
 
-// ===== Lấy thời gian hiện tại (ms) =====
 function getCurrentTimeMs() {
     return Date.now();
 }
 
-// ===== Cập nhật đồng hồ đếm ngược =====
 function updateClock() {
     if (!endTime) {
         if (countdownEl) countdownEl.textContent = '00.0';
@@ -143,7 +161,6 @@ function updateClock() {
     if (countdownEl) countdownEl.textContent = formatTimeMMSSF(diffSeconds);
 }
 
-// ===== Điều chỉnh thời gian (offset) =====
 function adjustTime(seconds) {
     timeOffset += seconds;
     timeOffset = Math.round(timeOffset * 100) / 100;
@@ -154,13 +171,11 @@ function adjustTime(seconds) {
     updateClock();
 }
 
-// ===== Gán sự kiện nút điều chỉnh =====
 document.getElementById('btn-decrease-0.05').addEventListener('click', function () { adjustTime(-0.05); });
 document.getElementById('btn-decrease-0.01').addEventListener('click', function () { adjustTime(-0.01); });
 document.getElementById('btn-increase-0.01').addEventListener('click', function () { adjustTime(0.01); });
 document.getElementById('btn-increase-0.05').addEventListener('click', function () { adjustTime(0.05); });
 
-// ===== Nút COPY (claimBtn) =====
 document.getElementById('claimBtn').addEventListener('click', function () {
     if (tiktokLink) {
         navigator.clipboard.writeText(tiktokLink).catch(function () {});
@@ -179,7 +194,6 @@ document.getElementById('claimBtn').addEventListener('click', function () {
     }
 });
 
-// ===== Nút + (claimChangeBtn) =====
 document.getElementById('claimChangeBtn').addEventListener('click', function () {
     if (link1) {
         link1 = null;
@@ -195,7 +209,6 @@ document.getElementById('claimChangeBtn').addEventListener('click', function () 
     }
 });
 
-// ===== Modal xác nhận =====
 function handleConfirm(ok) {
     var modal = document.getElementById('confirmModal');
     if (modal) modal.style.display = 'none';
@@ -206,7 +219,7 @@ var confirmOkBtn = document.getElementById('confirmOkBtn');
 if (confirmCancelBtn) { confirmCancelBtn.addEventListener('click', function () { handleConfirm(false); }); }
 if (confirmOkBtn) { confirmOkBtn.addEventListener('click', function () { handleConfirm(true); }); }
 
-// ===== Modal cấu hình màu sắc =====
+// ===== Mở modal cấu hình =====
 document.getElementById('btn-open').addEventListener('click', function () {
     var modal = document.getElementById('modal');
     if (modal) modal.style.display = 'flex';
@@ -217,10 +230,11 @@ document.getElementById('btn-cancel').addEventListener('click', function () {
     if (modal) modal.style.display = 'none';
 });
 
+// ===== Lưu màu nền =====
 document.getElementById('btn-submit').addEventListener('click', function () {
     var color = document.getElementById('hex_background_color').value;
-    document.body.style.backgroundColor = color;
-    try { localStorage.setItem('bgColor', color); } catch (e) {}
+    setBgColor(color); // Gọi hàm thông minh đổi màu nền & tự nhận diện màu chữ
+    
     var modal = document.getElementById('modal');
     if (modal) modal.style.display = 'none';
 });
@@ -231,7 +245,6 @@ document.getElementById('modal').addEventListener('click', function (e) {
     }
 });
 
-// ===== Khởi tạo =====
 updateClock();
 updateDTOffset();
 
