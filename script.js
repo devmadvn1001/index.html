@@ -92,9 +92,20 @@ if (endTimeDisplayEl) {
 function updateDTOffset() {
     if (!dTEl) return;
     const absVal = Math.abs(timeOffset);
-    const sign = timeOffset >= 0 ? '+' : '-';
-    // Chữ màu đen giữ nguyên sự tối giản như trong ảnh
-    dTEl.innerHTML = '<b style="color:#2c3e50">' + sign + absVal.toFixed(2) + 's</b>';
+    let sign = '';
+    let color = '#2c3e50'; // Màu đen xám mặc định cho giá trị 0.00
+
+    if (timeOffset > 0) {
+        sign = '+';
+        color = '#28a745'; // Màu xanh lá khi giá trị dương (+)
+    } else if (timeOffset < 0) {
+        sign = '-';
+        color = '#d9534f'; // Màu đỏ khi giá trị âm (-)
+    } else {
+        sign = '+'; // Hiển thị +0.00s khi bằng 0
+    }
+
+    dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
 }
 
 // ===== Hàm định dạng thời gian ss.f =====
