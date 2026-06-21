@@ -1,207 +1,325 @@
-:root {
-    --bg-color: #f0f4f8; /* Nền xám xanh nhạt */
-    --text-main: #2c3e50; /* Màu chữ đen xám */
-    --text-muted: #596275;
-    --btn-dark: #2c3e50; /* Xanh đậm cho nút Copy */
-    --btn-red: #d9534f;
-    --btn-green: #28a745;
+// ===== Lấy tham số từ URL =====
+const urlParams = new URLSearchParams(window.location.search);
+
+const paramM = urlParams.get('m') || 'user';
+const paramR = urlParams.get('r') || '';
+const tiktokLink = urlParams.get('link') || '';
+
+// ===== Parse tham số r =====
+let coins = 80;
+let canOpen = 25;
+let hotBoxStr = '🏅🇩🇪';
+let latestViewersStr = '';
+let endTime = 0; 
+
+if (paramR) {
+    const parts = paramR.split('|');
+    if (parts.length >= 1 && parts[0]) coins = parseInt(parts[0]) || 0;
+    if (parts.length >= 2 && parts[1]) canOpen = parseInt(parts[1]) || 0;
+    if (parts.length >= 3) hotBoxStr = parts[2] || '🏅🇩🇪';
+    if (parts.length >= 4) latestViewersStr = parts[3] || '';
+    if (parts.length >= 5) endTime = parseInt(parts[4]) || 0;
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+// ===== Biến toàn cục =====
+let timeOffset = 0; 
+let link1 = null; 
+
+// ===== CẤU HÌNH NHÁY MÀU NỀN THEO THỜI GIAN =====
+let colorConfig = {
+    active: false,
+    start: 0.6,
+    end: 0.0,
+    color: '#ff0000'
+};
+let currentBgState = 'default'; // Trạng thái nền: 'default' (Mặc định) hoặc 'flash' (Đang chớp màu)
+
+// Hàm thay đổi trạng thái màu nền và tự động chỉnh màu chữ Trắng/Đen
+function applyBackgroundColor(state, colorHex = '') {
+    if (state === 'default') {
+        // Trả về nền mặc định (Xám sáng)
+        document.body.style.backgroundColor = 'var(--bg-color)';
+        document.documentElement.style.setProperty('--text-main', '#2c3e50');
+        document.documentElement.style.setProperty('--text-muted', '#596275');
+    } else if (state === 'flash') {
+        // Áp dụng màu nháy người dùng đã chọn
+        document.body.style.backgroundColor = colorHex;
+        
+        // Thuật toán YIQ tự động đổi màu chữ cho tương phản với màu nền
+        let hex = colorHex.replace('#', '');
+        if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        if (hex.length === 6) {
+            let r = parseInt(hex.substr(0,2), 16);
+            let g = parseInt(hex.substr(2,2), 16);
+            let b = parseInt(hex.substr(4,2), 16);
+            let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            
+            if (yiq < 128) {
+                // Nền tối -> Chữ đổi màu Trắng
+                document.documentElement.style.setProperty('--text-main', '#ffffff');
+                document.documentElement.style.setProperty('--text-muted', '#e2e8f0');
+            } else {
+                // Nền sáng -> Chữ giữ màu Đen
+                document.documentElement.style.setProperty('--text-main', '#2c3e50');
+                document.documentElement.style.setProperty('--text-muted', '#596275');
+            }
+        }
+    }
+    // Update màu chữ của cục +/- 0.00s ở giữa
+    updateDTOffset(); 
 }
 
-html, body {
-    height: 100%;
-    width: 100%;
-    overflow-x: hidden;
-    /* Chống zoom khi double tap trên điện thoại */
-    touch-action: manipulation; 
+// ===== Khôi phục cấu hình đã lưu =====
+(function loadSavedState() {
+    try {
+        var testKey = '__test_ls__';
+        localStorage.setItem(testKey, '1');
+        localStorage.removeItem(testKey);
+
+        // Xóa sạch lỗi cũ (Lỗi dính cứng màu nền)
+        localStorage.removeItem('bgColor');
+
+        var savedOffset = localStorage.getItem('timeOffset');
+        if (savedOffset !== null && savedOffset !== undefined) {
+            timeOffset = parseFloat(savedOffset);
+            if (isNaN(timeOffset)) timeOffset = 0;
+        }
+
+        var savedLink1 = localStorage.getItem('link1');
+        if (savedLink1 && savedLink1 !== 'null' && savedLink1 !== 'undefined') {
+            link1 = savedLink1;
+        }
+
+        // Khôi phục mốc thời gian và màu sắc nháy
+        var savedConfig = localStorage.getItem('colorConfig');
+        if (savedConfig) {
+            colorConfig = JSON.parse(savedConfig);
+            
+            // Đẩy ngược lại vào Input của Form
+            const startInput = document.getElementById('start_seconds');
+            const endInput = document.getElementById('end_seconds');
+            const colorInput = document.getElementById('hex_background_color');
+            if (startInput) startInput.value = colorConfig.start;
+            if (endInput) endInput.value = colorConfig.end;
+            if (colorInput) colorInput.value = colorConfig.color;
+        }
+        
+        // Mới tải trang thì auto là nền xám mặc định chờ tới giờ mới nháy
+        applyBackgroundColor('default');
+
+    } catch (e) {}
+})();
+
+// ===== DOM refs =====
+const countdownEl = document.getElementById('countdown');
+const endTimeDisplayEl = document.getElementById('endTimeDisplay');
+const viewCountEl = document.getElementById('viewCount');
+const peopleCountEl = document.getElementById('peopleCount');
+const dTEl = document.getElementById('d-t');
+const usernameDisplayEl = document.getElementById('usernameDisplay');
+const hotBoxFlagEl = document.getElementById('hotBoxFlag');
+const viewersDisplayEl = document.getElementById('viewersDisplay');
+
+// ===== Khởi tạo giá trị từ URL params =====
+if (usernameDisplayEl) usernameDisplayEl.textContent = paramM;
+if (viewCountEl) viewCountEl.textContent = coins;
+if (peopleCountEl) peopleCountEl.textContent = canOpen;
+if (hotBoxFlagEl) hotBoxFlagEl.textContent = hotBoxStr;
+if (viewersDisplayEl) viewersDisplayEl.textContent = latestViewersStr;
+
+function formatEndTimeHHMMSS(timestampSeconds) {
+    if (!timestampSeconds) return '--:--:--';
+    const date = new Date(timestampSeconds * 1000);
+    const h = String(date.getHours()).padStart(2, '0');
+    const m = String(date.getMinutes()).padStart(2, '0');
+    const s = String(date.getSeconds()).padStart(2, '0');
+    return h + ':' + m + ':' + s;
 }
 
-body {
-    background: var(--bg-color);
-    color: var(--text-main);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 15px;
+if (endTimeDisplayEl) {
+    endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
 }
 
-/* Nút Cài đặt góc trên phải */
-.settings-btn {
-    position: absolute;
-    top: max(15px, 2vh);
-    right: max(15px, 4vw);
-    background: var(--btn-dark);
-    color: white;
-    border: none;
-    padding: 8px 18px;
-    border-radius: 20px;
-    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: opacity 0.2s;
+// ===== Hàm cập nhật hiển thị d-t (tổng offset) =====
+function updateDTOffset() {
+    if (!dTEl) return;
+    const absVal = Math.abs(timeOffset);
+    let sign = '';
+    let color = ''; 
+
+    if (timeOffset > 0) {
+        sign = '+';
+        color = '#28a745'; // Xanh lá
+    } else if (timeOffset < 0) {
+        sign = '-';
+        color = '#d9534f'; // Đỏ
+    } else {
+        sign = '+'; 
+        // Lấy màu tự động của hệ thống
+        color = getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#2c3e50';
+    }
+
+    dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
 }
 
-.settings-btn:hover { opacity: 0.85; }
-
-/* Container chính */
-.container {
-    text-align: center;
-    width: 100%;
-    max-width: 550px;
-    background: transparent;
+function formatTimeMMSSF(totalSeconds) {
+    const absSec = Math.abs(totalSeconds);
+    const seconds = Math.floor(absSec);
+    const milliseconds = Math.floor((absSec - Math.floor(absSec)) * 1000);
+    const f = String(Math.floor(milliseconds / 100));
+    return String(seconds) + '.' + f; 
 }
 
-/* Tên user */
-.usf {
-    font-size: clamp(1.2rem, 4vw, 1.6rem);
-    font-weight: 800;
-    margin-bottom: clamp(10px, 3vh, 15px);
-    color: var(--text-main);
-    word-break: break-word;
+function getCurrentTimeMs() {
+    return Date.now();
 }
 
-/* Thống kê (Coins/View) */
-.stats {
-    font-size: clamp(1rem, 3.5vw, 1.3rem);
-    color: var(--text-main);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: clamp(8px, 2vw, 12px);
-    margin-bottom: clamp(15px, 4vh, 30px);
-    font-weight: 500;
-}
-.divider {
-    color: var(--text-muted);
-    font-weight: 300;
-}
+// ===== TRỤC CHÍNH: CẬP NHẬT ĐỒNG HỒ VÀ KIỂM TRA MÀU =====
+function updateClock() {
+    if (!endTime) {
+        if (countdownEl) countdownEl.textContent = '00.0';
+        return;
+    }
 
-/* Chữ số đếm ngược siêu to */
-.cd {
-    font-size: clamp(4.5rem, 18vw, 8.5rem);
-    font-weight: 900;
-    color: var(--text-main);
-    margin: clamp(5px, 2vh, 15px) 0;
-    line-height: 1;
-    letter-spacing: -2px;
-    text-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
+    const now = getCurrentTimeMs();
+    const endTimeMs = endTime * 1000;
+    const adjustedEndMs = endTimeMs + timeOffset * 1000;
+    const diffMs = adjustedEndMs - now;
 
-/* Thời gian kết thúc */
-.time-info {
-    font-size: clamp(0.95rem, 3vw, 1.15rem);
-    color: var(--text-muted);
-    margin-bottom: clamp(20px, 5vh, 35px);
-}
+    // HẾT GIỜ (Về 0s)
+    if (diffMs <= 0) {
+        if (countdownEl) countdownEl.textContent = '00.0';
+        
+        // Hết giờ thì buộc web nhả màu, trả về lại mặc định
+        if (currentBgState !== 'default') {
+            currentBgState = 'default';
+            applyBackgroundColor('default');
+        }
+        return;
+    }
 
-/* Khu vực nút + / - thời gian */
-.dc {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: clamp(2px, 1vw, 8px); 
-    margin-bottom: clamp(20px, 5vh, 35px);
-    flex-wrap: nowrap; /* Cấm rớt dòng */
-    width: 100%;
-}
+    const diffSeconds = diffMs / 1000;
+    if (countdownEl) countdownEl.textContent = formatTimeMMSSF(diffSeconds);
 
-.db {
-    border: none;
-    border-radius: 8px;
-    padding: clamp(8px, 1.5vw, 10px) clamp(5px, 1.5vw, 12px); 
-    font-size: clamp(0.75rem, 2.5vw, 1rem);
-    font-weight: 600;
-    color: white;
-    cursor: pointer;
-    min-width: clamp(45px, 10vw, 60px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: transform 0.1s, box-shadow 0.2s;
-    white-space: nowrap; 
-}
-.db:active { transform: scale(0.95); }
-
-.btn-red { background-color: var(--btn-red); }
-.btn-green { background-color: var(--btn-green); }
-
-/* Chữ hiển thị độ lệch (0.00s) */
-.d-t {
-    font-size: clamp(1.1rem, 3.5vw, 1.4rem);
-    font-weight: 800;
-    min-width: clamp(55px, 12vw, 75px);
-    color: var(--text-main);
-    margin: 0 clamp(4px, 1vw, 10px); 
-    text-align: center;
+    // KIỂM TRA ĐIỀU KIỆN NHÁY MÀU
+    if (colorConfig.active) {
+        // Đồng hồ đếm lùi, chỉ nháy màu khi thời gian lọt khe (Giữa Bắt Đầu và Kết Thúc)
+        if (diffSeconds <= colorConfig.start && diffSeconds >= colorConfig.end) {
+            if (currentBgState !== 'flash') {
+                currentBgState = 'flash';
+                applyBackgroundColor('flash', colorConfig.color);
+            }
+        } else {
+            // Nằm ngoài khe thời gian -> Tắt màu nháy, trả về mặc định
+            if (currentBgState !== 'default') {
+                currentBgState = 'default';
+                applyBackgroundColor('default');
+            }
+        }
+    }
 }
 
-/* Nút COPY và Dấu + */
-.action-buttons {
-    display: flex;
-    justify-content: center;
-    gap: clamp(10px, 3vw, 15px);
-    margin-bottom: clamp(20px, 5vh, 35px);
+function adjustTime(seconds) {
+    timeOffset += seconds;
+    timeOffset = Math.round(timeOffset * 100) / 100;
+    try {
+        localStorage.setItem('timeOffset', String(timeOffset));
+    } catch (e) {}
+    updateDTOffset();
+    updateClock();
 }
 
-.cb {
-    background: var(--btn-dark);
-    color: white;
-    border: none;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 6px 12px rgba(44, 62, 80, 0.3);
-    transition: transform 0.1s, opacity 0.2s;
-}
-.cb:hover { opacity: 0.9; }
-.cb:active { transform: scale(0.95); }
+document.getElementById('btn-decrease-0.05').addEventListener('click', function () { adjustTime(-0.05); });
+document.getElementById('btn-decrease-0.01').addEventListener('click', function () { adjustTime(-0.01); });
+document.getElementById('btn-increase-0.01').addEventListener('click', function () { adjustTime(0.01); });
+document.getElementById('btn-increase-0.05').addEventListener('click', function () { adjustTime(0.05); });
 
-.main-btn {
-    padding: clamp(12px, 3.5vw, 14px) clamp(30px, 8vw, 40px);
-    border-radius: 30px;
-    font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+document.getElementById('claimBtn').addEventListener('click', function () {
+    if (tiktokLink) {
+        navigator.clipboard.writeText(tiktokLink).catch(function () {});
+    }
+
+    if (link1) {
+        fetch(link1, { mode: 'no-cors' }).catch(function () {});
+        try {
+            var newTab = window.open(link1, '_blank');
+            if (newTab) {
+                setTimeout(function () {
+                    try { newTab.close(); } catch (e) {}
+                }, 50);
+            }
+        } catch (e) {}
+    }
+});
+
+document.getElementById('claimChangeBtn').addEventListener('click', function () {
+    if (link1) {
+        link1 = null;
+        try { localStorage.removeItem('link1'); } catch (e) {}
+        alert('Đã xoá link(1)!');
+    } else {
+        var input = prompt('Nhập link(1):');
+        if (input && input.trim() !== '') {
+            link1 = input.trim();
+            try { localStorage.setItem('link1', String(link1)); } catch (e) {}
+            alert('Đã lưu link(1): ' + link1);
+        }
+    }
+});
+
+function handleConfirm(ok) {
+    var modal = document.getElementById('confirmModal');
+    if (modal) modal.style.display = 'none';
 }
 
-.square-btn {
-    width: clamp(45px, 12vw, 52px);
-    height: clamp(45px, 12vw, 52px);
-    border-radius: 14px;
-    font-size: clamp(1.3rem, 4vw, 1.6rem);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+var confirmCancelBtn = document.getElementById('confirmCancelBtn');
+var confirmOkBtn = document.getElementById('confirmOkBtn');
+if (confirmCancelBtn) { confirmCancelBtn.addEventListener('click', function () { handleConfirm(false); }); }
+if (confirmOkBtn) { confirmOkBtn.addEventListener('click', function () { handleConfirm(true); }); }
 
-/* Nút Canh theo màu sắc */
-.bottom-action { margin-top: 10px; }
-.color-btn {
-    background: var(--btn-dark);
-    color: white;
-    border: none;
-    padding: clamp(10px, 3vw, 12px) clamp(20px, 5vw, 24px);
-    border-radius: 8px;
-    font-size: clamp(0.9rem, 3vw, 1.05rem);
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(44, 62, 80, 0.2);
-}
+// ===== Bật modal cấu hình nháy màu =====
+document.getElementById('btn-open').addEventListener('click', function () {
+    var modal = document.getElementById('modal');
+    if (modal) modal.style.display = 'flex';
+});
 
-/* ======================================= */
-/* MODAL BẢN CŨ                            */
-/* ======================================= */
-.modal-overlay, .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 9999; padding: 15px;}
-.modal-content, .modal-confirm { background: #fff; padding: 24px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
-.modal-title { font-size: 1.4rem; margin-bottom: 20px; font-weight: bold; color: #111;}
-.form-group { margin-bottom: 15px; text-align: left; }
-.form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #333;}
-.form-group input[type="number"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
-.color-input { width: 100%; height: 40px; border: none; border-radius: 8px; cursor: pointer; }
-.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-.modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-.mbc, .modal-btn-cancel { background: #eee; color: #333; }
-.mbs, .modal-btn-ok { background: var(--btn-dark); color: #fff; }
+// ===== Tắt modal =====
+document.getElementById('btn-cancel').addEventListener('click', function () {
+    var modal = document.getElementById('modal');
+    if (modal) modal.style.display = 'none';
+});
+
+// ===== Nút LƯU CẤU HÌNH NHÁY MÀU =====
+document.getElementById('btn-submit').addEventListener('click', function () {
+    const startVal = parseFloat(document.getElementById('start_seconds').value);
+    const endVal = parseFloat(document.getElementById('end_seconds').value);
+    
+    // Nạp dữ liệu
+    colorConfig.start = isNaN(startVal) ? 0 : startVal;
+    colorConfig.end = isNaN(endVal) ? 0 : endVal;
+    colorConfig.color = document.getElementById('hex_background_color').value;
+    colorConfig.active = true;
+    
+    // Lưu vào Cache
+    try {
+        localStorage.setItem('colorConfig', JSON.stringify(colorConfig));
+    } catch (e) {}
+
+    // Bắt buộc đẩy web về nền mặc định (Xám), nằm yên đó CHỜ ĐẾN ĐÚNG GIỜ MỚI NHÁY MÀU
+    currentBgState = 'default';
+    applyBackgroundColor('default');
+    
+    var modal = document.getElementById('modal');
+    if (modal) modal.style.display = 'none';
+});
+
+document.getElementById('modal').addEventListener('click', function (e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+    }
+});
+
+updateClock();
+updateDTOffset();
+
+setInterval(updateClock, 10);
