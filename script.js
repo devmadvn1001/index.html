@@ -10,7 +10,7 @@ let coins = 80;
 let canOpen = 25;
 let hotBoxStr = '🏅🇩🇪';
 let latestViewersStr = '';
-let endTime = 0; 
+let endTime = 0;
 
 if (paramR) {
     const parts = paramR.split('|');
@@ -22,8 +22,8 @@ if (paramR) {
 }
 
 // ===== Biến toàn cục =====
-let timeOffset = 0; 
-let link1 = null; 
+let timeOffset = 0;
+let link1 = null;
 
 // ===== CẤU HÌNH NHÁY MÀU NỀN THEO THỜI GIAN =====
 let colorConfig = {
@@ -32,19 +32,21 @@ let colorConfig = {
     end: 0.0,
     color: '#ff0000'
 };
-let currentBgState = 'default'; // Trạng thái nền: 'default' (Mặc định) hoặc 'flash' (Đang chớp màu)
+let currentBgState = 'default';
 
-// Hàm thay đổi trạng thái màu nền và tự động chỉnh màu chữ Trắng/Đen
+// --- QUAN TRỌNG: Hàm này xử lý việc đổi màu nền và tự động chỉnh màu chữ ---
 function applyBackgroundColor(state, colorHex = '') {
     if (state === 'default') {
         // Trả về nền mặc định (Xám sáng)
-        document.body.style.backgroundColor = 'var(--bg-color)';
-        document.documentElement.style.setProperty('--text-main', '#2c3e50');
-        document.documentElement.style.setProperty('--text-muted', '#596275');
+        document.body.style.backgroundColor = 'var(--bg-page)'; // Sử dụng biến màu nền của trang
+        document.documentElement.style.setProperty('--text-main', '#1e293b');
+        document.documentElement.style.setProperty('--text-muted', '#64748b');
+        document.querySelector('.app-card').style.backgroundColor = 'var(--card-bg)'; // Trả màu nền card
     } else if (state === 'flash') {
-        // Áp dụng màu nháy người dùng đã chọn
+        // Áp dụng màu nháy cho cả body và card để full màn hình
         document.body.style.backgroundColor = colorHex;
-        
+        document.querySelector('.app-card').style.backgroundColor = colorHex;
+
         // Thuật toán YIQ tự động đổi màu chữ cho tương phản với màu nền
         let hex = colorHex.replace('#', '');
         if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
@@ -53,21 +55,22 @@ function applyBackgroundColor(state, colorHex = '') {
             let g = parseInt(hex.substr(2,2), 16);
             let b = parseInt(hex.substr(4,2), 16);
             let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-            
+
             if (yiq < 128) {
                 // Nền tối -> Chữ đổi màu Trắng
                 document.documentElement.style.setProperty('--text-main', '#ffffff');
                 document.documentElement.style.setProperty('--text-muted', '#e2e8f0');
             } else {
                 // Nền sáng -> Chữ giữ màu Đen
-                document.documentElement.style.setProperty('--text-main', '#2c3e50');
-                document.documentElement.style.setProperty('--text-muted', '#596275');
+                document.documentElement.style.setProperty('--text-main', '#1e293b');
+                document.documentElement.style.setProperty('--text-muted', '#64748b');
             }
         }
     }
     // Update màu chữ của cục +/- 0.00s ở giữa
-    updateDTOffset(); 
+    updateDTOffset();
 }
+// --------------------------------------------------------------------------
 
 // ===== Khôi phục cấu hình đã lưu =====
 (function loadSavedState() {
@@ -76,7 +79,6 @@ function applyBackgroundColor(state, colorHex = '') {
         localStorage.setItem(testKey, '1');
         localStorage.removeItem(testKey);
 
-        // Xóa sạch lỗi cũ (Lỗi dính cứng màu nền)
         localStorage.removeItem('bgColor');
 
         var savedOffset = localStorage.getItem('timeOffset');
@@ -90,12 +92,10 @@ function applyBackgroundColor(state, colorHex = '') {
             link1 = savedLink1;
         }
 
-        // Khôi phục mốc thời gian và màu sắc nháy
         var savedConfig = localStorage.getItem('colorConfig');
         if (savedConfig) {
             colorConfig = JSON.parse(savedConfig);
-            
-            // Đẩy ngược lại vào Input của Form
+
             const startInput = document.getElementById('start_seconds');
             const endInput = document.getElementById('end_seconds');
             const colorInput = document.getElementById('hex_background_color');
@@ -103,8 +103,7 @@ function applyBackgroundColor(state, colorHex = '') {
             if (endInput) endInput.value = colorConfig.end;
             if (colorInput) colorInput.value = colorConfig.color;
         }
-        
-        // Mới tải trang thì auto là nền xám mặc định chờ tới giờ mới nháy
+
         applyBackgroundColor('default');
 
     } catch (e) {}
@@ -145,18 +144,18 @@ function updateDTOffset() {
     if (!dTEl) return;
     const absVal = Math.abs(timeOffset);
     let sign = '';
-    let color = ''; 
+    let color = '';
 
     if (timeOffset > 0) {
         sign = '+';
-        color = '#28a745'; // Xanh lá
+        color = '#22c55e'; // Xanh lá
     } else if (timeOffset < 0) {
         sign = '-';
-        color = '#d9534f'; // Đỏ
+        color = '#ef4444'; // Đỏ
     } else {
-        sign = '+'; 
-        // Lấy màu tự động của hệ thống
-        color = getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#2c3e50';
+        sign = '+';
+        // Lấy tự động màu chữ chuẩn từ biến CSS
+        color = getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#1e293b';
     }
 
     dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
@@ -167,7 +166,7 @@ function formatTimeMMSSF(totalSeconds) {
     const seconds = Math.floor(absSec);
     const milliseconds = Math.floor((absSec - Math.floor(absSec)) * 1000);
     const f = String(Math.floor(milliseconds / 100));
-    return String(seconds) + '.' + f; 
+    return String(seconds) + '.' + f;
 }
 
 function getCurrentTimeMs() {
@@ -189,8 +188,7 @@ function updateClock() {
     // HẾT GIỜ (Về 0s)
     if (diffMs <= 0) {
         if (countdownEl) countdownEl.textContent = '00.0';
-        
-        // Hết giờ thì buộc web nhả màu, trả về lại mặc định
+
         if (currentBgState !== 'default') {
             currentBgState = 'default';
             applyBackgroundColor('default');
@@ -203,14 +201,12 @@ function updateClock() {
 
     // KIỂM TRA ĐIỀU KIỆN NHÁY MÀU
     if (colorConfig.active) {
-        // Đồng hồ đếm lùi, chỉ nháy màu khi thời gian lọt khe (Giữa Bắt Đầu và Kết Thúc)
         if (diffSeconds <= colorConfig.start && diffSeconds >= colorConfig.end) {
             if (currentBgState !== 'flash') {
                 currentBgState = 'flash';
                 applyBackgroundColor('flash', colorConfig.color);
             }
         } else {
-            // Nằm ngoài khe thời gian -> Tắt màu nháy, trả về mặc định
             if (currentBgState !== 'default') {
                 currentBgState = 'default';
                 applyBackgroundColor('default');
@@ -293,13 +289,13 @@ document.getElementById('btn-cancel').addEventListener('click', function () {
 document.getElementById('btn-submit').addEventListener('click', function () {
     const startVal = parseFloat(document.getElementById('start_seconds').value);
     const endVal = parseFloat(document.getElementById('end_seconds').value);
-    
+
     // Nạp dữ liệu
     colorConfig.start = isNaN(startVal) ? 0 : startVal;
     colorConfig.end = isNaN(endVal) ? 0 : endVal;
     colorConfig.color = document.getElementById('hex_background_color').value;
     colorConfig.active = true;
-    
+
     // Lưu vào Cache
     try {
         localStorage.setItem('colorConfig', JSON.stringify(colorConfig));
@@ -308,7 +304,7 @@ document.getElementById('btn-submit').addEventListener('click', function () {
     // Bắt buộc đẩy web về nền mặc định (Xám), nằm yên đó CHỜ ĐẾN ĐÚNG GIỜ MỚI NHÁY MÀU
     currentBgState = 'default';
     applyBackgroundColor('default');
-    
+
     var modal = document.getElementById('modal');
     if (modal) modal.style.display = 'none';
 });
