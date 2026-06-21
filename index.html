@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Canh thời gian T1</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
     <div id="confirmModal" class="modal-overlay">
@@ -55,6 +55,12 @@
         </div>
 
         <button type="button" class="color-btn" id="btn-open">🎨 Canh theo màu sắc</button>
+
+        <div class="active-config" id="activeConfigDisplay" style="display: none;">
+            <div class="config-color-dot" id="configColorDot"></div>
+            <span class="config-text" id="configText">Từ 0.0s đến 0.0s</span>
+            <button type="button" class="config-del-btn" id="configDelBtn">✖</button>
+        </div>
     </div>
 
     <div class="modal" id="modal">
@@ -79,6 +85,6 @@
         </div>
     </div>
 
-   <script src="script.js?v=12"></script>
+    <script src="script.js?v=12"></script>
 </body>
 </html>
