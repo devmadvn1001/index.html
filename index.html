@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <button type="button" class="settings-btn" id="btn-open-settings">Cài đặt</button>
-
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-confirm">
             <p class="modal-text">Bạn có chắc chắn?</p>
@@ -19,65 +17,68 @@
         </div>
     </div>
 
-    <div class="container">
-        <div class="usf">
+    <div class="app-card">
+        <div class="user-profile">
             <b id="usernameDisplay">@user</b>
         </div>
 
-        <div class="stats">
-            <span id="viewCount">1000</span>/<span id="peopleCount">500</span>
-            <span class="divider">—</span>
-            <span id="hotBoxFlag">🔥🏅TH</span>
-            <span class="divider">—</span>
-            <span>👀 <span id="viewersDisplay">2001</span></span>
+        <div class="stats-row">
+            <div class="stat-badge badge-yellow">
+                🪙 <span id="viewCount">0</span>/<span id="peopleCount">0</span>
+            </div>
+            <div class="stat-badge badge-gray" id="hotBoxFlag">🏅🇩🇪</div>
+            <div class="stat-badge badge-blue">
+                👀 <span id="viewersDisplay">0</span>
+            </div>
         </div>
 
-        <div class="cd" id="countdown">00.0</div>
-
-        <div class="time-info">
-            <div id="endTimeDisplay">--:--:--</div>
+        <div class="countdown-wrapper">
+            <div class="cd" id="countdown">00.0</div>
+            <div class="time-info" id="endTimeDisplay">--:--:--</div>
         </div>
 
-        <div class="dc">
-            <button type="button" class="db btn-red" id="btn-decrease-0.01">-0.01</button>
+        <div class="controls-panel">
             <button type="button" class="db btn-red" id="btn-decrease-0.05">-0.05</button>
-            <span class="d-t" id="d-t"><b>+0.00s</b></span>
-            <button type="button" class="db btn-green" id="btn-increase-0.05">+0.05</button>
+            <button type="button" class="db btn-red" id="btn-decrease-0.01">-0.01</button>
+            
+            <div class="offset-display">
+                <span class="d-t" id="d-t"><b>+0.00s</b></span>
+            </div>
+
             <button type="button" class="db btn-green" id="btn-increase-0.01">+0.01</button>
+            <button type="button" class="db btn-green" id="btn-increase-0.05">+0.05</button>
         </div>
 
         <div class="action-buttons">
-            <button type="button" class="cb main-btn" id="claimBtn">COPY</button>
+            <button type="button" class="cb main-btn" id="claimBtn">COPY LINK</button>
             <button type="button" class="cb square-btn" id="claimChangeBtn">+</button>
         </div>
 
-        <div class="bottom-action">
-            <button type="button" class="color-btn" id="btn-open">Canh theo màu sắc</button>
-        </div>
+        <button type="button" class="color-btn" id="btn-open">🎨 Canh theo màu sắc</button>
     </div>
 
     <div class="modal" id="modal">
         <div class="modal-content">
-            <div class="modal-title">Cấu hình màu nền</div>
+            <div class="modal-title">Cấu hình nháy màu</div>
             <div class="form-group">
-                <label for="start_seconds">Thời gian bắt đầu (s):</label>
+                <label for="start_seconds">Thời gian bắt đầu nháy (s):</label>
                 <input type="number" id="start_seconds" step="0.1" min="0">
             </div>
             <div class="form-group">
-                <label for="end_seconds">Thời gian kết thúc (s):</label>
+                <label for="end_seconds">Thời gian kết thúc nháy (s):</label>
                 <input type="number" id="end_seconds" step="0.1" min="0">
             </div>
             <div class="form-group">
-                <label for="hex_background_color">Màu nền:</label>
+                <label for="hex_background_color">Chọn màu:</label>
                 <input type="color" id="hex_background_color" value="#ff0000" class="color-input">
             </div>
             <div class="modal-actions">
                 <button type="button" class="modal-btn mbc" id="btn-cancel">Hủy</button>
-                <button type="button" class="modal-btn mbs" id="btn-submit">Lưu</button>
+                <button type="button" class="modal-btn mbs" id="btn-submit">Lưu cấu hình</button>
             </div>
         </div>
     </div>
 
-    <script src="script.js?v=5"></script>
+    <script src="script.js?v=6"></script>
 </body>
 </html>
