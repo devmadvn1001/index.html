@@ -103,42 +103,40 @@ body {
 }
 
 /* Khu vực nút + / - thời gian */
+/* Khu vực nút + / - thời gian */
 .dc {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: clamp(4px, 1.5vw, 10px); /* Khoảng cách giữa các nút */
+    gap: clamp(2px, 1vw, 8px); /* Thu hẹp khoảng cách để không bị chật */
     margin-bottom: clamp(20px, 5vh, 35px);
-    flex-wrap: wrap; /* Tránh vỡ layout trên máy quá nhỏ */
+    flex-wrap: nowrap; /* BẮT BUỘC NẰM TRÊN 1 DÒNG, KHÔNG RỚT DÒNG */
+    width: 100%;
 }
 
 .db {
     border: none;
     border-radius: 8px;
-    padding: clamp(8px, 2.5vw, 10px) clamp(10px, 3vw, 15px);
-    font-size: clamp(0.85rem, 2.8vw, 1rem);
+    padding: clamp(8px, 1.5vw, 10px) clamp(5px, 1.5vw, 12px); /* Ép nút gọn lại trên mobile */
+    font-size: clamp(0.75rem, 2.5vw, 1rem);
     font-weight: 600;
     color: white;
     cursor: pointer;
-    min-width: clamp(50px, 12vw, 60px);
+    min-width: clamp(45px, 10vw, 60px);
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     transition: transform 0.1s, box-shadow 0.2s;
+    white-space: nowrap; /* Tránh chữ trong nút bị bẻ đôi */
 }
-.db:active { transform: scale(0.95); }
 
-.btn-red { background-color: var(--btn-red); }
-.btn-green { background-color: var(--btn-green); }
-
-/* Chữ hiển thị độ lệch (0.00s) */
+/* Chữ hiển thị độ lệch (0.00s) ở giữa */
 .d-t {
     font-size: clamp(1.1rem, 3.5vw, 1.4rem);
     font-weight: 800;
-    min-width: clamp(65px, 15vw, 75px);
+    min-width: clamp(55px, 12vw, 75px);
     color: var(--text-main);
-    /* Đẩy 2 bên nút ra xa thêm một chút */
-    margin: 0 clamp(8px, 3vw, 15px); 
+    margin: 0 clamp(4px, 1vw, 10px); 
+    text-align: center;
 }
-
 /* Nút COPY và Dấu + */
 .action-buttons {
     display: flex;
