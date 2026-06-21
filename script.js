@@ -44,9 +44,9 @@ function updateConfigDisplayUI() {
     if (!activeConfigDisplay) return;
     if (colorConfig && colorConfig.active) {
         configColorDot.style.backgroundColor = colorConfig.color;
-        // Đã đổi thành định dạng "0.6 ➔ 0.0" theo ý bạn
-        configText.textContent = `${colorConfig.start} ➔ ${colorConfig.end}`;
-        activeConfigDisplay.style.display = 'inline-flex'; // Đổi thành inline-flex để thanh thu gọn ôm sát chữ
+        // Đổi lại thành định dạng "Từ x(s) đến y(s)"
+        configText.textContent = `Từ ${colorConfig.start}s đến ${colorConfig.end}s`;
+        activeConfigDisplay.style.display = 'flex'; // Dùng 'flex' để bung rộng thanh ra
     } else {
         activeConfigDisplay.style.display = 'none'; // Ẩn thanh
     }
