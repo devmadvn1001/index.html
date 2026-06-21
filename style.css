@@ -217,49 +217,51 @@ body {
     background: #f8fafc;
 }
 
-/* ======= CSS MỚI: THANH HIỂN THỊ CẤU HÌNH ======= */
+/* ======= CSS MỚI: THANH HIỂN THỊ CẤU HÌNH (DẠNG VIÊN THUỐC) ======= */
 .active-config {
-    display: flex;
+    display: inline-flex; /* Ép nó ôm sát nội dung, không dàn full ngang */
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     margin-top: 15px;
-    padding: 10px 16px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    padding: 8px 18px;
+    background: #1e293b; /* Nền xám đen sang trọng */
+    border: none;
+    border-radius: 30px; /* Bo tròn mạnh thành viên thuốc */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     transition: all 0.2s;
 }
 
 .config-color-dot {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    border: 2px solid rgba(0,0,0,0.1);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.1); /* Viền mờ cho chấm màu nổi bật */
 }
 
 .config-text {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 700;
-    color: var(--text-muted);
+    color: #f8fafc; /* Chữ trắng xám */
+    letter-spacing: 0.5px;
 }
 
 .config-del-btn {
     background: transparent;
     border: none;
-    color: #94a3b8;
-    font-size: 1rem;
-    font-weight: 800;
+    color: #94a3b8; /* Chữ X xám mờ */
+    font-size: 1.1rem;
+    font-weight: bold;
     cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 6px;
-    transition: all 0.1s;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.1s;
 }
 
 .config-del-btn:hover {
-    color: var(--btn-red);
-    background: #fee2e2;
+    color: #ef4444; /* Khi hover vào nút X thì sáng màu đỏ lên */
 }
 
 /* ======================================= */
