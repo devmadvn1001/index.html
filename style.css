@@ -116,21 +116,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5px; /* Giữ 2 nút giữa và số 0.00 sát rịt lại với nhau */
+    gap: 5px; 
     margin-bottom: 25px;
     flex-wrap: nowrap;
 }
 
-/* ======= ĐÂY LÀ PHẦN TÁCH NÚT RA HAI BÊN ======= */
-/* Đẩy nút -0.05 sang trái */
-.controls-panel .db:first-child {
-    margin-right: clamp(6px, 2vw, 14px); 
-}
-/* Đẩy nút +0.05 sang phải */
-.controls-panel .db:last-child {
-    margin-left: clamp(6px, 2vw, 14px); 
-}
-/* =============================================== */
+/* Đẩy nút ra 2 bên */
+.controls-panel .db:first-child { margin-right: clamp(6px, 2vw, 14px); }
+.controls-panel .db:last-child { margin-left: clamp(6px, 2vw, 14px); }
 
 /* Nút bấm +/- */
 .db {
@@ -156,7 +149,7 @@ body {
 .offset-display {
     min-width: 60px; 
     text-align: center;
-    margin: 0 2px; /* Lề rất hẹp để ôm sát vào 2 nút 0.01 bên cạnh */
+    margin: 0 2px; 
 }
 
 .d-t {
@@ -222,6 +215,51 @@ body {
     border-color: var(--text-muted);
     color: var(--text-main);
     background: #f8fafc;
+}
+
+/* ======= CSS MỚI: THANH HIỂN THỊ CẤU HÌNH ======= */
+.active-config {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 10px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+
+.config-color-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.config-text {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.config-del-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: all 0.1s;
+}
+
+.config-del-btn:hover {
+    color: var(--btn-red);
+    background: #fee2e2;
 }
 
 /* ======================================= */
