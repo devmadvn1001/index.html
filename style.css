@@ -86,19 +86,17 @@ body {
     margin: 15px 0 25px 0;
 }
 
-/* ĐẾM NGƯỢC SIÊU TO - FIX KÉO CAO CHỮ VÀ DÃN KHOẢNG CÁCH SỐ */
+/* ĐẾM NGƯỢC SIÊU TO - FIX LỖI ÉP LÙN TRÊN IOS */
 .cd {
+    /* MẸO: Ép dùng font Helvetica/Arial để số luôn cao và thon, không bị béo như font mặc định của iPhone */
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: clamp(4.5rem, 16vw, 8rem);
-    font-weight: 800; 
+    font-weight: 700; /* Giảm độ béo xuống một chút cho thanh thoát */
     color: var(--text-main);
     line-height: 1.1; 
-    letter-spacing: 2px; /* Dãn khoảng cách giữa các số thêm ~2dp */
+    letter-spacing: 1px; /* Khoảng cách các số vừa vặn */
     white-space: nowrap;
     font-variant-numeric: tabular-nums; 
-    
-    /* Ép kéo giãn chữ cao lên 20% để không bị lùn */
-    display: inline-block; 
-    transform: scaleY(1.2); 
     margin: clamp(15px, 2vh, 25px) 0; 
 }
 
@@ -119,7 +117,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: clamp(4px, 1.5vw, 10px); /* Khoảng cách mặc định giữa các nút */
+    gap: 5px; /* Ép toàn bộ các nút sát lại gần nhau hơn */
     margin-bottom: 25px;
     flex-wrap: nowrap;
 }
@@ -144,11 +142,11 @@ body {
 .btn-red { background-color: var(--btn-red); }
 .btn-green { background-color: var(--btn-green); }
 
-/* HIỂN THỊ SỐ 0.00S Ở GIỮA - FIX XÍCH LẠI GẦN NÚT */
+/* HIỂN THỊ SỐ 0.00S Ở GIỮA - KÉO CỰC KỲ SÁT VÀO 2 NÚT BÊN CẠNH */
 .offset-display {
-    min-width: clamp(55px, 10vw, 75px);
+    min-width: 60px; /* Vừa đủ ôm trọn chữ +0.00s */
     text-align: center;
-    margin: 0 clamp(2px, 1vw, 8px); /* Thu hẹp lề để 2 nút -0.01 và +0.01 sát vào giá trị giữa hơn */
+    margin: 0 2px; /* Kéo cực sát vào 2 nút -0.01 và +0.01 */
 }
 
 .d-t {
@@ -217,7 +215,7 @@ body {
 }
 
 /* ======================================= */
-/* MODAL BẢN MỚI                           */
+/* MODAL CẤU HÌNH NHÁY MÀU                 */
 /* ======================================= */
 .modal-overlay, .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 9999; padding: 15px;}
 .modal-content, .modal-confirm { background: #fff; padding: 28px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); }
