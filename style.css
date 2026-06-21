@@ -30,10 +30,32 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    /* FIX: Giảm padding body trên mobile để nới rộng diện tích ngang tối đa */
-    padding: clamp(6px, 2vw, 15px);
+    padding: 15px;
     transition: background-color 0.1s ease; 
 }
+
+/* ================= NÚT SYNC (GÓC TRÁI) ================= */
+.sync-btn {
+    position: absolute;
+    top: max(15px, 2vh);
+    left: max(15px, 4vw);
+    background: var(--card-bg);
+    color: var(--text-main);
+    border: 1px solid #e2e8f0;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 100;
+}
+.sync-btn:active { transform: scale(0.95); }
+.sync-icon { font-size: 1rem; }
 
 /* KHUNG GIAO DIỆN CHÍNH */
 .app-card {
@@ -41,14 +63,12 @@ body {
     width: 100%;
     max-width: 550px; 
     border-radius: 28px;
-    /* FIX: Thu hẹp lề trong hai bên (từ 20px xuống 10px trên mobile) để khung điều khiển full ngang */
-    padding: clamp(20px, 4vh, 30px) clamp(10px, 2vw, 20px);
+    padding: 30px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
     text-align: center;
     transition: background-color 0.1s ease;
 }
 
-/* Tên user */
 .user-profile {
     font-size: clamp(1.2rem, 4vw, 1.5rem);
     font-weight: 800;
@@ -58,7 +78,6 @@ body {
     letter-spacing: -0.5px;
 }
 
-/* Hàng Thống kê (Badge) */
 .stats-row {
     display: flex;
     justify-content: center;
@@ -83,12 +102,10 @@ body {
 .badge-gray { background: #f1f5f9; color: #475569; }
 .badge-blue { background: #e0f2fe; color: #0369a1; }
 
-/* Khu vực Đồng hồ */
 .countdown-wrapper {
     margin: 15px 0 25px 0;
 }
 
-/* ĐẾM NGƯỢC SIÊU TO */
 .cd {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: clamp(4.5rem, 16vw, 8rem);
@@ -101,7 +118,6 @@ body {
     margin: clamp(15px, 2vh, 25px) 0; 
 }
 
-/* Giờ kết thúc */
 .time-info {
     font-size: clamp(0.9rem, 3vw, 1.1rem);
     color: var(--text-muted);
@@ -109,15 +125,11 @@ body {
     margin-top: 15px;
 }
 
-/* ============================================================== */
-/* BẢNG ĐIỀU KHIỂN THỜI GIAN (ĐÃ NỚI BỀ NGANG FULL & AUTO RESIZE) */
-/* ============================================================== */
 .controls-panel {
     background: var(--panel-bg);
     border: 1px solid #e2e8f0;
     border-radius: 20px;
-    /* FIX: Thu hẹp khoảng cách lề trong để chừa chỗ cho các nút bung lụa */
-    padding: clamp(8px, 2vw, 12px) clamp(6px, 1.5vw, 10px);
+    padding: 12px 10px;
     display: flex;
     justify-content: space-between; 
     align-items: center;
@@ -125,29 +137,26 @@ body {
     margin-bottom: 25px;
 }
 
-/* Canh khoảng cách nút */
-.controls-panel > button:nth-of-type(1) { margin-right: clamp(4px, 1.5vw, 12px); } 
-.controls-panel > button:nth-of-type(2) { margin-right: clamp(2px, 1vw, 5px); }  
-.controls-panel > button:nth-of-type(3) { margin-left: clamp(2px, 1vw, 5px); }   
-.controls-panel > button:nth-of-type(4) { margin-left: clamp(4px, 1.5vw, 12px); }  
+.controls-panel > button:nth-of-type(1) { margin-right: clamp(6px, 2vw, 14px); } 
+.controls-panel > button:nth-of-type(2) { margin-right: clamp(2px, 1vw, 6px); }  
+.controls-panel > button:nth-of-type(3) { margin-left: clamp(2px, 1vw, 6px); }   
+.controls-panel > button:nth-of-type(4) { margin-left: clamp(6px, 2vw, 14px); }  
 
-/* Nút bấm +/- */
 .db {
     border: none;
     border-radius: 10px;
     padding: clamp(10px, 2.5vw, 14px) 0; 
-    /* FIX: Ép font chữ sử dụng 'vw' để tự động thu nhỏ trên điện thoại và nở to trên PC */
-    font-size: clamp(0.75rem, 3.5vw, 1rem); 
+    font-size: clamp(0.85rem, 3.5vw, 1rem); 
     font-weight: 700;
     color: white;
     cursor: pointer;
-    flex: 1; /* Tự động chia đều bề ngang 4 nút */
+    flex: 1; 
     min-width: 0; 
     text-align: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: transform 0.1s, opacity 0.2s;
     white-space: nowrap;
-    letter-spacing: -0.2px; /* Mẹo kéo nhẹ chữ sát lại một chút để không bị dẹp */
+    letter-spacing: -0.2px;
 }
 
 .db:active { transform: scale(0.92); }
@@ -156,10 +165,9 @@ body {
 .btn-red { background-color: var(--btn-red); }
 .btn-green { background-color: var(--btn-green); }
 
-/* HIỂN THỊ SỐ +0.00S Ở GIỮA */
 .offset-display {
     flex: 0 0 auto; 
-    min-width: clamp(50px, 10vw, 70px); 
+    min-width: clamp(55px, 10vw, 75px); 
     text-align: center;
 }
 
@@ -170,7 +178,6 @@ body {
     white-space: nowrap;
 }
 
-/* Nút COPY và Nút + */
 .action-buttons {
     display: flex;
     justify-content: center;
@@ -209,7 +216,6 @@ body {
     justify-content: center;
 }
 
-/* Nút Cấu hình màu */
 .color-btn {
     background: transparent;
     color: var(--text-muted);
@@ -228,7 +234,6 @@ body {
     background: #f8fafc;
 }
 
-/* THANH HIỂN THỊ CẤU HÌNH NHÁY MÀU */
 .active-config {
     display: flex; 
     align-items: center;
@@ -278,9 +283,6 @@ body {
     transform: scale(0.9);
 }
 
-/* ======================================= */
-/* MODAL CẤU HÌNH NHÁY MÀU                 */
-/* ======================================= */
 .modal-overlay, .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 9999; padding: 15px;}
 .modal-content, .modal-confirm { background: #fff; padding: 28px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); }
 .modal-title { font-size: 1.4rem; margin-bottom: 24px; font-weight: 800; color: #0f172a;}
@@ -296,3 +298,32 @@ body {
 .modal-btn:active { transform: scale(0.95); }
 .mbc, .modal-btn-cancel { background: #f1f5f9; color: #475569; }
 .mbs, .modal-btn-ok { background: #0f172a; color: #fff; }
+
+/* ÉP KHUNG NGANG BUNNG RỘNG TỐI ĐA TRÊN ĐIỆN THOẠI */
+@media screen and (max-width: 480px) {
+    body {
+        padding: 4px; 
+    }
+    .app-card {
+        padding: 24px 6px; 
+        border-radius: 18px; 
+    }
+    .controls-panel {
+        padding: 10px 4px; 
+    }
+    .controls-panel > button:nth-of-type(1) { margin-right: 3px; } 
+    .controls-panel > button:nth-of-type(2) { margin-right: 2px; }  
+    .controls-panel > button:nth-of-type(3) { margin-left: 2px; }   
+    .controls-panel > button:nth-of-type(4) { margin-left: 3px; }  
+    .db {
+        padding: 12px 0; 
+        font-size: 0.95rem; 
+    }
+    .offset-display {
+        min-width: 45px; 
+        margin: 0 1px;
+    }
+    .d-t {
+        font-size: 1.15rem;
+    }
+}
