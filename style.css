@@ -34,11 +34,11 @@ body {
     transition: background-color 0.1s ease; 
 }
 
-/* KHUNG GIAO DIỆN CHÍNH (CARD) - ĐÃ NỚI RỘNG THÊM */
+/* KHUNG GIAO DIỆN CHÍNH */
 .app-card {
     background: var(--card-bg);
     width: 100%;
-    max-width: 550px; /* Tăng độ rộng từ 480px lên 550px */
+    max-width: 550px; 
     border-radius: 28px;
     padding: 30px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
@@ -83,23 +83,23 @@ body {
 
 /* Khu vực Đồng hồ */
 .countdown-wrapper {
-    margin: 10px 0 25px 0;
+    margin: 15px 0 25px 0;
 }
 
-/* Đếm ngược siêu to - ĐÃ FIX LỖI BỊ BÓP LÙN */
+/* ĐẾM NGƯỢC SIÊU TO - FIX KÉO CAO CHỮ VÀ DÃN KHOẢNG CÁCH SỐ */
 .cd {
     font-size: clamp(4.5rem, 16vw, 8rem);
-    font-weight: 800; /* Giảm độ béo của chữ từ 900 xuống 800 để trông thanh thoát hơn */
+    font-weight: 800; 
     color: var(--text-main);
-    line-height: 1.2;
-    letter-spacing: 0; /* Xóa ép chữ ngang */
+    line-height: 1.1; 
+    letter-spacing: 2px; /* Dãn khoảng cách giữa các số thêm ~2dp */
     white-space: nowrap;
     font-variant-numeric: tabular-nums; 
     
-    /* MẸO CHÍNH: Kéo giãn chữ theo chiều dọc để khắc phục lỗi bóp lùn trên iOS */
-    display: inline-block;
-    transform: scaleY(1.15); /* Kéo chữ cao lên 15% */
-    margin: clamp(15px, 3vh, 25px) 0; /* Nới thêm không gian trên dưới để chữ không chạm viền */
+    /* Ép kéo giãn chữ cao lên 20% để không bị lùn */
+    display: inline-block; 
+    transform: scaleY(1.2); 
+    margin: clamp(15px, 2vh, 25px) 0; 
 }
 
 /* Giờ kết thúc */
@@ -107,7 +107,7 @@ body {
     font-size: clamp(0.9rem, 3vw, 1.1rem);
     color: var(--text-muted);
     font-weight: 600;
-    margin-top: 8px;
+    margin-top: 15px;
 }
 
 /* Bảng điều khiển Thời gian */
@@ -119,7 +119,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: clamp(8px, 2vw, 16px); /* Nới rộng khoảng cách giữa CÁC NÚT */
+    gap: clamp(4px, 1.5vw, 10px); /* Khoảng cách mặc định giữa các nút */
     margin-bottom: 25px;
     flex-wrap: nowrap;
 }
@@ -128,7 +128,7 @@ body {
 .db {
     border: none;
     border-radius: 10px;
-    padding: clamp(12px, 2.5vw, 14px) clamp(8px, 1.5vw, 14px); /* Làm nút to và dễ bấm hơn */
+    padding: clamp(12px, 2.5vw, 14px) clamp(8px, 1.5vw, 14px); 
     font-size: clamp(0.85rem, 2.5vw, 1rem);
     font-weight: 700;
     color: white;
@@ -144,11 +144,11 @@ body {
 .btn-red { background-color: var(--btn-red); }
 .btn-green { background-color: var(--btn-green); }
 
-/* Hiển thị số 0.00s ở giữa */
+/* HIỂN THỊ SỐ 0.00S Ở GIỮA - FIX XÍCH LẠI GẦN NÚT */
 .offset-display {
-    min-width: clamp(60px, 12vw, 80px);
+    min-width: clamp(55px, 10vw, 75px);
     text-align: center;
-    margin: 0 clamp(10px, 4vw, 25px); /* THÊM LỀ HAI BÊN ĐỂ ĐẨY NÚT RA XA CHO THOÁNG */
+    margin: 0 clamp(2px, 1vw, 8px); /* Thu hẹp lề để 2 nút -0.01 và +0.01 sát vào giá trị giữa hơn */
 }
 
 .d-t {
