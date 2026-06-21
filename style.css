@@ -1,10 +1,12 @@
 :root {
-    --bg-color: #f0f4f8; /* Nền xám xanh nhạt */
-    --text-main: #2c3e50; /* Màu chữ đen xám */
-    --text-muted: #596275;
-    --btn-dark: #2c3e50; /* Xanh đậm cho nút Copy */
-    --btn-red: #d9534f;
-    --btn-green: #28a745;
+    --bg-page: #f1f5f9;         /* Nền ngoài cùng xám rất nhạt */
+    --card-bg: #ffffff;         /* Nền thẻ trắng tinh */
+    --text-main: #1e293b;       /* Chữ đen đậm */
+    --text-muted: #64748b;      /* Chữ xám phụ */
+    --btn-dark: #0f172a;        /* Xanh đen sang trọng */
+    --btn-red: #ef4444;         /* Đỏ tươi */
+    --btn-green: #22c55e;       /* Xanh lá tươi */
+    --panel-bg: #f8fafc;        /* Nền của thanh điều khiển +/- */
 }
 
 * {
@@ -17,195 +19,212 @@ html, body {
     height: 100%;
     width: 100%;
     overflow-x: hidden;
-    /* Chống zoom khi double tap trên điện thoại */
-    touch-action: manipulation; 
+    touch-action: manipulation; /* Khóa zoom */
 }
 
 body {
-    background: var(--bg-color);
+    background: var(--bg-page);
     color: var(--text-main);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 10px; /* Thu hẹp lề để tăng không gian hiển thị cho màn hình nhỏ */
+    padding: 15px;
+    transition: background-color 0.1s ease; /* Chuyển màu nền mượt mà khi chớp */
 }
 
-/* Nút Cài đặt góc trên phải */
-.settings-btn {
-    position: absolute;
-    top: max(10px, 2vh);
-    right: max(10px, 3vw);
-    background: var(--btn-dark);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: clamp(0.7rem, 2.5vw, 0.85rem);
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: opacity 0.2s;
-}
-
-.settings-btn:hover { opacity: 0.85; }
-
-/* Container chính */
-.container {
-    text-align: center;
+/* KHUNG GIAO DIỆN CHÍNH (CARD) */
+.app-card {
+    background: var(--card-bg);
     width: 100%;
-    max-width: 550px;
-    background: transparent;
+    max-width: 480px; /* Nhỏ gọn, vừa vặn như App Mobile */
+    border-radius: 28px;
+    padding: 30px 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
+    text-align: center;
+    transition: background-color 0.1s ease;
 }
 
 /* Tên user */
-.usf {
-    font-size: clamp(1.1rem, 4vw, 1.6rem);
+.user-profile {
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
     font-weight: 800;
-    margin-bottom: clamp(8px, 2vh, 15px);
     color: var(--text-main);
+    margin-bottom: 16px;
     word-break: break-word;
+    letter-spacing: -0.5px;
 }
 
-/* Thống kê (Coins/View) */
-.stats {
-    font-size: clamp(0.9rem, 3vw, 1.3rem);
-    color: var(--text-main);
+/* Hàng Thống kê (Badge) */
+.stats-row {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: clamp(6px, 1.5vw, 12px);
-    margin-bottom: clamp(10px, 3vh, 30px);
-    font-weight: 500;
-    white-space: nowrap; /* Tránh rớt dòng màn hình hẹp */
-}
-.divider {
-    color: var(--text-muted);
-    font-weight: 300;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
 }
 
-/* Chữ số đếm ngược siêu to - ĐÃ FIX TRIỆT ĐỂ LỖI MẤT GIÂY TRÊN 12 MINI */
+.stat-badge {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: clamp(0.85rem, 3vw, 1rem);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.badge-yellow { background: #fef3c7; color: #b45309; }
+.badge-gray { background: #f1f5f9; color: #475569; }
+.badge-blue { background: #e0f2fe; color: #0369a1; }
+
+/* Khu vực Đồng hồ */
+.countdown-wrapper {
+    margin: 10px 0 25px 0;
+}
+
+/* Đếm ngược siêu to */
 .cd {
-    font-size: clamp(3rem, 16vw, 8.5rem); /* Nới rộng khoảng co giãn, bao trọn màn hình bé */
+    font-size: clamp(4rem, 18vw, 7.5rem);
     font-weight: 900;
     color: var(--text-main);
-    margin: clamp(5px, 2vh, 15px) 0;
     line-height: 1;
-    letter-spacing: -2px;
-    text-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    white-space: nowrap; /* ÉP BUỘC CHỮ KHÔNG BAO GIỜ RỚT DÒNG */
-    font-variant-numeric: tabular-nums; /* Giữ kích thước số luôn cố định, không giật lắc */
+    letter-spacing: -3px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums; /* Giữ số không bị giật lắc ngang */
 }
 
-/* Thời gian kết thúc */
+/* Giờ kết thúc */
 .time-info {
-    font-size: clamp(0.85rem, 2.5vw, 1.15rem);
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
     color: var(--text-muted);
-    margin-bottom: clamp(15px, 4vh, 35px);
+    font-weight: 600;
+    margin-top: 8px;
 }
 
-/* Khu vực nút + / - thời gian */
-.dc {
+/* Bảng điều khiển Thời gian (Nền xám ôm trọn các nút) */
+.controls-panel {
+    background: var(--panel-bg);
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 12px 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: clamp(2px, 1vw, 8px); 
-    margin-bottom: clamp(15px, 4vh, 35px);
-    flex-wrap: nowrap; /* Cấm rớt dòng */
-    width: 100%;
+    gap: clamp(4px, 1vw, 8px);
+    margin-bottom: 25px;
+    flex-wrap: nowrap;
 }
 
+/* Nút bấm +/- */
 .db {
     border: none;
-    border-radius: 6px;
-    padding: clamp(6px, 1.2vw, 10px) clamp(4px, 1vw, 12px); 
-    font-size: clamp(0.7rem, 2.2vw, 1rem);
-    font-weight: 600;
+    border-radius: 10px;
+    padding: clamp(10px, 2vw, 12px) clamp(6px, 1.5vw, 12px); 
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    font-weight: 700;
     color: white;
     cursor: pointer;
-    min-width: clamp(35px, 8vw, 60px); /* Thu gọn nút lại cho vừa máy nhỏ */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: transform 0.1s, box-shadow 0.2s;
-    white-space: nowrap; 
+    min-width: clamp(45px, 10vw, 60px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.1s, opacity 0.2s;
+    white-space: nowrap;
 }
-.db:active { transform: scale(0.95); }
+.db:active { transform: scale(0.92); }
+.db:hover { opacity: 0.9; }
 
 .btn-red { background-color: var(--btn-red); }
 .btn-green { background-color: var(--btn-green); }
 
-/* Chữ hiển thị độ lệch (0.00s) */
-.d-t {
-    font-size: clamp(0.9rem, 3vw, 1.4rem);
-    font-weight: 800;
-    min-width: clamp(45px, 10vw, 75px);
-    color: var(--text-main);
-    margin: 0 clamp(2px, 1vw, 10px); 
+/* Hiển thị số 0.00s */
+.offset-display {
+    min-width: clamp(60px, 12vw, 80px);
     text-align: center;
+}
+
+.d-t {
+    font-size: clamp(1rem, 3.5vw, 1.4rem);
+    font-weight: 800;
+    color: var(--text-main);
     white-space: nowrap;
 }
 
-/* Nút COPY và Dấu + */
+/* Nút COPY và Nút + */
 .action-buttons {
     display: flex;
     justify-content: center;
-    gap: clamp(8px, 2vw, 15px);
-    margin-bottom: clamp(15px, 4vh, 35px);
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .cb {
     background: var(--btn-dark);
     color: white;
     border: none;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 6px 12px rgba(44, 62, 80, 0.3);
-    transition: transform 0.1s, opacity 0.2s;
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.25);
+    transition: transform 0.1s, background 0.2s;
 }
-.cb:hover { opacity: 0.9; }
+.cb:hover { background: #1e293b; }
 .cb:active { transform: scale(0.95); }
 
 .main-btn {
-    padding: clamp(10px, 3vw, 14px) clamp(25px, 6vw, 40px);
-    border-radius: 30px;
-    font-size: clamp(0.95rem, 3vw, 1.25rem);
+    flex: 1;
+    max-width: 250px;
+    padding: 16px 20px;
+    border-radius: 18px;
+    font-size: clamp(1.1rem, 3.5vw, 1.25rem);
+    letter-spacing: 0.5px;
 }
 
 .square-btn {
-    width: clamp(40px, 10vw, 52px);
-    height: clamp(40px, 10vw, 52px);
-    border-radius: 12px;
-    font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    font-size: 1.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Nút Canh theo màu sắc */
-.bottom-action { margin-top: 5px; }
+/* Nút Cấu hình màu */
 .color-btn {
-    background: var(--btn-dark);
-    color: white;
-    border: none;
-    padding: clamp(8px, 2.5vw, 12px) clamp(16px, 4vw, 24px);
-    border-radius: 8px;
-    font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+    background: transparent;
+    color: var(--text-muted);
+    border: 2px dashed #cbd5e1;
+    padding: 12px 24px;
+    border-radius: 14px;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(44, 62, 80, 0.2);
+    width: 100%;
+    transition: all 0.2s;
+}
+.color-btn:hover {
+    border-color: var(--text-muted);
+    color: var(--text-main);
+    background: #f8fafc;
 }
 
 /* ======================================= */
-/* MODAL BẢN CŨ                            */
+/* MODAL BẢN MỚI (ĐẸP HƠN)                 */
 /* ======================================= */
-.modal-overlay, .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 9999; padding: 15px;}
-.modal-content, .modal-confirm { background: #fff; padding: 24px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
-.modal-title { font-size: 1.4rem; margin-bottom: 20px; font-weight: bold; color: #111;}
-.form-group { margin-bottom: 15px; text-align: left; }
-.form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #333;}
-.form-group input[type="number"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
-.color-input { width: 100%; height: 40px; border: none; border-radius: 8px; cursor: pointer; }
-.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-.modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-.mbc, .modal-btn-cancel { background: #eee; color: #333; }
-.mbs, .modal-btn-ok { background: var(--btn-dark); color: #fff; }
+.modal-overlay, .modal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 9999; padding: 15px;}
+.modal-content, .modal-confirm { background: #fff; padding: 28px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); }
+.modal-title { font-size: 1.4rem; margin-bottom: 24px; font-weight: 800; color: #0f172a;}
+.form-group { margin-bottom: 18px; text-align: left; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
+.form-group input[type="number"] { width: 100%; padding: 12px 16px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1.05rem; font-weight: 600; color: #1e293b; outline: none; transition: border 0.2s;}
+.form-group input[type="number"]:focus { border-color: #3b82f6; }
+.color-input { width: 100%; height: 48px; border: none; border-radius: 12px; cursor: pointer; padding: 0; overflow: hidden;}
+.color-input::-webkit-color-swatch-wrapper { padding: 0; }
+.color-input::-webkit-color-swatch { border: none; border-radius: 12px; }
+.modal-actions { display: flex; gap: 12px; margin-top: 28px; }
+.modal-btn { flex: 1; padding: 14px; border-radius: 14px; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; transition: transform 0.1s; }
+.modal-btn:active { transform: scale(0.95); }
+.mbc, .modal-btn-cancel { background: #f1f5f9; color: #475569; }
+.mbs, .modal-btn-ok { background: #0f172a; color: #fff; }
