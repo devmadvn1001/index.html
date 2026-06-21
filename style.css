@@ -30,7 +30,8 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 15px;
+    /* FIX: Giảm padding body trên mobile để nới rộng diện tích ngang tối đa */
+    padding: clamp(6px, 2vw, 15px);
     transition: background-color 0.1s ease; 
 }
 
@@ -40,7 +41,8 @@ body {
     width: 100%;
     max-width: 550px; 
     border-radius: 28px;
-    padding: 30px 20px;
+    /* FIX: Thu hẹp lề trong hai bên (từ 20px xuống 10px trên mobile) để khung điều khiển full ngang */
+    padding: clamp(20px, 4vh, 30px) clamp(10px, 2vw, 20px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
     text-align: center;
     transition: background-color 0.1s ease;
@@ -108,41 +110,44 @@ body {
 }
 
 /* ============================================================== */
-/* BẢNG ĐIỀU KHIỂN THỜI GIAN (ĐÃ FIX TỰ RESIZE VÀ CANH KHOẢNG CÁCH)*/
+/* BẢNG ĐIỀU KHIỂN THỜI GIAN (ĐÃ NỚI BỀ NGANG FULL & AUTO RESIZE) */
 /* ============================================================== */
 .controls-panel {
     background: var(--panel-bg);
     border: 1px solid #e2e8f0;
     border-radius: 20px;
-    padding: clamp(10px, 2vw, 12px) clamp(8px, 2vw, 12px);
+    /* FIX: Thu hẹp khoảng cách lề trong để chừa chỗ cho các nút bung lụa */
+    padding: clamp(8px, 2vw, 12px) clamp(6px, 1.5vw, 10px);
     display: flex;
-    justify-content: space-between; /* Sử dụng toàn bộ không gian ngang */
+    justify-content: space-between; 
     align-items: center;
     width: 100%;
     margin-bottom: 25px;
 }
 
-/* Canh khoảng cách theo đúng ý người dùng */
-.controls-panel > button:nth-of-type(1) { margin-right: clamp(6px, 2vw, 14px); } /* Tách xa -0.05 và -0.01 */
-.controls-panel > button:nth-of-type(2) { margin-right: clamp(2px, 1vw, 6px); }  /* Ép -0.01 sát vào giá trị giữa */
-.controls-panel > button:nth-of-type(3) { margin-left: clamp(2px, 1vw, 6px); }   /* Ép +0.01 sát vào giá trị giữa */
-.controls-panel > button:nth-of-type(4) { margin-left: clamp(6px, 2vw, 14px); }  /* Tách xa +0.01 và +0.05 */
+/* Canh khoảng cách nút */
+.controls-panel > button:nth-of-type(1) { margin-right: clamp(4px, 1.5vw, 12px); } 
+.controls-panel > button:nth-of-type(2) { margin-right: clamp(2px, 1vw, 5px); }  
+.controls-panel > button:nth-of-type(3) { margin-left: clamp(2px, 1vw, 5px); }   
+.controls-panel > button:nth-of-type(4) { margin-left: clamp(4px, 1.5vw, 12px); }  
 
 /* Nút bấm +/- */
 .db {
     border: none;
     border-radius: 10px;
-    padding: clamp(10px, 2vw, 14px) 0; /* Xóa padding ngang để flex tự co giãn */
-    font-size: clamp(0.7rem, 2.5vw, 1rem); /* Auto nhỏ lại cho màn 12 mini */
+    padding: clamp(10px, 2.5vw, 14px) 0; 
+    /* FIX: Ép font chữ sử dụng 'vw' để tự động thu nhỏ trên điện thoại và nở to trên PC */
+    font-size: clamp(0.75rem, 3.5vw, 1rem); 
     font-weight: 700;
     color: white;
     cursor: pointer;
-    flex: 1; /* CHÌA KHÓA: Tự động chia đều bề ngang 4 nút bằng nhau rắm rắp */
-    min-width: 0; /* Khóa chặn rớt dòng */
+    flex: 1; /* Tự động chia đều bề ngang 4 nút */
+    min-width: 0; 
     text-align: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: transform 0.1s, opacity 0.2s;
     white-space: nowrap;
+    letter-spacing: -0.2px; /* Mẹo kéo nhẹ chữ sát lại một chút để không bị dẹp */
 }
 
 .db:active { transform: scale(0.92); }
@@ -153,8 +158,8 @@ body {
 
 /* HIỂN THỊ SỐ +0.00S Ở GIỮA */
 .offset-display {
-    flex: 0 0 auto; /* Cố định khối này không bị co giãn vỡ Form */
-    min-width: clamp(55px, 10vw, 75px); 
+    flex: 0 0 auto; 
+    min-width: clamp(50px, 10vw, 70px); 
     text-align: center;
 }
 
@@ -223,7 +228,7 @@ body {
     background: #f8fafc;
 }
 
-/* THANH HIỂN THỊ CẤU HÌNH (RỘNG RÃI - GIỐNG HÌNH 1) */
+/* THANH HIỂN THỊ CẤU HÌNH NHÁY MÀU */
 .active-config {
     display: flex; 
     align-items: center;
