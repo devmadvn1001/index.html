@@ -35,19 +35,26 @@ let syncInterval = null;
 const btnSync = document.getElementById('btn-sync');
 const syncStatus = document.getElementById('sync-status');
 
-// Hàm PING server lấy giờ chuẩn (Dùng Binance API chống lỗi chặn mạng)
+// Hàm PING server lấy giờ chuẩn
 async function pingTimeServer() {
     if (!isSyncOn) return;
     try {
         const start = Date.now();
-        // Sử dụng API của Binance: Nhanh, chính xác mili-giây, không bao giờ lỗi CORS
-        const res = await fetch('https://api.binance.com/api/v3/time', { cache: 'no-store' });
-        if (!res.ok) throw new Error('Mạng chập chờn');
         
-        const data = await res.json();
+        // Gửi lệnh hỏi giờ đến 3 sàn giao dịch có máy chủ nhanh nhất thế giới cùng 1 lúc
+        const fetchBinance = fetch('https://api.binance.com/api/v3/time', { cache: 'no-store' })
+            .then(r => r.json()).then(d => d.serverTime);
+            
+        const fetchKucoin = fetch('https://api.kucoin.com/api/v1/timestamp', { cache: 'no-store' })
+            .then(r => r.json()).then(d => d.data);
+            
+        const fetchBybit = fetch('https://api.bybit.com/v5/market/time', { cache: 'no-store' })
+            .then(r => r.json()).then(d => Number(d.time));
+
+        // Promise.any: Thằng nào phản hồi nhanh nhất (Ping thấp nhất) sẽ được lấy kết quả, bỏ qua các thằng chậm hơn
+        const serverTime = await Promise.any([fetchBinance, fetchKucoin, fetchBybit]);
+        
         const end = Date.now();
-        
-        const serverTime = data.serverTime; // Binance trả về thẳng mili-giây
         const latency = (end - start) / 2; // Tính thời gian truyền đi 1 chiều
         
         // Tinh chỉnh độ lệch: (Giờ server thực tế + độ trễ mạng) - Giờ máy hiện tại
@@ -60,7 +67,7 @@ async function pingTimeServer() {
     } catch (error) {
         if (syncStatus) {
             syncStatus.textContent = 'LỖI PING';
-            syncStatus.style.color = '#ef4444'; // Báo lỗi nếu rớt mạng
+            syncStatus.style.color = '#ef4444'; // Báo lỗi nếu rớt mạng hoàn toàn
         }
     }
 }
