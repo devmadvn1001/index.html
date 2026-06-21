@@ -131,17 +131,17 @@ function updateDTOffset() {
     if (!dTEl) return;
     const absVal = Math.abs(timeOffset);
     const sign = timeOffset >= 0 ? '+' : '-';
-    const color = timeOffset >= 0 ? '#28a745' : '#dc3545'; // xanh lá nếu tăng, đỏ nếu giảm
+    const color = timeOffset >= 0 ? '#38a169' : '#e53e3e'; // xanh lá nếu tăng, đỏ nếu giảm (theo biến CSS mới)
     dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
 }
 
-// ===== Hàm định dạng thời gian ss:f (1 chữ số 1/10 giây) =====
+// ===== Hàm định dạng thời gian ss.f (1 chữ số 1/10 giây) =====
 function formatTimeMMSSF(totalSeconds) {
     const absSec = Math.abs(totalSeconds);
     const seconds = Math.floor(absSec);
     const milliseconds = Math.floor((absSec - Math.floor(absSec)) * 1000);
     const f = String(Math.floor(milliseconds / 100));
-    return String(seconds) + ':' + f;
+    return String(seconds) + '.' + f; // Thay đổi : thành .
 }
 
 // ===== Lấy thời gian hiện tại (ms) =====
@@ -152,8 +152,8 @@ function getCurrentTimeMs() {
 // ===== Cập nhật đồng hồ đếm ngược =====
 function updateClock() {
     if (!endTime) {
-        // Nếu không có end_time, hiển thị 00:00:0
-        if (countdownEl) countdownEl.textContent = '00:0';
+        // Nếu không có end_time, hiển thị 00.0
+        if (countdownEl) countdownEl.textContent = '00.0';
         if (progressEl) progressEl.style.width = '0%';
         return;
     }
@@ -165,7 +165,7 @@ function updateClock() {
     const diffMs = adjustedEndMs - now;
 
     if (diffMs <= 0) {
-        if (countdownEl) countdownEl.textContent = '00:0';
+        if (countdownEl) countdownEl.textContent = '00.0'; // Thay đổi : thành .
         if (progressEl) progressEl.style.width = '100%';
         return;
     }
@@ -174,8 +174,6 @@ function updateClock() {
     if (countdownEl) countdownEl.textContent = formatTimeMMSSF(diffSeconds);
 
     // Cập nhật thanh tiến trình: thời gian đã trôi qua / tổng thời gian
-    // Tổng thời gian = endTimeMs (từ epoch 0 đến end_time)
-    // Thời gian đã trôi qua = now (từ epoch 0 đến hiện tại)
     if (progressEl && endTimeMs > 0) {
         const totalMs = endTimeMs;
         const elapsedMs = now;
