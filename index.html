@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Modal xác nhận -->
+    <button type="button" class="settings-btn" id="btn-open-settings">Cài đặt</button>
+
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-confirm">
             <p class="modal-text">Bạn có chắc chắn?</p>
@@ -19,60 +20,43 @@
     </div>
 
     <div class="container">
-        <!-- Tên người dùng -->
         <div class="usf">
             <b id="usernameDisplay">@user</b>
         </div>
 
-        <!-- Thống kê: coins/can_open + hot_box + viewers -->
         <div class="stats">
-            <div class="stat-item">
-                <span class="stat-icon">️</span>
-                <span id="viewCount">80</span>/<span id="peopleCount">25</span>
-                <span id="hotBoxFlag">🏅🇩🇪</span>
-                <span class="viewers-label">&nbsp; - &nbsp;👀&nbsp;</span>
-                <span id="viewersDisplay">159</span>
-            </div>
+            <span id="viewCount">1000</span>/<span id="peopleCount">500</span>
+            <span class="divider">—</span>
+            <span id="hotBoxFlag">🔥🏅TH</span>
+            <span class="divider">—</span>
+            <span>👀 <span id="viewersDisplay">2001</span></span>
         </div>
 
-        <!-- Điều chỉnh thời gian -->
+        <div class="cd" id="countdown">0.0</div>
+
+        <div class="time-info">
+            <div id="endTimeDisplay">--:--:--</div>
+            <div class="ping-info">Ping 0.002s (syncing - ✅ internet tốt)</div>
+        </div>
+
         <div class="dc">
-            <button type="button" class="db" id="btn-decrease-0.05">-0.05s</button>
-            <button type="button" class="db" id="btn-decrease-0.01">-0.01s</button>
+            <button type="button" class="db btn-red" id="btn-decrease-0.01">-0.01</button>
+            <button type="button" class="db btn-red" id="btn-decrease-0.05">-0.05</button>
             <span class="d-t" id="d-t"><b>0.00s</b></span>
-            <button type="button" class="db" id="btn-increase-0.01">+0.01s</button>
-            <button type="button" class="db" id="btn-increase-0.05">+0.05s</button>
+            <button type="button" class="db btn-green" id="btn-increase-0.05">+0.05</button>
+            <button type="button" class="db btn-green" id="btn-increase-0.01">+0.01</button>
         </div>
 
-        <!-- Thanh tiến trình -->
-        <div class="progress-container">
-            <div class="progress-bar" id="progress"></div>
+        <div class="action-buttons">
+            <button type="button" class="cb main-btn" id="claimBtn">COPY</button>
+            <button type="button" class="cb square-btn" id="claimChangeBtn">+</button>
         </div>
 
-        <!-- Bộ đếm ngược -->
-        <div class="cd" id="countdown">0</div>
-
-        <!-- Thời gian kết thúc (end_time dạng hh:mm:ss) -->
-        <div class="end-time-label" id="endTimeDisplay">--:--:--</div>
-
-        <!-- Các nút COPY và màu sắc -->
-        <div>
-            <button type="button" class="cb" id="claimBtn">COPY</button>
-            <button type="button" class="cb" id="claimChangeBtn">+</button>
-        </div>
-
-        <br>
-
-        <!-- Ghi chú và nút mở cấu hình -->
-        <div class="note-container">
-            <span class="note"><b>- Bật tự động cập nhật thời gian</b></span>
-            <span class="note"><b>- Dùng thiết bị mạnh</b></span>
-            <span class="note"><b>- Đóng, xóa app không sử dụng</b></span>
-            <button type="button" class="config-btn" id="btn-open">Màu sắc</button>
+        <div class="bottom-action">
+            <button type="button" class="color-btn" id="btn-open">Canh theo màu sắc</button>
         </div>
     </div>
 
-    <!-- Modal cấu hình màu nền -->
     <div class="modal" id="modal">
         <div class="modal-content">
             <div class="modal-title">Cấu hình màu nền</div>
