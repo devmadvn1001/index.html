@@ -135,16 +135,14 @@ function updateDTOffset() {
     dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
 }
 
-// ===== Hàm định dạng thời gian mm:ss:f (1 chữ số mili giây) =====
-function formatTimeMMSSF(totalSeconds) {
+// ===== Hàm định dạng thời gian ss:f (giây và 1/10 giây) =====
+function formatTimeSSF(totalSeconds) {
     const absSec = Math.abs(totalSeconds);
-    const minutes = Math.floor(absSec / 60);
     const seconds = Math.floor(absSec % 60);
     const milliseconds = Math.floor((absSec - Math.floor(absSec)) * 1000);
-    const mm = String(minutes).padStart(2, '0');
     const ss = String(seconds).padStart(2, '0');
     const f = String(Math.floor(milliseconds / 100));
-    return mm + ':' + ss + ':' + f;
+    return ss + ':' + f;
 }
 
 // ===== Lấy thời gian hiện tại (ms) =====
@@ -152,12 +150,22 @@ function getCurrentTimeMs() {
     return Date.now();
 }
 
+// Cache nội dung hiển thị trước đó để tránh cập nhật DOM không cần thiết
+let lastCountdownText = '';
+let lastProgressPercent = '';
+
 // ===== Cập nhật đồng hồ đếm ngược =====
 function updateClock() {
     if (!endTime) {
-        // Nếu không có end_time, hiển thị 00:00:0
-        if (countdownEl) countdownEl.textContent = '00:00:0';
-        if (progressEl) progressEl.style.width = '0%';
+        // Nếu không có end_time, hiển thị 00:0
+        if (countdownEl && lastCountdownText !== '00:0') {
+            countdownEl.textContent = '00:0';
+            lastCountdownText = '00:0';
+        }
+        if (progressEl && lastProgressPercent !== '0%') {
+            progressEl.style.width = '0%';
+            lastProgressPercent = '0%';
+        }
         return;
     }
 
@@ -168,24 +176,36 @@ function updateClock() {
     const diffMs = adjustedEndMs - now;
 
     if (diffMs <= 0) {
-        if (countdownEl) countdownEl.textContent = '00:00:0';
-        if (progressEl) progressEl.style.width = '100%';
+        if (countdownEl && lastCountdownText !== '00:0') {
+            countdownEl.textContent = '00:0';
+            lastCountdownText = '00:0';
+        }
+        if (progressEl && lastProgressPercent !== '100%') {
+            progressEl.style.width = '100%';
+            lastProgressPercent = '100%';
+        }
         return;
     }
 
     const diffSeconds = diffMs / 1000;
-    if (countdownEl) countdownEl.textContent = formatTimeMMSSF(diffSeconds);
+    const newText = formatTimeSSF(diffSeconds);
+    if (countdownEl && lastCountdownText !== newText) {
+        countdownEl.textContent = newText;
+        lastCountdownText = newText;
+    }
 
     // Cập nhật thanh tiến trình: thời gian đã trôi qua / tổng thời gian
-    // Tổng thời gian = endTimeMs (từ epoch 0 đến end_time)
-    // Thời gian đã trôi qua = now (từ epoch 0 đến hiện tại)
     if (progressEl && endTimeMs > 0) {
         const totalMs = endTimeMs;
         const elapsedMs = now;
         const percent = Math.min(100, Math.max(0, (elapsedMs / totalMs) * 100));
-        progressEl.style.width = percent + '%';
+        // Chỉ cập nhật DOM khi % thay đổi >= 0.1% để giảm reflow
+        const percentStr = percent.toFixed(1) + '%';
+        if (lastProgressPercent !== percentStr) {
+            progressEl.style.width = percentStr;
+            lastProgressPercent = percentStr;
+        }
     }
-
 }
 
 // ===== Điều chỉnh thời gian (offset) =====
@@ -321,5 +341,11 @@ document.getElementById('modal').addEventListener('click', function (e) {
 updateClock();
 updateDTOffset();
 
-// Cập nhật đồng hồ mỗi 10ms để hiển thị mili giây mượt
-setInterval(updateClock, 10);
+// Dùng requestAnimationFrame để đồng hồ chạy ở tần số quét màn hình (60fps/120fps/144fps)
+// Mượt hơn setInterval và đồng bộ với v-sync, không gây tearing
+let animFrameId;
+function clockLoop() {
+    updateClock();
+    animFrameId = requestAnimationFrame(clockLoop);
+}
+animFrameId = requestAnimationFrame(clockLoop);
