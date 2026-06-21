@@ -26,7 +26,36 @@ let timeOffset = 0;
 let link1 = null;
 
 // ============================================================== //
-// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) ĐUA TỐC ĐỘ 3 SÀN TỐT NHẤT //
+// LOGIC CHUYỂN ĐỔI CHẾ ĐỘ SÁNG / TỐI (DARK MODE)                 //
+// ============================================================== //
+let isDarkMode = false;
+const btnTheme = document.getElementById('btn-theme');
+const themeIcon = document.getElementById('theme-icon');
+const themeText = document.getElementById('theme-text');
+
+function applyTheme(isDark) {
+    isDarkMode = isDark;
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        if (themeIcon) themeIcon.textContent = '🌞';
+        if (themeText) themeText.textContent = 'Light';
+    } else {
+        document.body.classList.remove('dark-mode');
+        if (themeIcon) themeIcon.textContent = '🌙';
+        if (themeText) themeText.textContent = 'Dark';
+    }
+    // Lưu lựa chọn vào máy
+    try { localStorage.setItem('theme', isDarkMode ? 'dark' : 'light'); } catch (e) {}
+}
+
+if (btnTheme) {
+    btnTheme.addEventListener('click', () => {
+        applyTheme(!isDarkMode);
+    });
+}
+
+// ============================================================== //
+// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) ĐUA TỐC ĐỘ                //
 // ============================================================== //
 let isSyncOn = false;
 let networkTimeOffset = 0; 
@@ -35,7 +64,6 @@ let syncInterval = null;
 const btnSync = document.getElementById('btn-sync');
 const syncStatus = document.getElementById('sync-status');
 
-// Hàm PING đua tốc độ Server
 async function pingTimeServer() {
     if (!isSyncOn) return;
     try {
@@ -59,20 +87,18 @@ async function pingTimeServer() {
         
         if (syncStatus) {
             syncStatus.textContent = 'ON';
-            syncStatus.style.color = '#22c55e'; // Xanh lá
+            syncStatus.style.color = '#22c55e'; 
         }
     } catch (error) {
         if (syncStatus) {
             syncStatus.textContent = 'LỖI PING';
-            syncStatus.style.color = '#ef4444'; // Báo lỗi nếu rớt mạng
+            syncStatus.style.color = '#ef4444'; 
         }
     }
 }
 
-// Hàm Bật/Tắt Sync và lưu trạng thái vào máy người dùng
 function applySyncState(state) {
     if (state) {
-        // BẬT SYNC
         isSyncOn = true;
         if (syncStatus) {
             syncStatus.textContent = 'PING...';
@@ -81,11 +107,8 @@ function applySyncState(state) {
         pingTimeServer(); 
         clearInterval(syncInterval);
         syncInterval = setInterval(pingTimeServer, 5000);
-        
-        // Lưu trạng thái "Đã Bật" vào máy
         try { localStorage.setItem('isSyncOn', 'true'); } catch (e) {}
     } else {
-        // TẮT SYNC
         isSyncOn = false;
         networkTimeOffset = 0;
         clearInterval(syncInterval);
@@ -93,13 +116,10 @@ function applySyncState(state) {
             syncStatus.textContent = 'OFF';
             syncStatus.style.color = '#ef4444'; 
         }
-        
-        // Lưu trạng thái "Đã Tắt" vào máy
         try { localStorage.setItem('isSyncOn', 'false'); } catch (e) {}
     }
 }
 
-// Bấm nút thì đảo ngược trạng thái
 if (btnSync) {
     btnSync.addEventListener('click', function() {
         applySyncState(!isSyncOn);
@@ -135,13 +155,16 @@ function updateConfigDisplayUI() {
     }
 }
 
+// Cải tiến hàm này để tương thích mượt mà với Dark Mode
 function applyBackgroundColor(state, colorHex = '') {
     if (state === 'default') {
-        document.body.style.backgroundColor = 'var(--bg-page)'; 
-        document.documentElement.style.setProperty('--text-main', '#1e293b');
-        document.documentElement.style.setProperty('--text-muted', '#64748b');
-        document.querySelector('.app-card').style.backgroundColor = 'var(--card-bg)'; 
+        // Trả lại toàn bộ CSS về mặc định (Tự động nhận diện Đang ở Sáng hay Tối để đổi màu)
+        document.body.style.backgroundColor = ''; 
+        document.querySelector('.app-card').style.backgroundColor = ''; 
+        document.documentElement.style.removeProperty('--text-main');
+        document.documentElement.style.removeProperty('--text-muted');
     } else if (state === 'flash') {
+        // Ép nháy màu
         document.body.style.backgroundColor = colorHex;
         document.querySelector('.app-card').style.backgroundColor = colorHex;
 
@@ -196,13 +219,15 @@ function applyBackgroundColor(state, colorHex = '') {
             if (colorInput) colorInput.value = colorConfig.color;
         }
 
-        // Đọc bộ nhớ xem user có đang bật Sync Time không
+        // 1. Phục hồi trạng thái Sync
         var savedSync = localStorage.getItem('isSyncOn');
-        if (savedSync === 'true') {
-            applySyncState(true); // Bật Sync tự động
-        } else {
-            applySyncState(false);
-        }
+        if (savedSync === 'true') applySyncState(true); 
+        else applySyncState(false);
+
+        // 2. Phục hồi trạng thái Dark Mode
+        let savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') applyTheme(true);
+        else applyTheme(false);
 
         updateConfigDisplayUI(); 
         applyBackgroundColor('default');
