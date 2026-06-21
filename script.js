@@ -26,7 +26,7 @@ let timeOffset = 0;
 let link1 = null;
 
 // ============================================================== //
-// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) BẰNG SERVER BINANCE CỰC MẠNH //
+// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) ĐUA TỐC ĐỘ 3 SÀN TỐT NHẤT //
 // ============================================================== //
 let isSyncOn = false;
 let networkTimeOffset = 0; 
@@ -35,13 +35,12 @@ let syncInterval = null;
 const btnSync = document.getElementById('btn-sync');
 const syncStatus = document.getElementById('sync-status');
 
-// Hàm PING server lấy giờ chuẩn
+// Hàm PING đua tốc độ Server
 async function pingTimeServer() {
     if (!isSyncOn) return;
     try {
         const start = Date.now();
         
-        // Gửi lệnh hỏi giờ đến 3 sàn giao dịch có máy chủ nhanh nhất thế giới cùng 1 lúc
         const fetchBinance = fetch('https://api.binance.com/api/v3/time', { cache: 'no-store' })
             .then(r => r.json()).then(d => d.serverTime);
             
@@ -51,13 +50,11 @@ async function pingTimeServer() {
         const fetchBybit = fetch('https://api.bybit.com/v5/market/time', { cache: 'no-store' })
             .then(r => r.json()).then(d => Number(d.time));
 
-        // Promise.any: Thằng nào phản hồi nhanh nhất (Ping thấp nhất) sẽ được lấy kết quả, bỏ qua các thằng chậm hơn
         const serverTime = await Promise.any([fetchBinance, fetchKucoin, fetchBybit]);
         
         const end = Date.now();
-        const latency = (end - start) / 2; // Tính thời gian truyền đi 1 chiều
+        const latency = (end - start) / 2;
         
-        // Tinh chỉnh độ lệch: (Giờ server thực tế + độ trễ mạng) - Giờ máy hiện tại
         networkTimeOffset = (serverTime + latency) - Date.now();
         
         if (syncStatus) {
@@ -67,37 +64,48 @@ async function pingTimeServer() {
     } catch (error) {
         if (syncStatus) {
             syncStatus.textContent = 'LỖI PING';
-            syncStatus.style.color = '#ef4444'; // Báo lỗi nếu rớt mạng hoàn toàn
+            syncStatus.style.color = '#ef4444'; // Báo lỗi nếu rớt mạng
         }
     }
 }
 
-// Lắng nghe thao tác Bật / Tắt Sync
-if (btnSync) {
-    btnSync.addEventListener('click', function() {
-        if (isSyncOn) {
-            // TẮT SYNC
-            isSyncOn = false;
-            networkTimeOffset = 0;
-            clearInterval(syncInterval);
-            
+// Hàm Bật/Tắt Sync và lưu trạng thái vào máy người dùng
+function applySyncState(state) {
+    if (state) {
+        // BẬT SYNC
+        isSyncOn = true;
+        if (syncStatus) {
+            syncStatus.textContent = 'PING...';
+            syncStatus.style.color = '#f59e0b'; 
+        }
+        pingTimeServer(); 
+        clearInterval(syncInterval);
+        syncInterval = setInterval(pingTimeServer, 5000);
+        
+        // Lưu trạng thái "Đã Bật" vào máy
+        try { localStorage.setItem('isSyncOn', 'true'); } catch (e) {}
+    } else {
+        // TẮT SYNC
+        isSyncOn = false;
+        networkTimeOffset = 0;
+        clearInterval(syncInterval);
+        if (syncStatus) {
             syncStatus.textContent = 'OFF';
             syncStatus.style.color = '#ef4444'; 
-        } else {
-            // BẬT SYNC
-            isSyncOn = true;
-            syncStatus.textContent = 'PING...';
-            syncStatus.style.color = '#f59e0b'; // Màu vàng cam đang load
-            
-            pingTimeServer(); // Ping phát đầu tiên ngay lập tức
-            
-            // Cài đặt ping liên tục mỗi 5 giây để luôn giữ sai số nhỏ nhất ở mức ms
-            syncInterval = setInterval(pingTimeServer, 5000);
         }
+        
+        // Lưu trạng thái "Đã Tắt" vào máy
+        try { localStorage.setItem('isSyncOn', 'false'); } catch (e) {}
+    }
+}
+
+// Bấm nút thì đảo ngược trạng thái
+if (btnSync) {
+    btnSync.addEventListener('click', function() {
+        applySyncState(!isSyncOn);
     });
 }
 
-// Hàm lấy thời gian: Tự động cộng/trừ sai số nếu bật Sync
 function getCurrentTimeMs() {
     return Date.now() + (isSyncOn ? networkTimeOffset : 0);
 }
@@ -157,6 +165,7 @@ function applyBackgroundColor(state, colorHex = '') {
     updateDTOffset();
 }
 
+// ===== KHÔI PHỤC TOÀN BỘ CẤU HÌNH ĐÃ LƯU KHI MỞ LINK MỚI =====
 (function loadSavedState() {
     try {
         var testKey = '__test_ls__';
@@ -187,12 +196,21 @@ function applyBackgroundColor(state, colorHex = '') {
             if (colorInput) colorInput.value = colorConfig.color;
         }
 
+        // Đọc bộ nhớ xem user có đang bật Sync Time không
+        var savedSync = localStorage.getItem('isSyncOn');
+        if (savedSync === 'true') {
+            applySyncState(true); // Bật Sync tự động
+        } else {
+            applySyncState(false);
+        }
+
         updateConfigDisplayUI(); 
         applyBackgroundColor('default');
 
     } catch (e) {}
 })();
 
+// ===== DOM refs =====
 const countdownEl = document.getElementById('countdown');
 const endTimeDisplayEl = document.getElementById('endTimeDisplay');
 const viewCountEl = document.getElementById('viewCount');
