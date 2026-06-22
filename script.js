@@ -44,7 +44,6 @@ function applyTheme(isDark) {
         if (themeIcon) themeIcon.textContent = '🌙';
         if (themeText) themeText.textContent = 'Dark';
     }
-    // Lưu lựa chọn vào máy
     try { localStorage.setItem('theme', isDarkMode ? 'dark' : 'light'); } catch (e) {}
 }
 
@@ -130,7 +129,6 @@ function getCurrentTimeMs() {
     return Date.now() + (isSyncOn ? networkTimeOffset : 0);
 }
 
-
 // ===== CẤU HÌNH NHÁY MÀU NỀN =====
 let colorConfig = {
     active: false,
@@ -155,16 +153,13 @@ function updateConfigDisplayUI() {
     }
 }
 
-// Cải tiến hàm này để tương thích mượt mà với Dark Mode
 function applyBackgroundColor(state, colorHex = '') {
     if (state === 'default') {
-        // Trả lại toàn bộ CSS về mặc định (Tự động nhận diện Đang ở Sáng hay Tối để đổi màu)
         document.body.style.backgroundColor = ''; 
         document.querySelector('.app-card').style.backgroundColor = ''; 
         document.documentElement.style.removeProperty('--text-main');
         document.documentElement.style.removeProperty('--text-muted');
     } else if (state === 'flash') {
-        // Ép nháy màu
         document.body.style.backgroundColor = colorHex;
         document.querySelector('.app-card').style.backgroundColor = colorHex;
 
@@ -219,12 +214,10 @@ function applyBackgroundColor(state, colorHex = '') {
             if (colorInput) colorInput.value = colorConfig.color;
         }
 
-        // 1. Phục hồi trạng thái Sync
         var savedSync = localStorage.getItem('isSyncOn');
         if (savedSync === 'true') applySyncState(true); 
         else applySyncState(false);
 
-        // 2. Phục hồi trạng thái Dark Mode
         let savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') applyTheme(true);
         else applyTheme(false);
@@ -292,6 +285,10 @@ function formatTimeMMSSF(totalSeconds) {
     return String(seconds) + '.' + f;
 }
 
+// Biến kiểm soát việc kích hoạt tính năng đóng tab
+let isClosedTimerStarted = false;
+
+// ===== TRỤC CHÍNH: CẬP NHẬT ĐỒNG HỒ VÀ KIỂM TRA MÀU =====
 function updateClock() {
     if (!endTime) {
         if (countdownEl) countdownEl.textContent = '00.0';
@@ -310,6 +307,33 @@ function updateClock() {
             currentBgState = 'default';
             applyBackgroundColor('default');
         }
+
+        // ============================================================== //
+        // LỚP TỰ HỦY: GIẢI PHÓNG RAM VÀ ĐÓNG TAB SAU 10 GIÂY             //
+        // ============================================================== //
+        if (!isClosedTimerStarted) {
+            isClosedTimerStarted = true;
+            setTimeout(function() {
+                // Cách 1: Thử ép đóng tab bằng thủ thuật JS
+                try {
+                    window.open('', '_self', '');
+                    window.close();
+                } catch (e) {}
+
+                // Cách 2: Nếu iOS/Android chặn, xóa trắng toàn bộ giao diện để thu hồi 99% RAM
+                document.body.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding: 20px;">
+                        <h2 style="color: var(--text-main); margin-bottom: 15px;">Đã xong nhiệm vụ! ✅</h2>
+                        <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.5;">
+                            Giao diện web đã tự hủy để giải phóng RAM cho điện thoại của bạn.<br><br>
+                            <b>Bạn hãy tự tắt Tab này nhé!</b>
+                        </p>
+                    </div>
+                `;
+            }, 10000); // Kích hoạt sau 10 giây
+        }
+        // ============================================================== //
+
         return;
     }
 
