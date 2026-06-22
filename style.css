@@ -41,7 +41,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Cho phép thả trôi từ trên xuống */
     min-height: 100vh;
     padding: 15px;
     transition: background-color 0.2s ease, color 0.2s ease; 
@@ -118,16 +118,24 @@ body {
 .theme-btn:active { transform: scale(0.95); }
 .theme-icon { font-size: 1rem; }
 
-/* KHUNG GIAO DIỆN CHÍNH */
+/* ====================================================== */
+/* KHUNG GIAO DIỆN CHÍNH (Đã nâng cấp Full màn hình)      */
+/* ====================================================== */
 .app-card {
     background: var(--card-bg);
     width: 100%;
     max-width: 550px; 
     border-radius: 28px;
-    padding: 30px 20px;
+    padding: 25px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
     text-align: center;
     transition: background-color 0.2s ease;
+    
+    /* Ma thuật giãn full màn hình (Chừa chỗ cho nút ở trên) */
+    margin-top: 55px; 
+    min-height: calc(100dvh - 85px); 
+    display: flex;
+    flex-direction: column;
 }
 
 .user-profile {
@@ -144,7 +152,6 @@ body {
     justify-content: center;
     align-items: center;
     gap: 12px;
-    margin-bottom: 25px;
     flex-wrap: wrap;
 }
 
@@ -163,30 +170,39 @@ body {
 .badge-gray { background: #e2e8f0; color: #334155; }
 .badge-blue { background: #e0f2fe; color: #0369a1; }
 
-.countdown-wrapper { margin: 15px 0 25px 0; }
+/* ====================================================== */
+/* KHUNG CHỨA SỐ ĐẾM (Lò xo đẩy phần còn lại xuống đáy)   */
+/* ====================================================== */
+.countdown-wrapper { 
+    flex: 1; /* Lò xo tự phình to dồn khoảng trống */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 15px 0 25px 0;
+}
 
+/* SỐ ĐẾM TO HƠN 30% CHUẨN XÁC */
 .cd {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: clamp(4.5rem, 16vw, 8rem);
+    font-size: clamp(5.8rem, 21vw, 10.4rem); /* Tăng 30% so với 4.5rem cũ */
     font-weight: 700; 
     color: var(--text-main);
-    line-height: 1.1; 
+    line-height: 1; 
     letter-spacing: 1px; 
     white-space: nowrap;
     font-variant-numeric: tabular-nums; 
-    margin: clamp(15px, 2vh, 25px) 0; 
+    margin: 0; 
 }
 
-/* ========================================================== */
-/* KHUNG CHỨA PING BÊN TRÁI VÀ GIỜ Ở GIỮA                     */
-/* ========================================================== */
 .info-row {
     position: relative;
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 15px;
+    margin-top: 20px;
 }
 
 .ping-info {
@@ -205,8 +221,10 @@ body {
     color: var(--text-muted);
     font-weight: 600;
 }
-/* ========================================================== */
 
+/* ====================================================== */
+/* KHUNG ĐIỀU KHIỂN DƯỚI ĐÁY                              */
+/* ====================================================== */
 .controls-panel {
     background: var(--panel-bg);
     border: 1px solid var(--border-color);
@@ -216,7 +234,7 @@ body {
     justify-content: space-between; 
     align-items: center;
     width: 100%;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
@@ -400,7 +418,8 @@ body {
 
 @media screen and (max-width: 480px) {
     body { padding: 4px; }
-    .app-card { padding: 24px 6px; border-radius: 18px; }
+    /* Màn siêu nhỏ kéo margin top lên để đỡ hẹp */
+    .app-card { padding: 20px 6px; border-radius: 18px; margin-top: 45px; min-height: calc(100dvh - 55px); }
     .controls-panel { padding: 10px 4px; }
     .controls-panel > button:nth-of-type(1) { margin-right: 3px; } 
     .controls-panel > button:nth-of-type(2) { margin-right: 2px; }  
