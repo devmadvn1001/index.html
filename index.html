@@ -4,74 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Canh thời gian T1</title>
-    <link rel="stylesheet" href="style.css?v=29">
+    <link rel="stylesheet" href="style.css?v=26">
 </head>
 <body>
-    
-    <div class="main-wrapper">
-        
-        <div class="top-bar">
-            <button type="button" class="sync-btn" id="btn-sync">
-                <span class="sync-icon">⏱️</span> Sync: <b id="sync-status" style="color: #ef4444;">OFF</b>
-            </button>
+    <button type="button" class="sync-btn" id="btn-sync">
+        <span class="sync-icon">⏱️</span> Sync: <b id="sync-status" style="color: #ef4444;">OFF</b>
+    </button>
 
-            <input type="text" class="name-input" id="my-name-input" placeholder="Tên..." maxlength="15">
+    <input type="text" class="name-input" id="my-name-input" placeholder="Tên của bạn..." maxlength="15">
 
-            <button type="button" class="theme-btn" id="btn-theme">
-                <span class="theme-icon" id="theme-icon">🌙</span> <b id="theme-text">Dark</b>
-            </button>
-        </div>
+    <button type="button" class="theme-btn" id="btn-theme">
+        <span class="theme-icon" id="theme-icon">🌙</span> <b id="theme-text">Dark</b>
+    </button>
 
-        <div class="app-card">
-            <div class="user-profile">
-                <b id="usernameDisplay">@user</b>
-            </div>
-
-            <div class="stats-row">
-                <div class="stat-badge badge-yellow">
-                    🪙 <span id="viewCount">0</span>/<span id="peopleCount">0</span>
-                </div>
-                <div class="stat-badge badge-gray" id="hotBoxFlag">🏅🇩🇪</div>
-                <div class="stat-badge badge-blue">
-                    👀 <span id="viewersDisplay">0</span>
-                </div>
-            </div>
-
-            <div class="countdown-wrapper">
-                <div class="cd" id="countdown">00.0</div>
-                <div class="time-info" id="endTimeDisplay">--:--:--</div>
-            </div>
-
-            <div class="controls-panel">
-                <button type="button" class="db btn-red" id="btn-decrease-0.05">-0.05</button>
-                <button type="button" class="db btn-red" id="btn-decrease-0.01">-0.01</button>
-                
-                <div class="offset-display">
-                    <span class="d-t" id="d-t"><b>+0.00s</b></span>
-                </div>
-
-                <button type="button" class="db btn-green" id="btn-increase-0.01">+0.01</button>
-                <button type="button" class="db btn-green" id="btn-increase-0.05">+0.05</button>
-            </div>
-
-            <div class="action-buttons">
-                <button type="button" class="cb main-btn" id="claimBtn">COPY LINK</button>
-                <button type="button" class="cb square-btn" id="claimChangeBtn">+</button>
-            </div>
-
-            <div class="active-viewers-box">
-                <span style="font-size: 1.1rem;">🔥</span> <span id="viewers-list">Đang kết nối phòng xem...</span>
-            </div>
-
-            <button type="button" class="color-btn" id="btn-open">🎨 Canh theo màu sắc</button>
-
-            <div class="active-config" id="activeConfigDisplay" style="display: none;">
-                <div class="config-color-dot" id="configColorDot"></div>
-                <span class="config-text" id="configText">Từ 0.0s đến 0.0s</span>
-                <button type="button" class="config-del-btn" id="configDelBtn">✖</button>
-            </div>
-        </div>
-        </div>
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-confirm">
             <p class="modal-text">Bạn có chắc chắn?</p>
@@ -79,6 +24,56 @@
                 <button type="button" class="modal-btn modal-btn-cancel" id="confirmCancelBtn">Huỷ</button>
                 <button type="button" class="modal-btn modal-btn-ok" id="confirmOkBtn">OK</button>
             </div>
+        </div>
+    </div>
+
+    <div class="app-card">
+        <div class="user-profile">
+            <b id="usernameDisplay">@user</b>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-badge badge-yellow">
+                🪙 <span id="viewCount">0</span>/<span id="peopleCount">0</span>
+            </div>
+            <div class="stat-badge badge-gray" id="hotBoxFlag">🏅🇩🇪</div>
+            <div class="stat-badge badge-blue">
+                👀 <span id="viewersDisplay">0</span>
+            </div>
+        </div>
+
+        <div class="countdown-wrapper">
+            <div class="cd" id="countdown">00.0</div>
+            <div class="time-info" id="endTimeDisplay">--:--:--</div>
+        </div>
+
+        <div class="controls-panel">
+            <button type="button" class="db btn-red" id="btn-decrease-0.05">-0.05</button>
+            <button type="button" class="db btn-red" id="btn-decrease-0.01">-0.01</button>
+            
+            <div class="offset-display">
+                <span class="d-t" id="d-t"><b>+0.00s</b></span>
+            </div>
+
+            <button type="button" class="db btn-green" id="btn-increase-0.01">+0.01</button>
+            <button type="button" class="db btn-green" id="btn-increase-0.05">+0.05</button>
+        </div>
+
+        <div class="action-buttons">
+            <button type="button" class="cb main-btn" id="claimBtn">COPY LINK</button>
+            <button type="button" class="cb square-btn" id="claimChangeBtn">+</button>
+        </div>
+
+        <div class="active-viewers-box">
+            <span style="font-size: 1.1rem;">🔥</span> <span id="viewers-list">Đang kết nối phòng xem...</span>
+        </div>
+
+        <button type="button" class="color-btn" id="btn-open">🎨 Canh theo màu sắc</button>
+
+        <div class="active-config" id="activeConfigDisplay" style="display: none;">
+            <div class="config-color-dot" id="configColorDot"></div>
+            <span class="config-text" id="configText">Từ 0.0s đến 0.0s</span>
+            <button type="button" class="config-del-btn" id="configDelBtn">✖</button>
         </div>
     </div>
 
@@ -104,6 +99,6 @@
         </div>
     </div>
 
-    <script type="module" src="script.js?v=29"></script>
+    <script type="module" src="script.js?v=26"></script>
 </body>
 </html>
