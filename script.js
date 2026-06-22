@@ -137,7 +137,7 @@ let syncInterval = null;
 
 const btnSync = document.getElementById('btn-sync');
 const syncStatus = document.getElementById('sync-status');
-const pingDisplay = document.getElementById('pingDisplay'); // <--- DOM PING MỚI
+const pingDisplay = document.getElementById('pingDisplay'); 
 
 async function pingTimeServer() {
     if (!isSyncOn) return;
@@ -165,11 +165,15 @@ async function pingTimeServer() {
             syncStatus.style.color = '#22c55e'; 
         }
 
-        // TÍNH TOÁN HIỂN THỊ PING ĐỘ LỆCH
+        // TÍNH TOÁN HIỂN THỊ PING ĐỘ LỆCH VÀ MÀU SẮC
         if (pingDisplay) {
             let sign = networkTimeOffset >= 0 ? '+' : '';
             let offsetInSeconds = (networkTimeOffset / 1000).toFixed(3);
-            pingDisplay.innerHTML = `Ping ms: <span style="color: #22c55e;">${sign}${offsetInSeconds}s</span>`;
+            
+            // LOGIC MÀU MỚI: Dương (+) -> Xanh lá | Âm (-) -> Đỏ
+            let pingColor = networkTimeOffset >= 0 ? '#22c55e' : '#ef4444'; 
+            
+            pingDisplay.innerHTML = `Ping ms: <span style="color: ${pingColor};">${sign}${offsetInSeconds}s</span>`;
         }
 
     } catch (error) {
