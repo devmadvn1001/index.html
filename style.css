@@ -163,7 +163,11 @@ body {
 .badge-gray { background: #e2e8f0; color: #334155; }
 .badge-blue { background: #e0f2fe; color: #0369a1; }
 
-.countdown-wrapper { margin: 15px 0 25px 0; }
+/* Thêm position relative để ghim cái Ping bên trong nó */
+.countdown-wrapper { 
+    margin: 15px 0 25px 0; 
+    position: relative; 
+}
 
 .cd {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -184,13 +188,16 @@ body {
     margin-top: 15px;
 }
 
-/* THÊM CSS CHO DÒNG HIỂN THỊ PING Ở ĐÂY */
+/* PING GÓC TRÁI (Kéo khỏi dòng chảy, ghim sát lề trái, ngang hàng giờ) */
 .ping-info {
-    font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+    position: absolute;
+    left: 0;
+    bottom: 2px;
+    font-size: clamp(0.7rem, 2.2vw, 0.85rem);
     color: var(--text-muted);
     font-weight: 700;
-    margin-top: 8px;
     transition: color 0.2s ease;
+    white-space: nowrap; /* Cấm rớt dòng */
 }
 
 .controls-panel {
