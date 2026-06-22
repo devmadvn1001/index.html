@@ -1,3 +1,20 @@
+// BẮT BUỘC IMPORT FIREBASE TỪ CDN BÊN NGOÀI
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getDatabase, ref, set, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+// ===== KẾT NỐI MÁY CHỦ FIREBASE CỦA BẠN =====
+const firebaseConfig = {
+    apiKey: "AIzaSyAOzLEX4hjRbp3pEbEm5dL2iqHUWZ0EZCM",
+    authDomain: "canh-ruong-tiktok.firebaseapp.com",
+    databaseURL: "https://canh-ruong-tiktok-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "canh-ruong-tiktok",
+    storageBucket: "canh-ruong-tiktok.firebasestorage.app",
+    messagingSenderId: "180203178276",
+    appId: "1:180203178276:web:49509b237ec8a8fb578bb1"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 // ===== Lấy tham số từ URL =====
 const urlParams = new URLSearchParams(window.location.search);
 
@@ -24,6 +41,64 @@ if (paramR) {
 // ===== Biến toàn cục =====
 let timeOffset = 0;
 let link1 = null;
+
+// ============================================================== //
+// HỆ THỐNG PHÒNG XEM CHUNG REAL-TIME (FIREBASE)                  //
+// ============================================================== //
+const myNameInput = document.getElementById('my-name-input');
+const viewersList = document.getElementById('viewers-list');
+
+// 1. Tạo ID phân biệt thiết bị để không bị trùng lặp
+let mySessionId = localStorage.getItem('mySessionId');
+if (!mySessionId) {
+    mySessionId = 'sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+    localStorage.setItem('mySessionId', mySessionId);
+}
+
+// 2. Chia phòng dựa vào thời gian EndTime của Rương
+const roomId = endTime ? `room_${endTime}` : 'room_default';
+const myViewerRef = ref(db, `rooms/${roomId}/viewers/${mySessionId}`);
+
+// 3. TUYỆT CHIÊU: Tự động xóa tên khi người dùng tắt trình duyệt / mất mạng
+onDisconnect(myViewerRef).remove();
+
+// 4. Hàm đẩy tên lên Máy chủ
+function pushNameToFirebase(name) {
+    if (name && name.trim() !== '') {
+        set(myViewerRef, name.trim().toUpperCase());
+    } else {
+        remove(myViewerRef); // Xóa nếu để trống tên
+    }
+}
+
+// 5. Lắng nghe tên khi người dùng gõ phím
+if (myNameInput) {
+    myNameInput.addEventListener('input', function() {
+        const val = this.value;
+        try { localStorage.setItem('myName', val); } catch(e){}
+        pushNameToFirebase(val);
+    });
+}
+
+// 6. Lắng nghe Máy chủ phát sóng về: Có ai đang xem?
+const roomViewersRef = ref(db, `rooms/${roomId}/viewers`);
+onValue(roomViewersRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        // Lấy danh sách tên, lọc bỏ khoảng trắng và lọc trùng lặp
+        const names = Object.values(data).filter(n => n.trim() !== '');
+        const uniqueNames = [...new Set(names)];
+        
+        if (uniqueNames.length > 0) {
+            viewersList.innerHTML = `<b>${uniqueNames.join(', ')}</b> đang cày chung`;
+        } else {
+            viewersList.innerHTML = `Chưa có ai điểm danh`;
+        }
+    } else {
+        viewersList.innerHTML = `Chưa có ai điểm danh`;
+    }
+});
+
 
 // ============================================================== //
 // LOGIC CHUYỂN ĐỔI CHẾ ĐỘ SÁNG / TỐI (DARK MODE)                 //
@@ -222,6 +297,13 @@ function applyBackgroundColor(state, colorHex = '') {
         if (savedTheme === 'dark') applyTheme(true);
         else applyTheme(false);
 
+        // Khôi phục Tên và Đẩy lên máy chủ ngay lập tức
+        let savedName = localStorage.getItem('myName');
+        if (savedName && myNameInput) {
+            myNameInput.value = savedName;
+            pushNameToFirebase(savedName);
+        }
+
         updateConfigDisplayUI(); 
         applyBackgroundColor('default');
 
@@ -295,14 +377,12 @@ function destroyApp() {
     if (isDestroyed) return;
     isDestroyed = true;
     
-    // 1. Giết sạch tiến trình CPU
+    // Xóa kết nối Firebase khi hủy App
+    remove(myViewerRef);
+
     clearInterval(mainClockInterval);
     if (syncInterval) clearInterval(syncInterval);
 
-    // 2. Thử đóng tab
-    try { window.close(); } catch (e) {}
-
-    // 3. Phá hủy HTML làm giao diện trung gian
     document.body.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width: 100vw; text-align:center; padding: 20px; background: var(--bg-page);">
             <h2 style="color: var(--text-main); margin-bottom: 15px;">Đã xong nhiệm vụ! ✅</h2>
@@ -310,28 +390,23 @@ function destroyApp() {
         </div>
     `;
 
-    // 4. TUYỆT CHIÊU CUỐI: Ép trình duyệt nhảy sang trang trắng tinh vô hình (Diệt 100% RAM)
     setTimeout(() => {
         window.location.replace("about:blank");
     }, 1000);
 }
 
-// Bắt cảm biến Tắt/Mở ứng dụng
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
-        // Tầng 1: Nếu vừa vuốt ẩn trình duyệt mà thời gian đã về 0 -> Tự hủy ngay lập tức không cần đợi 3s
         if (endTime && getCurrentTimeMs() >= (endTime * 1000 + timeOffset * 1000)) {
             destroyApp();
         }
     } else {
-        // Tầng 2: Nếu mở trình duyệt lại mà phát hiện thế giới thực đã qua 3s từ lúc chạm 0 -> Tự hủy ngay
         if (zeroHitTime > 0 && Date.now() - zeroHitTime >= 3000) {
             destroyApp();
         }
     }
 });
 
-// ===== TRỤC CHÍNH: CẬP NHẬT ĐỒNG HỒ VÀ KIỂM TRA MÀU =====
 function updateClock() {
     if (!endTime) {
         if (countdownEl) countdownEl.textContent = '00.0';
@@ -351,12 +426,10 @@ function updateClock() {
             applyBackgroundColor('default');
         }
 
-        // Lưu mốc thời gian thực tế lúc vừa chạm số 0
         if (zeroHitTime === 0) {
             zeroHitTime = Date.now();
         }
 
-        // Tầng 3: Chạy nền bình thường, hễ đủ 3 giây là tự hủy
         if (Date.now() - zeroHitTime >= 3000) {
             destroyApp();
         }
