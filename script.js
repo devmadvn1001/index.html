@@ -423,16 +423,10 @@ function updateClock() {
 
     const diffSeconds = diffMs / 1000;
     
-    // Đã thay đổi: Lấy TRỰC TIẾP con số hiển thị trên màn hình để làm mốc nháy màu
-    const displayedText = formatTimeMMSSF(diffSeconds);
-    if (countdownEl) countdownEl.textContent = displayedText;
+    if (countdownEl) countdownEl.textContent = formatTimeMMSSF(diffSeconds);
 
     if (colorConfig.active) {
-        // Chuyển đổi con số trên màn hình thành dạng số thập phân (VD: "0.7" thành 0.7)
-        const currentDisplayNum = parseFloat(displayedText);
-
-        // So sánh trực tiếp với con số màn hình thay vì thời gian thực
-        if (currentDisplayNum <= colorConfig.start && currentDisplayNum >= colorConfig.end) {
+        if (diffSeconds <= colorConfig.start && diffSeconds >= colorConfig.end) {
             if (currentBgState !== 'flash') {
                 currentBgState = 'flash';
                 applyBackgroundColor('flash', colorConfig.color);
@@ -558,3 +552,44 @@ updateClock();
 updateDTOffset();
 
 const mainClockInterval = setInterval(updateClock, 10);
+
+// ============================================================== //
+// [TÍNH NĂNG ẨN]: CỬ CHỈ VUỐT & CHẠM KÉP ĐỂ ĐỔI LINK CỰC NHANH   //
+// ============================================================== //
+
+// 1. CHẠM 2 LẦN (Double Tap) VÀO SỐ ĐẾM NGƯỢC
+let lastTap = 0;
+if(countdownEl) {
+    countdownEl.addEventListener('touchend', function(e) {
+        let currentTime = new Date().getTime();
+        let tapLength = currentTime - lastTap;
+        // Nếu chạm 2 lần cách nhau dưới 0.4 giây -> Mở bảng đổi link
+        if (tapLength < 400 && tapLength > 0) {
+            document.getElementById('claimChangeBtn').click();
+            e.preventDefault(); // Ngăn trình duyệt zoom màn hình
+        }
+        lastTap = currentTime;
+    });
+}
+
+// 2. VUỐT NGANG MÀN HÌNH (SWIPE LEFT/RIGHT)
+let touchstartX = 0;
+let touchstartY = 0;
+
+document.addEventListener('touchstart', function(e) {
+    touchstartX = e.changedTouches[0].screenX;
+    touchstartY = e.changedTouches[0].screenY;
+}, {passive: true});
+
+document.addEventListener('touchend', function(e) {
+    let touchendX = e.changedTouches[0].screenX;
+    let touchendY = e.changedTouches[0].screenY;
+
+    let diffX = Math.abs(touchendX - touchstartX);
+    let diffY = Math.abs(touchendY - touchstartY);
+
+    // Bắt sự kiện: Vuốt ngang tay 1 khoảng > 80 pixel và không bị chệch dọc quá nhiều
+    if (diffX > 80 && diffY < 80) {
+        document.getElementById('claimChangeBtn').click();
+    }
+}, {passive: true});
