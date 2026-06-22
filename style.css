@@ -184,6 +184,15 @@ body {
     margin-top: 15px;
 }
 
+/* THÊM CSS CHO DÒNG HIỂN THỊ PING Ở ĐÂY */
+.ping-info {
+    font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-top: 8px;
+    transition: color 0.2s ease;
+}
+
 .controls-panel {
     background: var(--panel-bg);
     border: 1px solid var(--border-color);
