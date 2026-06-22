@@ -163,11 +163,7 @@ body {
 .badge-gray { background: #e2e8f0; color: #334155; }
 .badge-blue { background: #e0f2fe; color: #0369a1; }
 
-/* Thêm position relative để ghim cái Ping bên trong nó */
-.countdown-wrapper { 
-    margin: 15px 0 25px 0; 
-    position: relative; 
-}
+.countdown-wrapper { margin: 15px 0 25px 0; }
 
 .cd {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -181,24 +177,35 @@ body {
     margin: clamp(15px, 2vh, 25px) 0; 
 }
 
-.time-info {
-    font-size: clamp(0.9rem, 3vw, 1.1rem);
-    color: var(--text-muted);
-    font-weight: 600;
+/* ==================================================== */
+/* KHUNG NGANG BỌC GIỜ VÀ PING MỚI                      */
+/* ==================================================== */
+.info-row {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-top: 15px;
 }
 
-/* PING GÓC TRÁI (Kéo khỏi dòng chảy, ghim sát lề trái, ngang hàng giờ) */
 .ping-info {
     position: absolute;
     left: 0;
     bottom: 2px;
-    font-size: clamp(0.7rem, 2.2vw, 0.85rem);
+    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
     color: var(--text-muted);
     font-weight: 700;
     transition: color 0.2s ease;
-    white-space: nowrap; /* Cấm rớt dòng */
+    white-space: nowrap;
 }
+
+.time-info {
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
+    color: var(--text-muted);
+    font-weight: 600;
+}
+/* ==================================================== */
 
 .controls-panel {
     background: var(--panel-bg);
@@ -292,7 +299,6 @@ body {
     justify-content: center;
 }
 
-/* KHUNG HIỂN THỊ AI ĐANG XEM */
 .active-viewers-box {
     background: var(--panel-bg);
     border: 1px dashed var(--border-color);
