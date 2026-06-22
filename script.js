@@ -54,7 +54,7 @@ if (btnTheme) {
 }
 
 // ============================================================== //
-// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) ĐUA TỐC ĐỘ SÀN BINANCE    //
+// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) ĐUA TỐC ĐỘ                //
 // ============================================================== //
 let isSyncOn = false;
 let networkTimeOffset = 0; 
@@ -286,7 +286,7 @@ function formatTimeMMSSF(totalSeconds) {
 }
 
 // ============================================================== //
-// THUẬT TOÁN HỦY DIỆT TAB CHUYÊN SÂU CHỐNG ĐÓNG BĂNG CỦA HĐH IOS //
+// THUẬT TOÁN HỦY DIỆT ĐA TẦNG (CHỐNG NGỦ ĐÔNG CỦA IOS)           //
 // ============================================================== //
 let zeroHitTime = 0;
 let isDestroyed = false;
@@ -295,32 +295,39 @@ function destroyApp() {
     if (isDestroyed) return;
     isDestroyed = true;
     
-    // 1. Tắt vĩnh viễn vòng lặp tính toán để giải phóng CPU
+    // 1. Giết sạch tiến trình CPU
     clearInterval(mainClockInterval);
     if (syncInterval) clearInterval(syncInterval);
 
-    // 2. Ép đóng tab cho các trình duyệt In-App
-    try {
-        window.open('', '_self', '');
-        window.close();
-    } catch (e) {}
+    // 2. Thử đóng tab
+    try { window.close(); } catch (e) {}
 
-    // 3. Phá hủy toàn bộ mã HTML cũ giải phóng RAM
+    // 3. Phá hủy HTML làm giao diện trung gian
     document.body.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width: 100vw; text-align:center; padding: 20px; background: var(--bg-page);">
             <h2 style="color: var(--text-main); margin-bottom: 15px;">Đã xong nhiệm vụ! ✅</h2>
-            <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.5;">
-                Giao diện web đã tự hủy và đóng băng để giải phóng Máy cho bạn.<br><br>
-                <b>Bạn có thể an tâm tắt Tab này đi nhé!</b>
-            </p>
+            <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.5;">Đang dọn dẹp RAM...</p>
         </div>
     `;
+
+    // 4. TUYỆT CHIÊU CUỐI: Ép trình duyệt nhảy sang trang trắng tinh vô hình (Diệt 100% RAM)
+    setTimeout(() => {
+        window.location.replace("about:blank");
+    }, 1000);
 }
 
-// Cảm biến: Nếu user vuốt ẩn tab (Background) MÀ đồng hồ ĐÃ CHẠM 0 TRƯỚC ĐÓ -> Hủy diệt ngay lập tức!
+// Bắt cảm biến Tắt/Mở ứng dụng
 document.addEventListener("visibilitychange", function() {
-    if (document.hidden && zeroHitTime > 0) {
-        destroyApp();
+    if (document.hidden) {
+        // Tầng 1: Nếu vừa vuốt ẩn trình duyệt mà thời gian đã về 0 -> Tự hủy ngay lập tức không cần đợi 3s
+        if (endTime && getCurrentTimeMs() >= (endTime * 1000 + timeOffset * 1000)) {
+            destroyApp();
+        }
+    } else {
+        // Tầng 2: Nếu mở trình duyệt lại mà phát hiện thế giới thực đã qua 3s từ lúc chạm 0 -> Tự hủy ngay
+        if (zeroHitTime > 0 && Date.now() - zeroHitTime >= 3000) {
+            destroyApp();
+        }
     }
 });
 
@@ -344,12 +351,12 @@ function updateClock() {
             applyBackgroundColor('default');
         }
 
-        // Lưu mốc thời gian thực tế lúc chạm số 0
+        // Lưu mốc thời gian thực tế lúc vừa chạm số 0
         if (zeroHitTime === 0) {
             zeroHitTime = Date.now();
         }
 
-        // Đếm dựa trên thời gian thật trôi qua (bất chấp iOS có đóng băng hay không)
+        // Tầng 3: Chạy nền bình thường, hễ đủ 3 giây là tự hủy
         if (Date.now() - zeroHitTime >= 3000) {
             destroyApp();
         }
