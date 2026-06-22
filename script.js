@@ -232,6 +232,7 @@ function updateConfigDisplayUI() {
     }
 }
 
+// [ĐÃ FIX LỖI CHỚP ĐAU MẮT Ở ĐÂY]
 function applyBackgroundColor(state, colorHex = '') {
     if (state === 'default') {
         document.body.style.backgroundColor = ''; 
@@ -241,23 +242,9 @@ function applyBackgroundColor(state, colorHex = '') {
     } else if (state === 'flash') {
         document.body.style.backgroundColor = colorHex;
         document.querySelector('.app-card').style.backgroundColor = colorHex;
-
-        let hex = colorHex.replace('#', '');
-        if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-        if (hex.length === 6) {
-            let r = parseInt(hex.substr(0,2), 16);
-            let g = parseInt(hex.substr(2,2), 16);
-            let b = parseInt(hex.substr(4,2), 16);
-            let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-
-            if (yiq < 128) {
-                document.documentElement.style.setProperty('--text-main', '#ffffff');
-                document.documentElement.style.setProperty('--text-muted', '#e2e8f0');
-            } else {
-                document.documentElement.style.setProperty('--text-main', '#1e293b');
-                document.documentElement.style.setProperty('--text-muted', '#64748b');
-            }
-        }
+        
+        // Đã xóa sạch thuật toán YIQ đổi màu chữ thành Trắng.
+        // Chữ giờ đây sẽ tự nhiên giữ nguyên màu Đen thẫm (Hoặc Trắng nếu đang bật Dark Mode)
     }
     updateDTOffset();
 }
@@ -394,9 +381,6 @@ function destroyApp() {
             <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.5;">Hệ thống đã dọn dẹp RAM.<br>Bạn có thể tắt Tab này nhé!</p>
         </div>
     `;
-
-    // LƯU Ý: Đã bỏ hoàn toàn lệnh window.close() và about:blank 
-    // để sửa triệt để lỗi văng sang Chrome gốc trên máy Android.
 }
 
 document.addEventListener("visibilitychange", function() {
