@@ -59,7 +59,7 @@ if (!mySessionId) {
 const roomId = endTime ? `room_${endTime}` : 'room_default';
 const myViewerRef = ref(db, `rooms/${roomId}/viewers/${mySessionId}`);
 
-// 3. TUYỆT CHIÊU: Tự động xóa tên khi người dùng mất mạng thực sự
+// 3. TUYỆT CHIÊU: Tự động xóa tên khi người dùng tắt trình duyệt / mất mạng
 onDisconnect(myViewerRef).remove();
 
 // 4. Hàm đẩy tên lên Máy chủ
@@ -137,6 +137,7 @@ let syncInterval = null;
 
 const btnSync = document.getElementById('btn-sync');
 const syncStatus = document.getElementById('sync-status');
+const pingDisplay = document.getElementById('pingDisplay'); // <--- DOM PING MỚI
 
 async function pingTimeServer() {
     if (!isSyncOn) return;
@@ -163,10 +164,21 @@ async function pingTimeServer() {
             syncStatus.textContent = 'ON';
             syncStatus.style.color = '#22c55e'; 
         }
+
+        // TÍNH TOÁN HIỂN THỊ PING ĐỘ LỆCH
+        if (pingDisplay) {
+            let sign = networkTimeOffset >= 0 ? '+' : '';
+            let offsetInSeconds = (networkTimeOffset / 1000).toFixed(3);
+            pingDisplay.innerHTML = `Ping ms: <span style="color: #22c55e;">${sign}${offsetInSeconds}s</span>`;
+        }
+
     } catch (error) {
         if (syncStatus) {
             syncStatus.textContent = 'LỖI PING';
             syncStatus.style.color = '#ef4444'; 
+        }
+        if (pingDisplay) {
+            pingDisplay.innerHTML = `Ping ms: <span style="color: #ef4444;">LỖI</span>`;
         }
     }
 }
@@ -190,6 +202,12 @@ function applySyncState(state) {
             syncStatus.textContent = 'OFF';
             syncStatus.style.color = '#ef4444'; 
         }
+        
+        // TRẢ VỀ MẶC ĐỊNH KHI TẮT SYNC
+        if (pingDisplay) {
+            pingDisplay.innerHTML = `Ping ms: --`;
+        }
+
         try { localStorage.setItem('isSyncOn', 'false'); } catch (e) {}
     }
 }
@@ -368,7 +386,7 @@ function formatTimeMMSSF(totalSeconds) {
 }
 
 // ============================================================== //
-// THUẬT TOÁN HỦY DIỆT VÀ QUẢN LÝ PHÒNG XEM (VISIBILITY SENSOR)   //
+// THUẬT TOÁN HỦY DIỆT ĐA TẦNG (CHỐNG NGỦ ĐÔNG CỦA IOS)           //
 // ============================================================== //
 let zeroHitTime = 0;
 let isDestroyed = false;
@@ -395,23 +413,12 @@ function destroyApp() {
     }, 1000);
 }
 
-// LẮNG NGHE SỰ KIỆN VUỐT ẨN TAB HOẶC MỞ LẠI TAB
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
-        // [MỚI] TẦNG 0: NGƯỜI DÙNG VUỐT ẨN TAB -> LẬP TỨC RÚT TÊN KHỎI FIREBASE
-        remove(myViewerRef);
-
-        // Tầng 1: Hủy diệt nếu quá giờ
         if (endTime && getCurrentTimeMs() >= (endTime * 1000 + timeOffset * 1000)) {
             destroyApp();
         }
     } else {
-        // [MỚI] TẦNG 0: NGƯỜI DÙNG MỞ LẠI TAB -> ĐẨY TÊN LÊN FIREBASE LẠI NẾU CÓ TÊN
-        if (myNameInput && myNameInput.value.trim() !== '') {
-            pushNameToFirebase(myNameInput.value);
-        }
-
-        // Tầng 2: Hủy diệt nếu đã chạm 0 quá 3 giây
         if (zeroHitTime > 0 && Date.now() - zeroHitTime >= 3000) {
             destroyApp();
         }
