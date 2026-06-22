@@ -48,30 +48,25 @@ let link1 = null;
 const myNameInput = document.getElementById('my-name-input');
 const viewersList = document.getElementById('viewers-list');
 
-// 1. Tạo ID phân biệt thiết bị để không bị trùng lặp
 let mySessionId = localStorage.getItem('mySessionId');
 if (!mySessionId) {
     mySessionId = 'sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
     localStorage.setItem('mySessionId', mySessionId);
 }
 
-// 2. Chia phòng dựa vào thời gian EndTime của Rương
 const roomId = endTime ? `room_${endTime}` : 'room_default';
 const myViewerRef = ref(db, `rooms/${roomId}/viewers/${mySessionId}`);
 
-// 3. TUYỆT CHIÊU: Tự động xóa tên khi người dùng tắt trình duyệt / mất mạng
 onDisconnect(myViewerRef).remove();
 
-// 4. Hàm đẩy tên lên Máy chủ
 function pushNameToFirebase(name) {
     if (name && name.trim() !== '') {
         set(myViewerRef, name.trim().toUpperCase());
     } else {
-        remove(myViewerRef); // Xóa nếu để trống tên
+        remove(myViewerRef); 
     }
 }
 
-// 5. Lắng nghe tên khi người dùng gõ phím
 if (myNameInput) {
     myNameInput.addEventListener('input', function() {
         const val = this.value;
@@ -80,12 +75,10 @@ if (myNameInput) {
     });
 }
 
-// 6. Lắng nghe Máy chủ phát sóng về: Có ai đang xem?
 const roomViewersRef = ref(db, `rooms/${roomId}/viewers`);
 onValue(roomViewersRef, (snapshot) => {
     const data = snapshot.val();
     if (data) {
-        // Lấy danh sách tên, lọc bỏ khoảng trắng và lọc trùng lặp
         const names = Object.values(data).filter(n => n.trim() !== '');
         const uniqueNames = [...new Set(names)];
         
@@ -129,7 +122,7 @@ if (btnTheme) {
 }
 
 // ============================================================== //
-// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) ĐUA TỐC ĐỘ                //
+// CƠ CHẾ ĐỒNG BỘ THỜI GIAN THEO PING MẠNG TIKTOK                 //
 // ============================================================== //
 let isSyncOn = false;
 let networkTimeOffset = 0; 
@@ -144,36 +137,26 @@ async function pingTimeServer() {
     try {
         const start = Date.now();
         
-        const fetchBinance = fetch('https://api.binance.com/api/v3/time', { cache: 'no-store' })
-            .then(r => r.json()).then(d => d.serverTime);
-            
-        const fetchKucoin = fetch('https://api.kucoin.com/api/v1/timestamp', { cache: 'no-store' })
-            .then(r => r.json()).then(d => d.data);
-            
-        const fetchBybit = fetch('https://api.bybit.com/v5/market/time', { cache: 'no-store' })
-            .then(r => r.json()).then(d => Number(d.time));
-
-        const serverTime = await Promise.any([fetchBinance, fetchKucoin, fetchBybit]);
+        // Bắn 1 gói tin rỗng đến máy chủ TikTok để lấy độ trễ mạng thực tế của 4G/Wifi
+        await fetch('https://www.tiktok.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
         
-        const end = Date.now();
-        const latency = (end - start) / 2;
+        const pingMs = Date.now() - start; 
         
-        networkTimeOffset = (serverTime + latency) - Date.now();
+        // Đồng hồ sẽ chạy nhanh hơn 1 nửa số Ping (để lệnh bấm bay vừa vặn tới máy chủ TikTok khi về 0)
+        networkTimeOffset = Math.round(pingMs / 2);
         
         if (syncStatus) {
             syncStatus.textContent = 'ON';
             syncStatus.style.color = '#22c55e'; 
         }
 
-        // TÍNH TOÁN HIỂN THỊ PING ĐỘ LỆCH VÀ MÀU SẮC
         if (pingDisplay) {
-            let sign = networkTimeOffset >= 0 ? '+' : '';
-            let offsetInSeconds = (networkTimeOffset / 1000).toFixed(3);
-            
-            // LOGIC MÀU MỚI: Dương (+) -> Xanh lá | Âm (-) -> Đỏ
-            let pingColor = networkTimeOffset >= 0 ? '#22c55e' : '#ef4444'; 
-            
-            pingDisplay.innerHTML = `Ping ms: <span style="color: ${pingColor};">${sign}${offsetInSeconds}s</span>`;
+            // TÔ MÀU THEO CHUẨN GAME: Xanh (Ngon) -> Vàng (Hơi lag) -> Đỏ (Quá lag)
+            let pingColor = '#22c55e'; 
+            if (pingMs >= 150 && pingMs < 300) pingColor = '#f59e0b';
+            if (pingMs >= 300) pingColor = '#ef4444'; 
+
+            pingDisplay.innerHTML = `Ping mạng: <span style="color: ${pingColor};">${pingMs}ms</span>`;
         }
 
     } catch (error) {
@@ -182,7 +165,7 @@ async function pingTimeServer() {
             syncStatus.style.color = '#ef4444'; 
         }
         if (pingDisplay) {
-            pingDisplay.innerHTML = `Ping ms: <span style="color: #ef4444;">LỖI</span>`;
+            pingDisplay.innerHTML = `Ping mạng: <span style="color: #ef4444;">LỖI</span>`;
         }
     }
 }
@@ -207,9 +190,8 @@ function applySyncState(state) {
             syncStatus.style.color = '#ef4444'; 
         }
         
-        // TRẢ VỀ MẶC ĐỊNH KHI TẮT SYNC
         if (pingDisplay) {
-            pingDisplay.innerHTML = `Ping ms: --`;
+            pingDisplay.innerHTML = `Ping mạng: --`;
         }
 
         try { localStorage.setItem('isSyncOn', 'false'); } catch (e) {}
@@ -319,7 +301,6 @@ function applyBackgroundColor(state, colorHex = '') {
         if (savedTheme === 'dark') applyTheme(true);
         else applyTheme(false);
 
-        // Khôi phục Tên và Đẩy lên máy chủ ngay lập tức
         let savedName = localStorage.getItem('myName');
         if (savedName && myNameInput) {
             myNameInput.value = savedName;
@@ -399,7 +380,6 @@ function destroyApp() {
     if (isDestroyed) return;
     isDestroyed = true;
     
-    // Xóa kết nối Firebase khi hủy App
     remove(myViewerRef);
 
     clearInterval(mainClockInterval);
@@ -419,10 +399,14 @@ function destroyApp() {
 
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
+        remove(myViewerRef);
         if (endTime && getCurrentTimeMs() >= (endTime * 1000 + timeOffset * 1000)) {
             destroyApp();
         }
     } else {
+        if (myNameInput && myNameInput.value.trim() !== '') {
+            pushNameToFirebase(myNameInput.value);
+        }
         if (zeroHitTime > 0 && Date.now() - zeroHitTime >= 3000) {
             destroyApp();
         }
