@@ -47,32 +47,17 @@ body {
     transition: background-color 0.2s ease, color 0.2s ease; 
 }
 
-/* KHUNG TỔNG BAO BỌC TOÀN BỘ GIAO DIỆN */
-.main-wrapper {
-    width: 100%;
-    max-width: 550px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Khoảng cách an toàn giữa Top Bar và Card trắng */
-}
-
-/* THANH CHỨA 3 NÚT TRÊN CÙNG */
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    gap: 8px; /* Ép khoảng cách cố định giữa 3 nút */
-}
-
-/* NÚT SYNC & NÚT THEME (Đã bỏ absolute) */
-.sync-btn, .theme-btn {
+/* NÚT SYNC (GÓC TRÁI) */
+.sync-btn {
+    position: absolute;
+    top: max(15px, 2vh);
+    left: max(15px, 4vw);
     background: var(--card-bg);
     color: var(--text-main);
     border: 1px solid var(--border-color);
-    padding: 8px 12px;
+    padding: 8px 14px;
     border-radius: 20px;
-    font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
@@ -80,14 +65,17 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    white-space: nowrap; /* Cấm rớt dòng */
-    flex-shrink: 0; /* Cấm bóp méo nút khi màn hình nhỏ */
+    z-index: 100;
 }
-.sync-btn:active, .theme-btn:active { transform: scale(0.95); }
-.sync-icon, .theme-icon { font-size: 1rem; }
+.sync-btn:active { transform: scale(0.95); }
+.sync-icon { font-size: 1rem; }
 
-/* Ô NHẬP TÊN (Đã bỏ absolute, set Flex 1 tự phình to) */
+/* NÚT NHẬP TÊN CÁ NHÂN (GIỮA TRÊN CÙNG) */
 .name-input {
+    position: absolute;
+    top: max(15px, 2vh);
+    left: 50%;
+    transform: translateX(-50%);
     background: var(--card-bg);
     color: var(--text-main);
     border: 1px dashed var(--border-color);
@@ -95,23 +83,46 @@ body {
     border-radius: 20px;
     font-size: clamp(0.75rem, 2.5vw, 0.85rem);
     font-weight: 700;
+    width: 90px;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    z-index: 100;
     outline: none;
     transition: all 0.2s;
-    flex: 1; /* Chiếm toàn bộ khoảng trống còn dư giữa 2 nút */
-    min-width: 60px;
-    max-width: 160px; /* Bề ngang tối đa, tự do căn giữa */
 }
 .name-input:focus {
     border: 1px solid #3b82f6;
-    max-width: 200px;
+    width: 140px; 
 }
+
+/* NÚT THEME SÁNG/TỐI (GÓC PHẢI) */
+.theme-btn {
+    position: absolute;
+    top: max(15px, 2vh);
+    right: max(15px, 4vw);
+    background: var(--card-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 100;
+}
+.theme-btn:active { transform: scale(0.95); }
+.theme-icon { font-size: 1rem; }
 
 /* KHUNG GIAO DIỆN CHÍNH */
 .app-card {
     background: var(--card-bg);
     width: 100%;
+    max-width: 550px; 
     border-radius: 28px;
     padding: 30px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
@@ -365,14 +376,9 @@ body {
 .mbc, .modal-btn-cancel { background: var(--panel-bg); color: var(--text-main); border: 1px solid var(--border-color); }
 .mbs, .modal-btn-ok { background: var(--btn-dark); color: white; }
 
-/* TINH CHỈNH CUỐI CÙNG CHO MÀN HÌNH SIÊU NHỎ */
 @media screen and (max-width: 480px) {
-    body { padding: 8px 6px; } 
+    body { padding: 4px; }
     .app-card { padding: 24px 6px; border-radius: 18px; }
-    
-    .sync-btn, .theme-btn { padding: 8px 8px; font-size: 0.75rem; gap: 4px; }
-    .name-input { padding: 8px 5px; font-size: 0.8rem; }
-    
     .controls-panel { padding: 10px 4px; }
     .controls-panel > button:nth-of-type(1) { margin-right: 3px; } 
     .controls-panel > button:nth-of-type(2) { margin-right: 2px; }  
