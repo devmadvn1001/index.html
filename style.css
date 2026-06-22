@@ -70,6 +70,31 @@ body {
 .sync-btn:active { transform: scale(0.95); }
 .sync-icon { font-size: 1rem; }
 
+/* NÚT NHẬP TÊN CÁ NHÂN (GIỮA TRÊN CÙNG) */
+.name-input {
+    position: absolute;
+    top: max(15px, 2vh);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card-bg);
+    color: var(--text-main);
+    border: 1px dashed var(--border-color);
+    padding: 8px 10px;
+    border-radius: 20px;
+    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+    font-weight: 700;
+    width: 90px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    z-index: 100;
+    outline: none;
+    transition: all 0.2s;
+}
+.name-input:focus {
+    border: 1px solid #3b82f6;
+    width: 140px; 
+}
+
 /* NÚT THEME SÁNG/TỐI (GÓC PHẢI) */
 .theme-btn {
     position: absolute;
@@ -227,7 +252,7 @@ body {
     font-weight: 800;
     cursor: pointer;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    transition: transform 0.1s, background 0.2s;
+    transition: transform 0.1s, opacity 0.2s;
 }
 .cb:hover { opacity: 0.9; }
 .cb:active { transform: scale(0.95); }
@@ -249,6 +274,26 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* KHUNG HIỂN THỊ AI ĐANG XEM */
+.active-viewers-box {
+    background: var(--panel-bg);
+    border: 1px dashed var(--border-color);
+    padding: 10px 15px;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.active-viewers-box b {
+    color: var(--text-main);
+    font-weight: 800;
 }
 
 .color-btn {
@@ -315,7 +360,6 @@ body {
 }
 .config-del-btn:active { transform: scale(0.9); }
 
-/* MODAL TỰ ĐỘNG CHUYỂN MÀU THEO GIAO DIỆN */
 .modal-overlay, .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 9999; padding: 15px;}
 .modal-content, .modal-confirm { background: var(--card-bg); padding: 28px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); transition: background-color 0.2s ease;}
 .modal-title { font-size: 1.4rem; margin-bottom: 24px; font-weight: 800; color: var(--text-main);}
