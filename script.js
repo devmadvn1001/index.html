@@ -309,28 +309,32 @@ function updateClock() {
         }
 
         // ============================================================== //
-        // LỚP TỰ HỦY: GIẢI PHÓNG RAM VÀ ĐÓNG TAB SAU 10 GIÂY             //
+        // LỚP ĐÓNG BĂNG DEEP FREEZE: GIẢI PHÓNG TOÀN BỘ CPU & RAM        //
         // ============================================================== //
         if (!isClosedTimerStarted) {
             isClosedTimerStarted = true;
             setTimeout(function() {
-                // Cách 1: Thử ép đóng tab bằng thủ thuật JS
+                // 1. Tắt vĩnh viễn vòng lặp tính toán để giải phóng 100% CPU
+                clearInterval(mainClockInterval);
+                if (syncInterval) clearInterval(syncInterval);
+
+                // 2. Thử ép đóng tab bằng JS (Có thể bị chặn trên di động)
                 try {
                     window.open('', '_self', '');
                     window.close();
                 } catch (e) {}
 
-                // Cách 2: Nếu iOS/Android chặn, xóa trắng toàn bộ giao diện để thu hồi 99% RAM
+                // 3. Phá hủy toàn bộ mã HTML cũ để giải phóng RAM cho điện thoại
                 document.body.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; text-align:center; padding: 20px;">
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width: 100vw; text-align:center; padding: 20px; background: var(--bg-page);">
                         <h2 style="color: var(--text-main); margin-bottom: 15px;">Đã xong nhiệm vụ! ✅</h2>
                         <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.5;">
-                            Giao diện web đã tự hủy để giải phóng RAM cho điện thoại của bạn.<br><br>
-                            <b>Bạn hãy tự tắt Tab này nhé!</b>
+                            Giao diện web đã tự hủy và đóng băng để giải phóng Máy cho bạn.<br><br>
+                            <b>Bạn có thể an tâm tắt Tab này đi nhé!</b>
                         </p>
                     </div>
                 `;
-            }, 10000); // Kích hoạt sau 10 giây
+            }, 3000); // Kích hoạt ngay sau 3 giây
         }
         // ============================================================== //
 
@@ -466,4 +470,5 @@ document.getElementById('modal').addEventListener('click', function (e) {
 updateClock();
 updateDTOffset();
 
-setInterval(updateClock, 10);
+// Đã gán thành biến toàn cục để có thể "Giết" được vòng lặp này khi tự hủy
+const mainClockInterval = setInterval(updateClock, 10);
