@@ -44,7 +44,6 @@ body {
     align-items: flex-start; 
     min-height: 100vh;
     padding: 15px;
-    /* ĐÃ SỬA TẠI ĐÂY: Xóa background-color khỏi transition để màu nháy TỨC THÌ (0ms trễ) */
     transition: color 0.2s ease; 
 }
 
@@ -130,8 +129,9 @@ body {
     padding: 25px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
     text-align: center;
-    /* ĐÃ SỬA TẠI ĐÂY: Xóa transition background-color để khung giữa cũng nháy TỨC THÌ */
     margin-top: 55px; 
+    /* ĐÃ SỬA: Thêm khoảng trống ở dưới để có chỗ vuốt an toàn */
+    margin-bottom: 40px; 
     min-height: calc(100dvh - 85px); 
     display: flex;
     flex-direction: column;
