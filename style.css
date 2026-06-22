@@ -44,7 +44,8 @@ body {
     align-items: flex-start; 
     min-height: 100vh;
     padding: 15px;
-    transition: background-color 0.2s ease, color 0.2s ease; 
+    /* ĐÃ SỬA TẠI ĐÂY: Xóa background-color khỏi transition để màu nháy TỨC THÌ (0ms trễ) */
+    transition: color 0.2s ease; 
 }
 
 /* NÚT SYNC (GÓC TRÁI) */
@@ -129,13 +130,12 @@ body {
     padding: 25px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
     text-align: center;
-    transition: background-color 0.2s ease;
-    
+    /* ĐÃ SỬA TẠI ĐÂY: Xóa transition background-color để khung giữa cũng nháy TỨC THÌ */
     margin-top: 55px; 
     min-height: calc(100dvh - 85px); 
     display: flex;
     flex-direction: column;
-    justify-content: center; /* KÉO CÁC NỘI DUNG VÀO GIỮA KHUNG */
+    justify-content: center; 
 }
 
 .user-profile {
@@ -170,14 +170,13 @@ body {
 .badge-gray { background: #e2e8f0; color: #334155; }
 .badge-blue { background: #e0f2fe; color: #0369a1; }
 
-/* KHUNG CHỨA SỐ ĐẾM (Đã gỡ bỏ flex: 1 để tự nhiên) */
 .countdown-wrapper { 
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin: 25px 0; /* Trả lại khoảng cách vừa vặn */
+    margin: 25px 0; 
 }
 
 .cd {
