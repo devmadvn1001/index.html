@@ -38,8 +38,7 @@ html, body {
 body {
     background: var(--bg-page);
     color: var(--text-main);
-    /* [ĐÃ ĐỔI FONT Ở ĐÂY] - Mang lại giao diện gọn gàng, giống hệt App điện thoại */
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: flex-start; 
@@ -182,11 +181,11 @@ body {
 }
 
 .cd {
-    font-family: 'Inter', "Segoe UI", Arial, sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: clamp(5.8rem, 21vw, 10.4rem); 
-    font-weight: 800; /* Chuẩn độ đậm 800 (Extra Bold) */
-    color: var(--text-main); /* Dùng biến này thay vì mã HEX cứng để không lỗi Dark mode */
-    line-height: normal; 
+    font-weight: 700; 
+    color: var(--text-main);
+    line-height: 1; 
     letter-spacing: 1px; 
     white-space: nowrap;
     font-variant-numeric: tabular-nums; 
