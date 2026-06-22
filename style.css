@@ -182,12 +182,11 @@ body {
 }
 
 .cd {
-    /* [ĐÃ ĐỔI FONT Ở ĐÂY] - Kế thừa font của Body thay vì dùng Helvetica thô cứng */
-    font-family: inherit;
+    font-family: 'Inter', "Segoe UI", Arial, sans-serif;
     font-size: clamp(5.8rem, 21vw, 10.4rem); 
-    font-weight: 700; 
-    color: var(--text-main);
-    line-height: 1; 
+    font-weight: 800; /* Chuẩn độ đậm 800 (Extra Bold) */
+    color: var(--text-main); /* Dùng biến này thay vì mã HEX cứng để không lỗi Dark mode */
+    line-height: normal; 
     letter-spacing: 1px; 
     white-space: nowrap;
     font-variant-numeric: tabular-nums; 
