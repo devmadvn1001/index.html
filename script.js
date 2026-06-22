@@ -54,7 +54,7 @@ if (btnTheme) {
 }
 
 // ============================================================== //
-// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) ĐUA TỐC ĐỘ                //
+// CƠ CHẾ ĐỒNG BỘ THỜI GIAN (SYNC TIME) ĐUA TỐC ĐỘ SÀN BINANCE    //
 // ============================================================== //
 let isSyncOn = false;
 let networkTimeOffset = 0; 
@@ -285,8 +285,44 @@ function formatTimeMMSSF(totalSeconds) {
     return String(seconds) + '.' + f;
 }
 
-// Biến kiểm soát việc kích hoạt tính năng đóng tab
-let isClosedTimerStarted = false;
+// ============================================================== //
+// THUẬT TOÁN HỦY DIỆT TAB CHUYÊN SÂU CHỐNG ĐÓNG BĂNG CỦA HĐH IOS //
+// ============================================================== //
+let zeroHitTime = 0;
+let isDestroyed = false;
+
+function destroyApp() {
+    if (isDestroyed) return;
+    isDestroyed = true;
+    
+    // 1. Tắt vĩnh viễn vòng lặp tính toán để giải phóng CPU
+    clearInterval(mainClockInterval);
+    if (syncInterval) clearInterval(syncInterval);
+
+    // 2. Ép đóng tab cho các trình duyệt In-App
+    try {
+        window.open('', '_self', '');
+        window.close();
+    } catch (e) {}
+
+    // 3. Phá hủy toàn bộ mã HTML cũ giải phóng RAM
+    document.body.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width: 100vw; text-align:center; padding: 20px; background: var(--bg-page);">
+            <h2 style="color: var(--text-main); margin-bottom: 15px;">Đã xong nhiệm vụ! ✅</h2>
+            <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.5;">
+                Giao diện web đã tự hủy và đóng băng để giải phóng Máy cho bạn.<br><br>
+                <b>Bạn có thể an tâm tắt Tab này đi nhé!</b>
+            </p>
+        </div>
+    `;
+}
+
+// Cảm biến: Nếu user vuốt ẩn tab (Background) MÀ đồng hồ ĐÃ CHẠM 0 TRƯỚC ĐÓ -> Hủy diệt ngay lập tức!
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden && zeroHitTime > 0) {
+        destroyApp();
+    }
+});
 
 // ===== TRỤC CHÍNH: CẬP NHẬT ĐỒNG HỒ VÀ KIỂM TRA MÀU =====
 function updateClock() {
@@ -308,36 +344,15 @@ function updateClock() {
             applyBackgroundColor('default');
         }
 
-        // ============================================================== //
-        // LỚP ĐÓNG BĂNG DEEP FREEZE: GIẢI PHÓNG TOÀN BỘ CPU & RAM        //
-        // ============================================================== //
-        if (!isClosedTimerStarted) {
-            isClosedTimerStarted = true;
-            setTimeout(function() {
-                // 1. Tắt vĩnh viễn vòng lặp tính toán để giải phóng 100% CPU
-                clearInterval(mainClockInterval);
-                if (syncInterval) clearInterval(syncInterval);
-
-                // 2. Thử ép đóng tab bằng JS (Có thể bị chặn trên di động)
-                try {
-                    window.open('', '_self', '');
-                    window.close();
-                } catch (e) {}
-
-                // 3. Phá hủy toàn bộ mã HTML cũ để giải phóng RAM cho điện thoại
-                document.body.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width: 100vw; text-align:center; padding: 20px; background: var(--bg-page);">
-                        <h2 style="color: var(--text-main); margin-bottom: 15px;">Đã xong nhiệm vụ! ✅</h2>
-                        <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.5;">
-                            Giao diện web đã tự hủy và đóng băng để giải phóng Máy cho bạn.<br><br>
-                            <b>Bạn có thể an tâm tắt Tab này đi nhé!</b>
-                        </p>
-                    </div>
-                `;
-            }, 3000); // Kích hoạt ngay sau 3 giây
+        // Lưu mốc thời gian thực tế lúc chạm số 0
+        if (zeroHitTime === 0) {
+            zeroHitTime = Date.now();
         }
-        // ============================================================== //
 
+        // Đếm dựa trên thời gian thật trôi qua (bất chấp iOS có đóng băng hay không)
+        if (Date.now() - zeroHitTime >= 3000) {
+            destroyApp();
+        }
         return;
     }
 
@@ -470,5 +485,4 @@ document.getElementById('modal').addEventListener('click', function (e) {
 updateClock();
 updateDTOffset();
 
-// Đã gán thành biến toàn cục để có thể "Giết" được vòng lặp này khi tự hủy
 const mainClockInterval = setInterval(updateClock, 10);
