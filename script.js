@@ -137,12 +137,10 @@ async function pingTimeServer() {
     try {
         const start = Date.now();
         
-        // Bắn 1 gói tin rỗng đến máy chủ TikTok để lấy độ trễ mạng thực tế của 4G/Wifi
         await fetch('https://www.tiktok.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
         
         const pingMs = Date.now() - start; 
         
-        // Đồng hồ sẽ chạy nhanh hơn 1 nửa số Ping (để lệnh bấm bay vừa vặn tới máy chủ TikTok khi về 0)
         networkTimeOffset = Math.round(pingMs / 2);
         
         if (syncStatus) {
@@ -151,7 +149,6 @@ async function pingTimeServer() {
         }
 
         if (pingDisplay) {
-            // TÔ MÀU THEO CHUẨN GAME: Xanh (Ngon) -> Vàng (Hơi lag) -> Đỏ (Quá lag)
             let pingColor = '#22c55e'; 
             if (pingMs >= 150 && pingMs < 300) pingColor = '#f59e0b';
             if (pingMs >= 300) pingColor = '#ef4444'; 
@@ -232,7 +229,6 @@ function updateConfigDisplayUI() {
     }
 }
 
-// [ĐÃ FIX LỖI CHỚP ĐAU MẮT Ở ĐÂY]
 function applyBackgroundColor(state, colorHex = '') {
     if (state === 'default') {
         document.body.style.backgroundColor = ''; 
@@ -429,10 +425,17 @@ function updateClock() {
     }
 
     const diffSeconds = diffMs / 1000;
-    if (countdownEl) countdownEl.textContent = formatTimeMMSSF(diffSeconds);
+    
+    // Đã thay đổi: Lấy TRỰC TIẾP con số hiển thị trên màn hình để làm mốc nháy màu
+    const displayedText = formatTimeMMSSF(diffSeconds);
+    if (countdownEl) countdownEl.textContent = displayedText;
 
     if (colorConfig.active) {
-        if (diffSeconds <= colorConfig.start && diffSeconds >= colorConfig.end) {
+        // Chuyển đổi con số trên màn hình thành dạng số thập phân (VD: "0.7" thành 0.7)
+        const currentDisplayNum = parseFloat(displayedText);
+
+        // So sánh trực tiếp với con số màn hình thay vì thời gian thực
+        if (currentDisplayNum <= colorConfig.start && currentDisplayNum >= colorConfig.end) {
             if (currentBgState !== 'flash') {
                 currentBgState = 'flash';
                 applyBackgroundColor('flash', colorConfig.color);
