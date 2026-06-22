@@ -59,7 +59,7 @@ if (!mySessionId) {
 const roomId = endTime ? `room_${endTime}` : 'room_default';
 const myViewerRef = ref(db, `rooms/${roomId}/viewers/${mySessionId}`);
 
-// 3. TUYỆT CHIÊU: Tự động xóa tên khi người dùng tắt trình duyệt / mất mạng
+// 3. TUYỆT CHIÊU: Tự động xóa tên khi người dùng mất mạng thực sự
 onDisconnect(myViewerRef).remove();
 
 // 4. Hàm đẩy tên lên Máy chủ
@@ -368,7 +368,7 @@ function formatTimeMMSSF(totalSeconds) {
 }
 
 // ============================================================== //
-// THUẬT TOÁN HỦY DIỆT ĐA TẦNG (CHỐNG NGỦ ĐÔNG CỦA IOS)           //
+// THUẬT TOÁN HỦY DIỆT VÀ QUẢN LÝ PHÒNG XEM (VISIBILITY SENSOR)   //
 // ============================================================== //
 let zeroHitTime = 0;
 let isDestroyed = false;
@@ -395,12 +395,23 @@ function destroyApp() {
     }, 1000);
 }
 
+// LẮNG NGHE SỰ KIỆN VUỐT ẨN TAB HOẶC MỞ LẠI TAB
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
+        // [MỚI] TẦNG 0: NGƯỜI DÙNG VUỐT ẨN TAB -> LẬP TỨC RÚT TÊN KHỎI FIREBASE
+        remove(myViewerRef);
+
+        // Tầng 1: Hủy diệt nếu quá giờ
         if (endTime && getCurrentTimeMs() >= (endTime * 1000 + timeOffset * 1000)) {
             destroyApp();
         }
     } else {
+        // [MỚI] TẦNG 0: NGƯỜI DÙNG MỞ LẠI TAB -> ĐẨY TÊN LÊN FIREBASE LẠI NẾU CÓ TÊN
+        if (myNameInput && myNameInput.value.trim() !== '') {
+            pushNameToFirebase(myNameInput.value);
+        }
+
+        // Tầng 2: Hủy diệt nếu đã chạm 0 quá 3 giây
         if (zeroHitTime > 0 && Date.now() - zeroHitTime >= 3000) {
             destroyApp();
         }
