@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Canh thời gian T1</title>
-    <link rel="stylesheet" href="style.css?v=32">
+    <link rel="stylesheet" href="style.css?v=50">
 </head>
 <body>
     <button type="button" class="sync-btn" id="btn-sync">
@@ -48,8 +48,13 @@
             <div class="info-row">
                 <div class="ping-info" id="pingDisplay">Ping mạng: --</div>
                 <div class="time-info" id="endTimeDisplay">--:--:--</div>
+                
+                <div class="next-box-wrapper" id="nextBoxWrapper" style="display: none;">
+                    <button type="button" class="btn-next-box" id="nextBoxBtn">
+                        <span id="nextBoxCount">0</span> ➔
+                    </button>
+                </div>
             </div>
-
         </div>
 
         <div class="controls-panel">
@@ -73,7 +78,7 @@
             <span style="font-size: 1.1rem;">🔥</span> <span id="viewers-list">Đang kết nối phòng xem...</span>
         </div>
 
-        <button type="button" class="color-btn" id="btn-open">🎨 Canh theo màu sắc</button>
+        <button type="button" class="color-btn" id="btn-open">🎨 Cài đặt Web UI</button>
 
         <div class="active-config" id="activeConfigDisplay" style="display: none;">
             <div class="config-color-dot" id="configColorDot"></div>
@@ -84,19 +89,25 @@
 
     <div class="modal" id="modal">
         <div class="modal-content">
-            <div class="modal-title">Cấu hình nháy màu</div>
+            <div class="modal-title">Cấu hình Web UI</div>
             <div class="form-group">
-                <label for="start_seconds">Thời gian bắt đầu nháy (s):</label>
+                <label for="start_seconds">Thời gian bắt đầu nháy nền (s):</label>
                 <input type="number" id="start_seconds" step="0.1" min="0">
             </div>
             <div class="form-group">
-                <label for="end_seconds">Thời gian kết thúc nháy (s):</label>
+                <label for="end_seconds">Thời gian kết thúc nháy nền (s):</label>
                 <input type="number" id="end_seconds" step="0.1" min="0">
             </div>
             <div class="form-group">
-                <label for="hex_background_color">Chọn màu:</label>
+                <label for="hex_background_color">Chọn màu nền:</label>
                 <input type="color" id="hex_background_color" value="#ff0000" class="color-input">
             </div>
+            
+            <div class="form-group" style="margin-top: 20px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
+                <label for="ws_url_input" style="color: #3b82f6;">Link Cloudflare Tunnel (Bắt rương chuỗi):</label>
+                <input type="text" id="ws_url_input" placeholder="VD: wss://tool-cua-toi.trycloudflare.com" style="width: 100%; padding: 12px 16px; border-radius: 12px; background: var(--bg-page); border: 2px solid var(--border-color); font-size: 0.95rem; color: var(--text-main); outline: none;">
+            </div>
+
             <div class="modal-actions">
                 <button type="button" class="modal-btn mbc" id="btn-cancel">Hủy</button>
                 <button type="button" class="modal-btn mbs" id="btn-submit">Lưu cấu hình</button>
@@ -104,6 +115,6 @@
         </div>
     </div>
 
-    <script type="module" src="script.js?v=41"></script>
+    <script type="module" src="script.js?v=50"></script>
 </body>
 </html>
