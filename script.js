@@ -695,35 +695,3 @@ const mainClockInterval = setInterval(updateClock, 10);
 
 
 
-
-// ============================================================== //
-// SCRIPT TEST RƯƠNG CHUỖI (XÓA ĐI SAU KHI TEST XONG NHÉ)
-// ============================================================== //
-setTimeout(() => {
-    if (liveRoomId) {
-        // Lấy thời gian hiện tại cộng thêm 30s để làm rương giả
-        const fakeEndTime2 = Math.max(endTime, Math.floor(Date.now() / 1000)) + 30;
-        const fakeBox2 = {
-            room_id: liveRoomId, 
-            end_time: fakeEndTime2, 
-            m: paramM,
-            r_params: "999|25|🎁 TEST 2|999|" + fakeEndTime2,
-            tiktok_link: tiktokLink
-        };
-        
-        const fakeEndTime3 = fakeEndTime2 + 30;
-        const fakeBox3 = {
-            room_id: liveRoomId, 
-            end_time: fakeEndTime3, 
-            m: paramM,
-            r_params: "888|25|🎁 TEST 3|888|" + fakeEndTime3,
-            tiktok_link: tiktokLink
-        };
-
-        // Bơm thẳng vào hàng đợi không cần thông qua mạng
-        nextBoxesQueue.push(fakeBox2);
-        nextBoxesQueue.push(fakeBox3);
-        nextBoxesQueue.sort((a, b) => a.end_time - b.end_time);
-        updateNextBoxUI();
-    }
-}, 1000); // 1 giây sau khi mở web sẽ hiện nút Next BoxI
