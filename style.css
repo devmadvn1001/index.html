@@ -413,32 +413,46 @@ body {
     .d-t { font-size: 1.15rem; }
 }
 
-/* ================= NÚT NEXT BOX WEBSOCKET ================= */
+/* ================= NÚT NEXT BOX WEBSOCKET (ĐÃ NÂNG CẤP) ================= */
 .next-box-wrapper {
     position: absolute;
     right: 0;
     bottom: -5px;
+    display: flex;
+    gap: 12px; /* Khoảng cách giữa nút Prev và Next */
 }
-.btn-next-box {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+
+.btn-next-box, .btn-prev-box {
     color: white;
     border: none;
-    border-radius: 12px;
-    padding: 6px 12px;
-    font-size: 0.95rem;
+    border-radius: 14px;
+    padding: 10px 20px; /* NÚT ĐÃ ĐƯỢC TĂNG TO THÊM 30% VÀ DÀI HƠN */
+    font-size: 1.15rem; /* CHỮ TO HƠN */
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
     display: flex;
     align-items: center;
-    gap: 6px;
-    animation: pulseNext 1.5s infinite;
+    gap: 8px;
     transition: transform 0.1s;
 }
-.btn-next-box:active { transform: scale(0.9); }
+
+.btn-next-box {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+    animation: pulseNext 1.5s infinite;
+}
+
+.btn-prev-box {
+    background: linear-gradient(135deg, #64748b, #475569); /* MÀU XÁM TRO CHO NÚT BACK */
+    box-shadow: 0 4px 10px rgba(100, 116, 139, 0.4);
+}
+
+.btn-next-box:active, .btn-prev-box:active { 
+    transform: scale(0.9); 
+}
 
 @keyframes pulseNext {
     0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
-    70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+    70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
     100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
 }
