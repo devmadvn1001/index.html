@@ -119,7 +119,7 @@ if (myNameInput) {
 setupRoomViewers(endTime);
 
 // ============================================================== //
-// HỆ THỐNG WEBSOCKET & ĐIỀU HƯỚNG RƯƠNG (GIỮ 5 PHÚT QUÁ KHỨ)     //
+// HỆ THỐNG WEBSOCKET & ĐIỀU HƯỚNG RƯƠNG                           //
 // ============================================================== //
 let allBoxes = []; 
 let liveRoomId = '';
@@ -153,7 +153,6 @@ function connectWebSocket() {
             if (liveRoomId && data.room_id === liveRoomId) {
                 const nowSec = Math.floor(Date.now() / 1000);
                 
-                // QUÉT RỘNG: Đọc rương hiện tại và cả quá khứ trong vòng 5 phút (300s)
                 if (data.end_time + 300 > nowSec) {
                     const exists = allBoxes.some(b => b.end_time === data.end_time);
                     if (!exists) {
@@ -173,7 +172,7 @@ if (liveRoomId) {
 }
 
 function updateNavigationUI() {
-    const wrapper = document.getElementById('nextBoxWrapper'); // Dùng cho T1
+    const wrapper = document.getElementById('nextBoxWrapper');
     const btnPrev = document.getElementById('prevBoxBtn');
     const btnNext = document.getElementById('nextBoxBtn');
     const prevCount = document.getElementById('prevBoxCount');
@@ -276,20 +275,18 @@ if (btnPrevEl) {
 // ============================================================== //
 // UI & LOGIC ĐỒNG BỘ THỜI GIAN (PING CHUẨN MÁY CHỦ HTTP)         //
 // ============================================================== //
-let isSyncOn = isT3 ? true : false; // T3 tự động Bật Sync
+let isSyncOn = isT3 ? true : false;
 let networkTimeOffset = 0; 
 let syncInterval = null;
 
-const btnSync = document.getElementById('btn-sync'); // Chỉ có ở T1
+const btnSync = document.getElementById('btn-sync'); 
 const syncStatus = document.getElementById('sync-status');
 const pingDisplay = document.getElementById('pingDisplay'); 
 
-// Hàm Ping Thần Thánh - Đọc Header để bắt mạch giờ máy chủ
 async function pingTimeServer() {
     if (!isSyncOn) return;
     try {
         const start = Date.now();
-        // Dùng luôn file hiện tại để vượt rào CORS và lấy HTTP Date Header chuẩn nhất
         const response = await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
         const end = Date.now();
         const pingMs = end - start; 
@@ -302,15 +299,14 @@ async function pingTimeServer() {
             networkTimeOffset = Math.round(pingMs / 2);
         }
 
-        // Tách nhánh hiển thị riêng biệt cho T1 và T3
         if (isT3 && pingDisplay) {
             let statusText = '✅ internet tốt';
             let pingS = (pingMs / 1000).toFixed(3);
             if (pingMs > 150) statusText = '⚠️ mạng khá';
             if (pingMs > 300) statusText = '❌ mạng kém';
-            pingDisplay.innerHTML = `Ping ${pingS}s (syncing - ${statusText})`;
+            // Tối giản dòng Ping theo mẫu T3
+            pingDisplay.innerHTML = `Ping ${pingS}s (syncing)`;
         } else {
-            // T1
             if (syncStatus) { syncStatus.textContent = 'ON'; syncStatus.style.color = '#22c55e'; }
             if (pingDisplay) {
                 let pingColor = '#22c55e'; 
@@ -347,7 +343,6 @@ function applySyncState(state) {
     }
 }
 
-// Gọi Sync mặc định cho T3
 if (isT3) { applySyncState(true); }
 
 if (btnSync) {
@@ -377,7 +372,6 @@ function updateConfigDisplayUI() {
 }
 
 function applyBackgroundColor(state, colorHex = '') {
-    // T3 không dùng nháy màu, vô hiệu hóa
     if (isT3) return;
 
     if (state === 'default') {
@@ -446,7 +440,7 @@ function applyBackgroundColor(state, colorHex = '') {
 
 const countdownEl = document.getElementById('countdown');
 const endTimeDisplayEl = document.getElementById('endTimeDisplay');
-const serverTimeDisplayEl = document.getElementById('serverTimeDisplay'); // Riêng T3
+const serverTimeDisplayEl = document.getElementById('serverTimeDisplay');
 const viewCountEl = document.getElementById('viewCount');
 const peopleCountEl = document.getElementById('peopleCount');
 const dTEl = document.getElementById('d-t');
@@ -508,7 +502,8 @@ function updateClock() {
     updateNavigationUI(); 
 
     if (!endTime) {
-        if (countdownEl) countdownEl.textContent = '00.0';
+        if (countdownEl) countdownEl.textContent = '0.0s';
+        if (isT3 && serverTimeDisplayEl) serverTimeDisplayEl.textContent = '--:--:--';
         return;
     }
 
@@ -517,18 +512,25 @@ function updateClock() {
     const adjustedEndMs = endTimeMs + timeOffset * 1000;
     const diffMs = adjustedEndMs - now;
 
-    // Cập nhật giờ Server trên T3
-    if (isT3 && serverTimeDisplayEl) {
-        serverTimeDisplayEl.textContent = formatEndTimeHHMMSS(now / 1000);
-    }
-
+    // KHI HẾT GIỜ (Đếm ngược về <= 0)
     if (diffMs <= 0) {
-        if (countdownEl) countdownEl.textContent = '00.0';
-        if (currentBgState !== 'default') {
+        if (countdownEl) countdownEl.textContent = '0.0s'; // Hiện đúng 0.0s
+        
+        // ĐÓNG BĂNG thời gian Server ở đúng thời điểm rương nổ
+        if (isT3 && serverTimeDisplayEl) {
+            serverTimeDisplayEl.textContent = formatEndTimeHHMMSS(adjustedEndMs / 1000);
+        }
+
+        if (!isT3 && currentBgState !== 'default') {
             currentBgState = 'default';
             applyBackgroundColor('default');
         }
-        return;
+        return; // Dừng chạy để số không đổi nữa
+    }
+
+    // NẾU CÒN GIỜ (Đang chạy đếm ngược)
+    if (isT3 && serverTimeDisplayEl) {
+        serverTimeDisplayEl.textContent = formatEndTimeHHMMSS(now / 1000);
     }
 
     const diffSeconds = diffMs / 1000;
