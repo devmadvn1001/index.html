@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Canh thời gian T1</title>
-    <link rel="stylesheet" href="style.css?v=52">
+    <link rel="stylesheet" href="style.css?v=60">
+    <!-- TRÍ NHỚ ĐIỀU HƯỚNG: Tự động chuyển sang T3 nếu đã lưu -->
+    <script>
+        if (localStorage.getItem('active_ui') === 'T3') {
+            window.location.replace('t3.html' + window.location.search);
+        }
+    </script>
 </head>
 <body>
     <button type="button" class="sync-btn" id="btn-sync">
@@ -13,8 +19,9 @@
 
     <input type="text" class="name-input" id="my-name-input" placeholder="Tên của bạn..." maxlength="15">
 
-    <button type="button" class="theme-btn" id="btn-theme">
-        <span class="theme-icon" id="theme-icon">🌙</span> <b id="theme-text">Dark</b>
+    <!-- NÚT HOÁN ĐỔI T1 -> T3 -->
+    <button type="button" class="theme-btn" id="btn-switch-ui">
+        <span class="theme-icon">🔄</span> <b id="theme-text">Sang T3</b>
     </button>
 
     <div id="confirmModal" class="modal-overlay">
@@ -57,7 +64,7 @@
                         <span id="nextBoxCount">0</span> <span style="font-size: 1.3rem;">➔</span>
                     </button>
                 </div>
-                </div>
+            </div>
         </div>
 
         <div class="controls-panel">
@@ -93,16 +100,12 @@
     <div class="modal" id="modal">
         <div class="modal-content">
             <div class="modal-title">Cấu hình Web UI</div>
-            <div class="form-group">
+            <div class="form-group" id="color-settings-group">
                 <label for="start_seconds">Thời gian bắt đầu nháy nền (s):</label>
                 <input type="number" id="start_seconds" step="0.1" min="0">
-            </div>
-            <div class="form-group">
-                <label for="end_seconds">Thời gian kết thúc nháy nền (s):</label>
+                <label for="end_seconds" style="margin-top: 10px;">Thời gian kết thúc nháy nền (s):</label>
                 <input type="number" id="end_seconds" step="0.1" min="0">
-            </div>
-            <div class="form-group">
-                <label for="hex_background_color">Chọn màu nền:</label>
+                <label for="hex_background_color" style="margin-top: 10px;">Chọn màu nền:</label>
                 <input type="color" id="hex_background_color" value="#ff0000" class="color-input">
             </div>
             
@@ -118,6 +121,6 @@
         </div>
     </div>
 
-    <script type="module" src="script.js?v=52"></script>
+    <script type="module" src="script.js?v=60"></script>
 </body>
 </html>
