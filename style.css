@@ -44,11 +44,9 @@ body {
     align-items: flex-start; 
     min-height: 100vh;
     padding: 15px;
-    /* ĐÃ SỬA TẠI ĐÂY: Xóa background-color khỏi transition để màu nháy TỨC THÌ (0ms trễ) */
     transition: color 0.2s ease; 
 }
 
-/* NÚT SYNC (GÓC TRÁI) */
 .sync-btn {
     position: absolute;
     top: max(15px, 2vh);
@@ -71,7 +69,6 @@ body {
 .sync-btn:active { transform: scale(0.95); }
 .sync-icon { font-size: 1rem; }
 
-/* NÚT NHẬP TÊN CÁ NHÂN (GIỮA TRÊN CÙNG) */
 .name-input {
     position: absolute;
     top: max(15px, 2vh);
@@ -96,7 +93,6 @@ body {
     width: 140px; 
 }
 
-/* NÚT THEME SÁNG/TỐI (GÓC PHẢI) */
 .theme-btn {
     position: absolute;
     top: max(15px, 2vh);
@@ -119,9 +115,6 @@ body {
 .theme-btn:active { transform: scale(0.95); }
 .theme-icon { font-size: 1rem; }
 
-/* ====================================================== */
-/* KHUNG GIAO DIỆN CHÍNH (Gom nội dung vào giữa màn hình) */
-/* ====================================================== */
 .app-card {
     background: var(--card-bg);
     width: 100%;
@@ -130,7 +123,6 @@ body {
     padding: 25px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0,0,0,0.05);
     text-align: center;
-    /* ĐÃ SỬA TẠI ĐÂY: Xóa transition background-color để khung giữa cũng nháy TỨC THÌ */
     margin-top: 55px; 
     min-height: calc(100dvh - 85px); 
     display: flex;
@@ -419,4 +411,34 @@ body {
     .db { padding: 12px 0; font-size: 0.95rem; }
     .offset-display { min-width: 45px; margin: 0 1px; }
     .d-t { font-size: 1.15rem; }
+}
+
+/* ================= NÚT NEXT BOX WEBSOCKET ================= */
+.next-box-wrapper {
+    position: absolute;
+    right: 0;
+    bottom: -5px;
+}
+.btn-next-box {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: pulseNext 1.5s infinite;
+    transition: transform 0.1s;
+}
+.btn-next-box:active { transform: scale(0.9); }
+
+@keyframes pulseNext {
+    0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
+    70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
 }
