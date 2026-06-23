@@ -452,7 +452,7 @@ body {
     width: 100%;
     max-width: 500px;
     display: flex;
-    justify-content: flex-end; /* Đẩy nút qua góc phải */
+    justify-content: flex-end; 
     align-items: center;
     margin-bottom: 20px;
 }
@@ -480,7 +480,7 @@ body {
     align-items: center;
 }
 
-.t3-header { text-align: center; margin-bottom: 30px; }
+.t3-header { text-align: center; margin-bottom: 20px; }
 .t3-username { font-size: 1.4rem; font-weight: 800; color: #1e293b; margin-bottom: 8px; letter-spacing: -0.5px; }
 .t3-stats { font-size: 1.1rem; font-weight: 600; color: #475569; }
 
@@ -489,7 +489,7 @@ body {
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
 .t3-cd {
@@ -502,45 +502,44 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
-.t3-time-info { text-align: center; margin-bottom: 30px; }
+.t3-time-info { text-align: center; margin-bottom: 25px; min-height: 50px; }
 
 .t3-time-range { 
     font-size: 1.15rem; font-weight: 500; color: #64748b; margin-bottom: 5px; 
-    font-variant-numeric: tabular-nums; /* FIX GIẬT THỜI GIAN */
+    font-variant-numeric: tabular-nums;
 }
-/* Đóng khung cố định cho 2 cụm giờ của T3 */
+
 #serverTimeDisplay, #endTimeDisplay {
     display: inline-block;
     min-width: 70px;
     text-align: center;
 }
 
-.t3-ping { font-size: 1rem; font-weight: 600; color: #64748b; }
+.t3-ping { font-size: 1.05rem; font-weight: 600; color: #64748b; }
 
-/* FIX T3 OFFSET BUTTONS AUTO-RESIZE & CÂN BẰNG KHOẢNG CÁCH */
+/* FIX T3 OFFSET BUTTONS AUTO-RESIZE & CÂN BẰNG KHOẢNG CÁCH Y HỆT VIDEO */
 .t3-controls-row {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Đẩy dàn đều ra 2 bên */
-    gap: 8px; 
+    justify-content: space-between; 
+    gap: 12px; 
     width: 100%;
     margin-bottom: 30px;
-    padding: 0 5px;
+    padding: 0;
 }
 
 .t3-btn-red, .t3-btn-green {
-    border: none; border-radius: 12px; padding: 12px 0; font-size: 1rem; font-weight: 700; color: white; 
-    flex: 1; /* TỰ ĐỘNG GIÃN RỘNG NÚT */
-    max-width: 75px; 
-    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: none; border-radius: 8px; padding: 12px 0; font-size: 1.1rem; font-weight: 600; color: white; 
+    flex: 1; 
+    cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-.t3-btn-red { background: #ef4444; }
-.t3-btn-green { background: #22c55e; }
-.t3-btn-red:active, .t3-btn-green:active { transform: scale(0.9); }
+.t3-btn-red { background: #e11d48; } /* Màu đỏ dịu hơn chút */
+.t3-btn-green { background: #16a34a; } /* Màu xanh dịu hơn chút */
+.t3-btn-red:active, .t3-btn-green:active { transform: scale(0.95); }
 
 .t3-offset-value { 
-    font-size: 1.3rem; font-weight: 800; color: #1e293b; 
-    width: 70px; /* Khóa chết chiều rộng Offset không cho xê dịch */
+    font-size: 1.4rem; font-weight: 800; color: #1e293b; 
+    width: 80px; 
     flex-shrink: 0;
     text-align: center; 
     font-variant-numeric: tabular-nums;
@@ -587,12 +586,12 @@ body {
 }
 
 .t3-btn-copy, .t3-btn-plus {
-    background: #2c3545; /* Xanh nhám tối chuẩn màu hình mẫu */
+    background: #2c3545; 
     color: #ffffff;
     border: none;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 10px 20px rgba(44, 53, 69, 0.3); /* Bóng đổ mềm nổi lên nền web */
+    box-shadow: 0 10px 20px rgba(44, 53, 69, 0.3); 
     transition: transform 0.1s, box-shadow 0.2s;
 }
 
@@ -602,7 +601,7 @@ body {
 }
 
 .t3-btn-copy {
-    border-radius: 30px; /* Bo góc viên thuốc */
+    border-radius: 30px; 
     padding: 14px 45px;
     font-size: 1.15rem;
     letter-spacing: 0.5px;
@@ -610,12 +609,12 @@ body {
 }
 
 .t3-btn-plus {
-    border-radius: 50%; /* Hình tròn hoàn hảo */
+    border-radius: 50%; 
     width: 55px;
     height: 55px;
     font-size: 1.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-bottom: 3px; /* Cân bằng thị giác cho dấu + */
+    padding-bottom: 3px; 
 }
