@@ -207,6 +207,14 @@ body {
     font-size: clamp(0.9rem, 3vw, 1.1rem);
     color: var(--text-muted);
     font-weight: 600;
+    font-variant-numeric: tabular-nums; /* FIX GIẬT THỜI GIAN */
+}
+
+/* Đóng khung cố định cho chữ trên T1 khỏi văng */
+#endTimeDisplay {
+    display: inline-block;
+    min-width: 65px;
+    text-align: center;
 }
 
 .controls-panel {
@@ -261,6 +269,7 @@ body {
     font-weight: 800;
     color: var(--text-main);
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 .action-buttons {
@@ -494,26 +503,48 @@ body {
 }
 
 .t3-time-info { text-align: center; margin-bottom: 30px; }
-.t3-time-range { font-size: 1.15rem; font-weight: 500; color: #64748b; margin-bottom: 5px; }
+
+.t3-time-range { 
+    font-size: 1.15rem; font-weight: 500; color: #64748b; margin-bottom: 5px; 
+    font-variant-numeric: tabular-nums; /* FIX GIẬT THỜI GIAN */
+}
+/* Đóng khung cố định cho 2 cụm giờ của T3 */
+#serverTimeDisplay, #endTimeDisplay {
+    display: inline-block;
+    min-width: 70px;
+    text-align: center;
+}
+
 .t3-ping { font-size: 1rem; font-weight: 600; color: #64748b; }
 
+/* FIX T3 OFFSET BUTTONS AUTO-RESIZE & CÂN BẰNG KHOẢNG CÁCH */
 .t3-controls-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between; /* Đẩy dàn đều ra 2 bên */
+    gap: 8px; 
     width: 100%;
     margin-bottom: 30px;
+    padding: 0 5px;
 }
 
 .t3-btn-red, .t3-btn-green {
-    border: none; border-radius: 12px; padding: 12px 0; font-size: 1rem; font-weight: 700; color: white; width: 65px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: none; border-radius: 12px; padding: 12px 0; font-size: 1rem; font-weight: 700; color: white; 
+    flex: 1; /* TỰ ĐỘNG GIÃN RỘNG NÚT */
+    max-width: 75px; 
+    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 .t3-btn-red { background: #ef4444; }
 .t3-btn-green { background: #22c55e; }
 .t3-btn-red:active, .t3-btn-green:active { transform: scale(0.9); }
 
-.t3-offset-value { font-size: 1.3rem; font-weight: 800; color: #1e293b; width: 80px; text-align: center; }
+.t3-offset-value { 
+    font-size: 1.3rem; font-weight: 800; color: #1e293b; 
+    width: 70px; /* Khóa chết chiều rộng Offset không cho xê dịch */
+    flex-shrink: 0;
+    text-align: center; 
+    font-variant-numeric: tabular-nums;
+}
 
 .t3-firebase-box {
     width: 100%;
@@ -541,7 +572,7 @@ body {
     justify-content: center;
     align-items: center;
     gap: 15px;
-    margin-top: 25px; /* Cách ra khỏi box Firebase */
+    margin-top: 25px; 
 }
 
 /* ========================================================= */
