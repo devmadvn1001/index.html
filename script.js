@@ -111,7 +111,8 @@ if (tiktokLink) {
     if (match) liveRoomId = match[1];
 }
 
-const customWsUrl = localStorage.getItem('ws_url');
+const paramWs = urlParams.get('ws');
+const customWsUrl = paramWs || localStorage.getItem('ws_url');
 let ws = null;
 
 function connectWebSocket() {
@@ -699,27 +700,30 @@ const mainClockInterval = setInterval(updateClock, 10);
 // SCRIPT TEST RƯƠNG CHUỖI (XÓA ĐI SAU KHI TEST XONG NHÉ)
 // ============================================================== //
 setTimeout(() => {
-    if (liveRoomId && ws) {
-        // 1. Tạo rương giả số 2 (Cách rương hiện tại 30 giây)
+    if (liveRoomId) {
+        // Lấy thời gian hiện tại cộng thêm 30s để làm rương giả
+        const fakeEndTime2 = Math.max(endTime, Math.floor(Date.now() / 1000)) + 30;
         const fakeBox2 = {
             room_id: liveRoomId, 
-            end_time: endTime + 30, 
+            end_time: fakeEndTime2, 
             m: paramM,
-            r_params: "999|25|🎁 TEST 2|999|" + (endTime + 30),
+            r_params: "999|25|🎁 TEST 2|999|" + fakeEndTime2,
             tiktok_link: tiktokLink
         };
-        ws.onmessage({ data: JSON.stringify(fakeBox2) });
+        
+        const fakeEndTime3 = fakeEndTime2 + 30;
+        const fakeBox3 = {
+            room_id: liveRoomId, 
+            end_time: fakeEndTime3, 
+            m: paramM,
+            r_params: "888|25|🎁 TEST 3|888|" + fakeEndTime3,
+            tiktok_link: tiktokLink
+        };
 
-        // 2. Tạo thêm rương giả số 3 luôn cho máu (Cách rương hiện tại 60 giây)
-        setTimeout(() => {
-            const fakeBox3 = {
-                room_id: liveRoomId, 
-                end_time: endTime + 60, 
-                m: paramM,
-                r_params: "888|25|🎁 TEST 3|888|" + (endTime + 60),
-                tiktok_link: tiktokLink
-            };
-            ws.onmessage({ data: JSON.stringify(fakeBox3) });
-        }, 500);
+        // Bơm thẳng vào hàng đợi không cần thông qua mạng
+        nextBoxesQueue.push(fakeBox2);
+        nextBoxesQueue.push(fakeBox3);
+        nextBoxesQueue.sort((a, b) => a.end_time - b.end_time);
+        updateNextBoxUI();
     }
-}, 4000); // Sẽ tự động thả 2 rương giả sau 4 giây kể từ lúc mở Web UI
+}, 1000); // 1 giây sau khi mở web sẽ hiện nút Next BoxI
