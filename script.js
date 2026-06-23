@@ -101,14 +101,25 @@ if (myNameInput) {
 setupRoomViewers(endTime);
 
 // ============================================================== //
-// HỆ THỐNG WEBSOCKET (BẮT RƯƠNG CHUỖI REALTIME)                  //
+// HỆ THỐNG WEBSOCKET & ĐIỀU HƯỚNG (ĐÃ NÂNG CẤP LỊCH SỬ RƯƠNG)    //
 // ============================================================== //
-let nextBoxesQueue = [];
+let allBoxes = []; // Lưu trữ TẤT CẢ rương để có thể Back / Next
 let liveRoomId = '';
 
 if (tiktokLink) {
     const match = tiktokLink.match(/live\/(\d+)/);
     if (match) liveRoomId = match[1];
+}
+
+// Bơm ngay rương đầu tiên vào Danh sách
+if (endTime && liveRoomId) {
+    allBoxes.push({
+        room_id: liveRoomId,
+        end_time: endTime,
+        m: paramM,
+        r_params: paramR,
+        tiktok_link: tiktokLink
+    });
 }
 
 const paramWs = urlParams.get('ws');
@@ -125,13 +136,15 @@ function connectWebSocket() {
             const data = JSON.parse(event.data);
             if (liveRoomId && data.room_id === liveRoomId) {
                 const nowSec = Math.floor(Date.now() / 1000);
-                // CHỈ LẤY RƯƠNG CÁCH >= 20s VÀ CHƯA HẾT HẠN
-                if (data.end_time >= (endTime + 20) && data.end_time > nowSec) {
-                    const exists = nextBoxesQueue.some(b => b.end_time === data.end_time);
+                
+                // QUÉT RỘNG: Lấy TẤT CẢ các rương miễn là chưa hết hạn (Gỡ bỏ mốc >= 20s)
+                if (data.end_time > nowSec) {
+                    const exists = allBoxes.some(b => b.end_time === data.end_time);
                     if (!exists) {
-                        nextBoxesQueue.push(data);
-                        nextBoxesQueue.sort((a, b) => a.end_time - b.end_time);
-                        updateNextBoxUI();
+                        allBoxes.push(data);
+                        // Sắp xếp lại từ rương cũ nhất đến mới nhất
+                        allBoxes.sort((a, b) => a.end_time - b.end_time);
+                        updateNavigationUI();
                     }
                 }
             }
@@ -139,7 +152,7 @@ function connectWebSocket() {
     };
     
     ws.onclose = () => {
-        setTimeout(connectWebSocket, 3000); // Mất kết nối thì tự thử lại
+        setTimeout(connectWebSocket, 3000);
     };
 }
 
@@ -147,67 +160,101 @@ if (liveRoomId) {
     connectWebSocket();
 }
 
-function updateNextBoxUI() {
-    const nextBoxWrapper = document.getElementById('nextBoxWrapper');
-    const nextBoxCount = document.getElementById('nextBoxCount');
-    if (!nextBoxWrapper || !nextBoxCount) return;
+function updateNavigationUI() {
+    const wrapper = document.getElementById('nextBoxWrapper');
+    const btnPrev = document.getElementById('prevBoxBtn');
+    const btnNext = document.getElementById('nextBoxBtn');
+    const prevCount = document.getElementById('prevBoxCount');
+    const nextCount = document.getElementById('nextBoxCount');
     
-    if (nextBoxesQueue.length > 0) {
-        const nowSec = Math.floor(Date.now() / 1000);
-        nextBoxesQueue = nextBoxesQueue.filter(b => b.end_time > nowSec); // Lọc rác
+    if (!wrapper || !btnPrev || !btnNext) return;
+    
+    allBoxes.sort((a, b) => a.end_time - b.end_time);
+    const currentIndex = allBoxes.findIndex(b => b.end_time === endTime);
+    
+    if (currentIndex === -1) {
+        wrapper.style.display = 'none';
+        return;
+    }
+
+    const hasPrev = currentIndex > 0;
+    const hasNext = currentIndex < allBoxes.length - 1;
+
+    if (hasPrev || hasNext) {
+        wrapper.style.display = 'flex';
         
-        if (nextBoxesQueue.length > 0) {
-            nextBoxCount.textContent = nextBoxesQueue.length;
-            nextBoxWrapper.style.display = 'block';
+        if (hasPrev) {
+            btnPrev.style.display = 'flex';
+            if (prevCount) prevCount.textContent = currentIndex; // Hiển thị số rương ở phía trước
         } else {
-            nextBoxWrapper.style.display = 'none';
+            btnPrev.style.display = 'none';
+        }
+        
+        if (hasNext) {
+            btnNext.style.display = 'flex';
+            if (nextCount) nextCount.textContent = (allBoxes.length - 1 - currentIndex); // Hiển thị số rương ở phía sau
+        } else {
+            btnNext.style.display = 'none';
         }
     } else {
-        nextBoxWrapper.style.display = 'none';
+        wrapper.style.display = 'none';
     }
 }
 
-const nextBoxBtnEl = document.getElementById('nextBoxBtn');
-if (nextBoxBtnEl) {
-    nextBoxBtnEl.addEventListener('click', () => {
-        if (nextBoxesQueue.length === 0) return;
-        
-        const nextBox = nextBoxesQueue.shift();
-        
-        endTime = nextBox.end_time;
-        paramM = nextBox.m; 
-        
-        const parts = nextBox.r_params.split('|');
-        if (parts.length >= 1 && parts[0]) coins = parseInt(parts[0]) || 0;
-        if (parts.length >= 2 && parts[1]) canOpen = parseInt(parts[1]) || 0;
-        if (parts.length >= 3) hotBoxStr = parts[2] || '🏅🇩🇪';
-        if (parts.length >= 4) latestViewersStr = parts[3] || '';
-        
-        const newUrl = new URL(window.location);
-        newUrl.searchParams.set('m', nextBox.m);
-        newUrl.searchParams.set('r', nextBox.r_params);
-        window.history.replaceState({}, '', newUrl);
+function loadBox(targetBox) {
+    if (!targetBox) return;
 
-        if (usernameDisplayEl) usernameDisplayEl.textContent = nextBox.m;
-        if (viewCountEl) viewCountEl.textContent = coins;
-        if (peopleCountEl) peopleCountEl.textContent = canOpen;
-        if (hotBoxFlagEl) hotBoxFlagEl.textContent = hotBoxStr;
-        if (viewersDisplayEl) viewersDisplayEl.textContent = latestViewersStr;
-        if (endTimeDisplayEl) endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
-        
-        if (countdownEl) {
-            countdownEl.style.fontSize = ''; 
-            countdownEl.style.color = '';
+    endTime = targetBox.end_time;
+    paramM = targetBox.m; 
+    
+    const parts = targetBox.r_params.split('|');
+    if (parts.length >= 1 && parts[0]) coins = parseInt(parts[0]) || 0;
+    if (parts.length >= 2 && parts[1]) canOpen = parseInt(parts[1]) || 0;
+    if (parts.length >= 3) hotBoxStr = parts[2] || '🏅🇩🇪';
+    if (parts.length >= 4) latestViewersStr = parts[3] || '';
+    
+    const newUrl = new URL(window.location);
+    newUrl.searchParams.set('m', targetBox.m);
+    newUrl.searchParams.set('r', targetBox.r_params);
+    window.history.replaceState({}, '', newUrl);
+
+    if (usernameDisplayEl) usernameDisplayEl.textContent = targetBox.m;
+    if (viewCountEl) viewCountEl.textContent = coins;
+    if (peopleCountEl) peopleCountEl.textContent = canOpen;
+    if (hotBoxFlagEl) hotBoxFlagEl.textContent = hotBoxStr;
+    if (viewersDisplayEl) viewersDisplayEl.textContent = latestViewersStr;
+    if (endTimeDisplayEl) endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
+    
+    if (countdownEl) {
+        countdownEl.style.fontSize = ''; 
+        countdownEl.style.color = '';
+    }
+    document.body.style.backgroundColor = ''; 
+    currentBgState = 'default';
+    
+    setupRoomViewers(endTime); 
+    updateNavigationUI();
+    updateClock();
+}
+
+const btnNextEl = document.getElementById('nextBoxBtn');
+const btnPrevEl = document.getElementById('prevBoxBtn');
+
+if (btnNextEl) {
+    btnNextEl.addEventListener('click', () => {
+        const currentIndex = allBoxes.findIndex(b => b.end_time === endTime);
+        if (currentIndex !== -1 && currentIndex < allBoxes.length - 1) {
+            loadBox(allBoxes[currentIndex + 1]);
         }
-        document.body.style.backgroundColor = ''; 
-        currentBgState = 'default';
-        
-        isDestroyed = false;
-        zeroHitTime = 0;
-        
-        setupRoomViewers(endTime); 
-        updateNextBoxUI();
-        updateClock();
+    });
+}
+
+if (btnPrevEl) {
+    btnPrevEl.addEventListener('click', () => {
+        const currentIndex = allBoxes.findIndex(b => b.end_time === endTime);
+        if (currentIndex > 0) {
+            loadBox(allBoxes[currentIndex - 1]);
+        }
     });
 }
 
@@ -461,58 +508,18 @@ function formatTimeMMSSF(totalSeconds) {
     return String(seconds) + '.' + f;
 }
 
-// ============================================================== //
-// THUẬT TOÁN HỦY DIỆT VÀ CHUYỂN RƯƠNG CHUỖI                      //
-// ============================================================== //
-let zeroHitTime = 0;
-let isDestroyed = false;
-
-function destroyApp() {
-    if (isDestroyed) return;
-    isDestroyed = true;
-    
-    if (myViewerRef) remove(myViewerRef);
-
-    clearInterval(mainClockInterval);
-    if (syncInterval) clearInterval(syncInterval);
-
-    document.body.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width: 100vw; text-align:center; padding: 20px; background: var(--bg-page);">
-            <h2 style="color: var(--text-main); margin-bottom: 15px;">Đã xong nhiệm vụ! ✅</h2>
-            <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.5;">Hệ thống đã dọn dẹp RAM.<br>Bạn có thể tắt Tab này nhé!</p>
-        </div>
-    `;
-}
-
-function checkAndDestroy() {
-    if (nextBoxesQueue.length > 0) {
-        if (countdownEl) {
-            countdownEl.innerHTML = '<span style="font-size: clamp(2rem, 6vw, 2.5rem); color: #3b82f6;">BẤM NEXT ➔</span>';
-        }
-        document.body.style.backgroundColor = '#dbeafe'; 
-        return; 
-    }
-    destroyApp();
-}
-
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
         if (myViewerRef) remove(myViewerRef);
-        if (endTime && getCurrentTimeMs() >= (endTime * 1000 + timeOffset * 1000)) {
-            checkAndDestroy();
-        }
     } else {
         if (myNameInput && myNameInput.value.trim() !== '') {
             pushNameToFirebase(myNameInput.value);
-        }
-        if (zeroHitTime > 0 && Date.now() - zeroHitTime >= 3000) {
-            checkAndDestroy();
         }
     }
 });
 
 function updateClock() {
-    updateNextBoxUI(); // Liên tục dọn dẹp mảng rương chờ
+    updateNavigationUI(); // Cập nhật lại 2 nút Next/Back liên tục
 
     if (!endTime) {
         if (countdownEl) countdownEl.textContent = '00.0';
@@ -524,6 +531,7 @@ function updateClock() {
     const adjustedEndMs = endTimeMs + timeOffset * 1000;
     const diffMs = adjustedEndMs - now;
 
+    // Đã xóa cơ chế Destroy App (Xóa RAM). Web chỉ dừng ở 00.0
     if (diffMs <= 0) {
         if (countdownEl) countdownEl.textContent = '00.0';
 
@@ -531,25 +539,17 @@ function updateClock() {
             currentBgState = 'default';
             applyBackgroundColor('default');
         }
-
-        if (zeroHitTime === 0) {
-            zeroHitTime = Date.now();
-        }
-
-        if (Date.now() - zeroHitTime >= 3000) {
-            checkAndDestroy();
-        }
         return;
     }
 
     const diffSeconds = diffMs / 1000;
     const displayedText = formatTimeMMSSF(diffSeconds);
     
-    if (countdownEl && zeroHitTime === 0) {
+    if (countdownEl) {
         countdownEl.textContent = displayedText;
     }
 
-    if (colorConfig.active && zeroHitTime === 0) {
+    if (colorConfig.active) {
         const currentDisplayNum = parseFloat(displayedText);
         if (currentDisplayNum <= colorConfig.start && currentDisplayNum >= colorConfig.end) {
             if (currentBgState !== 'flash') {
@@ -686,12 +686,3 @@ updateClock();
 updateDTOffset();
 
 const mainClockInterval = setInterval(updateClock, 10);
-
-
-
-
-
-
-
-
-
