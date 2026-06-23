@@ -437,9 +437,12 @@ body {
 /* ========================================================================= */
 /* ======================== CSS DÀNH RIÊNG CHO T3 ========================== */
 /* ========================================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 .t3-body {
-    background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #f8fafc, #eef2f7, #e2e8f0);
+    color: #1f2937;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -448,6 +451,7 @@ body {
     min-height: 100vh;
 }
 
+/* Nút chuyển đổi góc phải (Giống giao diện tab) */
 .t3-top-bar {
     width: 100%;
     max-width: 500px;
@@ -458,16 +462,16 @@ body {
 }
 
 .t3-switch-btn {
-    background: #1e293b; 
-    color: white; 
-    border: none; 
-    padding: 8px 18px; 
-    border-radius: 20px; 
-    font-weight: 700; 
-    font-size: 0.95rem;
+    background: rgba(255, 255, 255, 0.96);
+    color: #1f2937;
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 6px 14px; 
+    border-radius: 999px; 
+    font-weight: 600; 
+    font-size: 13px;
     cursor: pointer; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-    transition: transform 0.1s;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.12); 
+    transition: all 0.25s ease;
 }
 .t3-switch-btn:active { transform: scale(0.95); }
 
@@ -478,73 +482,122 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
 }
 
-.t3-header { text-align: center; margin-bottom: 20px; }
-.t3-username { font-size: 1.4rem; font-weight: 800; color: #1e293b; margin-bottom: 8px; letter-spacing: -0.5px; }
-.t3-stats { font-size: 1.1rem; font-weight: 600; color: #475569; }
+/* Header Info */
+.t3-header { text-align: center; margin-bottom: 6px; opacity: 0.9; line-height: 1.7; }
+.t3-username { font-size: 1.6rem; font-weight: 800; margin-bottom: 5px; }
+.t3-stats { font-size: 1.1rem; font-weight: 600; }
 
+/* Đồng hồ đếm ngược có viền bóng y chang gốc */
 .t3-countdown-area {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin-bottom: 15px;
+    margin: 10px 0;
 }
 
 .t3-cd {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 6.5rem;
+    font-size: 6rem;
     font-weight: 800;
-    color: #1e293b;
+    letter-spacing: 1px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     line-height: 1;
-    letter-spacing: -2px;
     font-variant-numeric: tabular-nums;
 }
 
-.t3-time-info { text-align: center; margin-bottom: 25px; min-height: 50px; }
-
-.t3-time-range { 
-    font-size: 1.15rem; font-weight: 500; color: #64748b; margin-bottom: 5px; 
-    font-variant-numeric: tabular-nums;
+/* Time & Ping */
+.t3-time-info { 
+    text-align: center; 
+    margin-bottom: 18px; 
+    opacity: 0.8;
+    line-height: 1.6;
+    min-height: 50px;
 }
+.t3-time-range { font-size: 1.1rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.t3-ping { font-size: 1.1rem; font-weight: 500; }
+#serverTimeDisplay, #endTimeDisplay { display: inline-block; min-width: 70px; text-align: center; }
 
-#serverTimeDisplay, #endTimeDisplay {
-    display: inline-block;
-    min-width: 70px;
-    text-align: center;
-}
-
-.t3-ping { font-size: 1.05rem; font-weight: 600; color: #64748b; }
-
-/* FIX T3 OFFSET BUTTONS AUTO-RESIZE & CÂN BẰNG KHOẢNG CÁCH Y HỆT VIDEO */
+/* Control Offset - Fix co giãn nút */
 .t3-controls-row {
     display: flex;
     align-items: center;
     justify-content: space-between; 
-    gap: 12px; 
+    gap: 10px; 
     width: 100%;
-    margin-bottom: 30px;
+    margin: 18px 0;
     padding: 0;
 }
 
 .t3-btn-red, .t3-btn-green {
-    border: none; border-radius: 8px; padding: 12px 0; font-size: 1.1rem; font-weight: 600; color: white; 
+    border: none; 
+    border-radius: 8px; 
+    padding: 10px 0; 
+    font-size: 14px; 
+    font-weight: 600; 
+    color: white; 
     flex: 1; 
-    cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer; 
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
-.t3-btn-red { background: #e11d48; } /* Màu đỏ dịu hơn chút */
-.t3-btn-green { background: #16a34a; } /* Màu xanh dịu hơn chút */
+.t3-btn-red { background: #d84a4a; } 
+.t3-btn-green { background: #16a34a; } 
 .t3-btn-red:active, .t3-btn-green:active { transform: scale(0.95); }
 
 .t3-offset-value { 
-    font-size: 1.4rem; font-weight: 800; color: #1e293b; 
-    width: 80px; 
+    font-size: 1.1rem; 
+    font-weight: 800; 
+    min-width: 90px; 
     flex-shrink: 0;
     text-align: center; 
     font-variant-numeric: tabular-nums;
 }
 
+/* Copy & Plus Buttons - Y hệt bản gốc */
+.t3-actions-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.t3-btn-copy, .t3-btn-plus {
+    background: linear-gradient(135deg, #475569, #1e293b);
+    color: #ffffff;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.t3-btn-copy:active, .t3-btn-plus:active { 
+    transform: scale(0.97); 
+}
+
+.t3-btn-copy {
+    border-radius: 999px; 
+    padding: 14px 38px;
+    font-size: 1.1rem;
+    min-width: 140px;
+}
+
+.t3-btn-plus {
+    border-radius: 50%; 
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 2px;
+}
+
+/* Hộp Firebase hiển thị người xem */
 .t3-firebase-box {
     width: 100%;
     background: rgba(255, 255, 255, 0.5);
@@ -572,49 +625,4 @@ body {
     align-items: center;
     gap: 15px;
     margin-top: 25px; 
-}
-
-/* ========================================================= */
-/* CSS NÚT COPY & DẤU + (GIAO DIỆN T3 NEUMORPHISM NỔI KHỐI)  */
-/* ========================================================= */
-.t3-actions-row {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    width: 100%;
-    margin-bottom: 35px;
-}
-
-.t3-btn-copy, .t3-btn-plus {
-    background: #2c3545; 
-    color: #ffffff;
-    border: none;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 10px 20px rgba(44, 53, 69, 0.3); 
-    transition: transform 0.1s, box-shadow 0.2s;
-}
-
-.t3-btn-copy:active, .t3-btn-plus:active { 
-    transform: scale(0.95); 
-    box-shadow: 0 5px 10px rgba(44, 53, 69, 0.25);
-}
-
-.t3-btn-copy {
-    border-radius: 30px; 
-    padding: 14px 45px;
-    font-size: 1.15rem;
-    letter-spacing: 0.5px;
-    min-width: 140px;
-}
-
-.t3-btn-plus {
-    border-radius: 50%; 
-    width: 55px;
-    height: 55px;
-    font-size: 1.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-bottom: 3px; 
 }
