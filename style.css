@@ -543,3 +543,48 @@ body {
     gap: 15px;
     margin-top: 25px; /* Cách ra khỏi box Firebase */
 }
+
+/* ========================================================= */
+/* CSS NÚT COPY & DẤU + (GIAO DIỆN T3 NEUMORPHISM NỔI KHỐI)  */
+/* ========================================================= */
+.t3-actions-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 35px;
+}
+
+.t3-btn-copy, .t3-btn-plus {
+    background: #2c3545; /* Xanh nhám tối chuẩn màu hình mẫu */
+    color: #ffffff;
+    border: none;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(44, 53, 69, 0.3); /* Bóng đổ mềm nổi lên nền web */
+    transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.t3-btn-copy:active, .t3-btn-plus:active { 
+    transform: scale(0.95); 
+    box-shadow: 0 5px 10px rgba(44, 53, 69, 0.25);
+}
+
+.t3-btn-copy {
+    border-radius: 30px; /* Bo góc viên thuốc */
+    padding: 14px 45px;
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+    min-width: 140px;
+}
+
+.t3-btn-plus {
+    border-radius: 50%; /* Hình tròn hoàn hảo */
+    width: 55px;
+    height: 55px;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 3px; /* Cân bằng thị giác cho dấu + */
+}
