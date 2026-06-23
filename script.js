@@ -119,7 +119,7 @@ if (myNameInput) {
 setupRoomViewers(endTime);
 
 // ============================================================== //
-// HỆ THỐNG WEBSOCKET & ĐIỀU HƯỚNG RƯƠNG                           //
+// HỆ THỐNG WEBSOCKET PING & ĐIỀU HƯỚNG RƯƠNG                     //
 // ============================================================== //
 let allBoxes = []; 
 let liveRoomId = '';
@@ -142,17 +142,57 @@ if (endTime && liveRoomId) {
 const paramWs = urlParams.get('ws');
 const customWsUrl = paramWs || localStorage.getItem('ws_url');
 let ws = null;
+let wsPingInterval = null;
 
 function connectWebSocket() {
     if (!customWsUrl) return; 
     ws = new WebSocket(customWsUrl);
     
+    ws.onopen = () => {
+        // T3: Kích hoạt động cơ Ping bằng WebSocket (1.5 giây bắn 1 nhịp tim)
+        if (isT3) {
+            wsPingInterval = setInterval(() => {
+                if (ws.readyState === 1) {
+                    ws.send(JSON.stringify({ action: 'ping', client_time: Date.now() }));
+                }
+            }, 1500); 
+        }
+    };
+    
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
+            
+            // 1. NẾU LÀ GÓI TIN "PONG" TRẢ VỀ TỪ PYTHON SERVER
+            if (data.action === 'pong') {
+                const now = Date.now();
+                const rtt = now - data.client_time;
+                const pingMs = rtt / 2;
+                const pingS = (pingMs / 1000).toFixed(3);
+                
+                // Đồng bộ giờ máy chủ
+                if (data.server_time) {
+                    networkTimeOffset = (data.server_time + pingMs) - now;
+                } else {
+                    networkTimeOffset = pingMs; 
+                }
+
+                // Hiển thị ra UI Ping cho T3
+                const endTimeMs = endTime * 1000;
+                const diffMs = (endTimeMs + timeOffset * 1000) - now;
+
+                if (isT3 && pingDisplay && diffMs > 0) {
+                    let statusText = '✅ internet tốt';
+                    if (pingMs > 150) statusText = '⚠️ mạng khá';
+                    if (pingMs > 300) statusText = '❌ mạng kém';
+                    pingDisplay.innerHTML = `Ping ${pingS}s (syncing - ${statusText})`;
+                }
+                return; // Dừng, không xử lý xuống phần rương
+            }
+
+            // 2. NẾU LÀ GÓI TIN ĐẨY RƯƠNG CHUỖI
             if (liveRoomId && data.room_id === liveRoomId) {
                 const nowSec = Math.floor(Date.now() / 1000);
-                
                 if (data.end_time + 300 > nowSec) {
                     const exists = allBoxes.some(b => b.end_time === data.end_time);
                     if (!exists) {
@@ -164,7 +204,11 @@ function connectWebSocket() {
             }
         } catch(e) {}
     };
-    ws.onclose = () => { setTimeout(connectWebSocket, 3000); };
+    ws.onclose = () => { 
+        clearInterval(wsPingInterval);
+        if (isT3 && pingDisplay) pingDisplay.innerHTML = `Ping lỗi (syncing - ❌ offline)`;
+        setTimeout(connectWebSocket, 3000); 
+    };
 }
 
 if (liveRoomId) {
@@ -273,7 +317,7 @@ if (btnPrevEl) {
 }
 
 // ============================================================== //
-// UI & LOGIC ĐỒNG BỘ THỜI GIAN (PING CHUẨN MÁY CHỦ HTTP)         //
+// UI & LOGIC ĐỒNG BỘ THỜI GIAN (HTTP FALLBACK)                   //
 // ============================================================== //
 let isSyncOn = isT3 ? true : false;
 let networkTimeOffset = 0; 
@@ -285,6 +329,10 @@ const pingDisplay = document.getElementById('pingDisplay');
 
 async function pingTimeServer() {
     if (!isSyncOn) return;
+    
+    // T3: Nếu WebSocket đang sống và làm việc, HTTP rút lui không cần ping nữa
+    if (isT3 && ws && ws.readyState === 1) return; 
+
     try {
         const start = Date.now();
         const response = await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
@@ -299,13 +347,16 @@ async function pingTimeServer() {
             networkTimeOffset = Math.round(pingMs / 2);
         }
 
-        if (isT3 && pingDisplay) {
+        const endTimeMs = endTime * 1000;
+        const diffMs = (endTimeMs + timeOffset * 1000) - Date.now();
+
+        if (isT3 && pingDisplay && diffMs > 0) {
             let statusText = '✅ internet tốt';
             let pingS = (pingMs / 1000).toFixed(3);
             if (pingMs > 150) statusText = '⚠️ mạng khá';
             if (pingMs > 300) statusText = '❌ mạng kém';
-            pingDisplay.innerHTML = `Ping ${pingS}s (syncing)`;
-        } else {
+            pingDisplay.innerHTML = `Ping ${pingS}s (syncing - ${statusText})`;
+        } else if (!isT3) {
             if (syncStatus) { syncStatus.textContent = 'ON'; syncStatus.style.color = '#22c55e'; }
             if (pingDisplay) {
                 let pingColor = '#22c55e'; 
@@ -317,7 +368,7 @@ async function pingTimeServer() {
     } catch (error) {
         if (isT3 && pingDisplay) {
             pingDisplay.innerHTML = `Ping lỗi (syncing - ❌ offline)`;
-        } else {
+        } else if (!isT3) {
             if (syncStatus) { syncStatus.textContent = 'LỖI PING'; syncStatus.style.color = '#ef4444'; }
             if (pingDisplay) { pingDisplay.innerHTML = `Ping mạng: <span style="color: #ef4444;">LỖI</span>`; }
         }
@@ -474,10 +525,10 @@ function updateDTOffset() {
 
     if (timeOffset > 0) { sign = '+'; color = '#22c55e'; } 
     else if (timeOffset < 0) { sign = '-'; color = '#ef4444'; } 
-    else { sign = '+'; color = isT3 ? '#1e293b' : (getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#1e293b'); }
+    else { sign = ''; color = isT3 ? '#1e293b' : (getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#1e293b'); }
 
-    // XÓA BỎ CHỮ 'S' Ở OFFSET ĐỂ TRÁNH GIẬT KHUNG HÌNH (0.00 THAY VÌ 0.00S)
-    dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + '</b>';
+    // OFFSET LUÔN CÓ CHỮ S VÀ GIỮ NGUYÊN 0.00
+    dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
 }
 
 function formatTimeMMSSF(totalSeconds) {
@@ -514,18 +565,19 @@ function updateClock() {
 
     // KHI HẾT GIỜ (Đếm ngược về <= 0)
     if (diffMs <= 0) {
-        if (countdownEl) countdownEl.textContent = '0.0'; // Hiện đúng 0.0
+        if (countdownEl) countdownEl.textContent = '0.0'; // CHUẨN 0.0 KHÔNG CÓ S
         
-        // ĐÓNG BĂNG thời gian Server ở đúng thời điểm rương nổ
-        if (isT3 && serverTimeDisplayEl) {
-            serverTimeDisplayEl.textContent = formatEndTimeHHMMSS(adjustedEndMs / 1000);
+        // ĐÓNG BĂNG VÀ BÁO HẾT GIỜ (Màu xám gốc)
+        if (isT3) {
+            if (serverTimeDisplayEl) serverTimeDisplayEl.textContent = formatEndTimeHHMMSS(adjustedEndMs / 1000);
+            if (pingDisplay) pingDisplay.innerHTML = `<span style="font-weight: 600; color: #64748b;">Đã hết giờ !</span>`;
         }
 
         if (!isT3 && currentBgState !== 'default') {
             currentBgState = 'default';
             applyBackgroundColor('default');
         }
-        return; // Dừng chạy để số không đổi nữa
+        return; 
     }
 
     // NẾU CÒN GIỜ (Đang chạy đếm ngược)
@@ -652,7 +704,6 @@ if (btnSubmit) {
             applyBackgroundColor('default');
         }
         
-        // LƯU CLOUDFLARE TUNNEL URL & USERNAME
         const wsUrlVal = document.getElementById('ws_url_input').value.trim();
         if (wsUrlVal) localStorage.setItem('ws_url', wsUrlVal);
         else localStorage.removeItem('ws_url');
