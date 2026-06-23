@@ -304,7 +304,6 @@ async function pingTimeServer() {
             let pingS = (pingMs / 1000).toFixed(3);
             if (pingMs > 150) statusText = '⚠️ mạng khá';
             if (pingMs > 300) statusText = '❌ mạng kém';
-            // Tối giản dòng Ping theo mẫu T3
             pingDisplay.innerHTML = `Ping ${pingS}s (syncing)`;
         } else {
             if (syncStatus) { syncStatus.textContent = 'ON'; syncStatus.style.color = '#22c55e'; }
@@ -477,7 +476,8 @@ function updateDTOffset() {
     else if (timeOffset < 0) { sign = '-'; color = '#ef4444'; } 
     else { sign = '+'; color = isT3 ? '#1e293b' : (getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#1e293b'); }
 
-    dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
+    // XÓA BỎ CHỮ 'S' Ở OFFSET ĐỂ TRÁNH GIẬT KHUNG HÌNH (0.00 THAY VÌ 0.00S)
+    dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + '</b>';
 }
 
 function formatTimeMMSSF(totalSeconds) {
@@ -502,7 +502,7 @@ function updateClock() {
     updateNavigationUI(); 
 
     if (!endTime) {
-        if (countdownEl) countdownEl.textContent = '0.0s';
+        if (countdownEl) countdownEl.textContent = '0.0';
         if (isT3 && serverTimeDisplayEl) serverTimeDisplayEl.textContent = '--:--:--';
         return;
     }
@@ -514,7 +514,7 @@ function updateClock() {
 
     // KHI HẾT GIỜ (Đếm ngược về <= 0)
     if (diffMs <= 0) {
-        if (countdownEl) countdownEl.textContent = '0.0s'; // Hiện đúng 0.0s
+        if (countdownEl) countdownEl.textContent = '0.0'; // Hiện đúng 0.0
         
         // ĐÓNG BĂNG thời gian Server ở đúng thời điểm rương nổ
         if (isT3 && serverTimeDisplayEl) {
