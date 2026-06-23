@@ -1,8 +1,6 @@
-// BẮT BUỘC IMPORT FIREBASE TỪ CDN BÊN NGOÀI
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getDatabase, ref, set, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-// ===== KẾT NỐI MÁY CHỦ FIREBASE CỦA BẠN =====
 const firebaseConfig = {
     apiKey: "AIzaSyAOzLEX4hjRbp3pEbEm5dL2iqHUWZ0EZCM",
     authDomain: "canh-ruong-tiktok.firebaseapp.com",
@@ -15,14 +13,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ===== Lấy tham số từ URL =====
 const urlParams = new URLSearchParams(window.location.search);
 
-const paramM = urlParams.get('m') || 'user';
+let paramM = urlParams.get('m') || 'user';
 const paramR = urlParams.get('r') || '';
 const tiktokLink = urlParams.get('link') || '';
 
-// ===== Parse tham số r =====
 let coins = 80;
 let canOpen = 25;
 let hotBoxStr = '🏅🇩🇪';
@@ -38,7 +34,6 @@ if (paramR) {
     if (parts.length >= 5) endTime = parseInt(parts[4]) || 0;
 }
 
-// ===== Biến toàn cục =====
 let timeOffset = 0;
 let link1 = null;
 
@@ -54,16 +49,43 @@ if (!mySessionId) {
     localStorage.setItem('mySessionId', mySessionId);
 }
 
-const roomId = endTime ? `room_${endTime}` : 'room_default';
-const myViewerRef = ref(db, `rooms/${roomId}/viewers/${mySessionId}`);
+let currentRoomIdStr = '';
+let myViewerRef = null;
+let roomViewersRef = null;
+let unsubscribeViewers = null;
 
-onDisconnect(myViewerRef).remove();
+function setupRoomViewers(newEndTime) {
+    if (myViewerRef) { remove(myViewerRef); myViewerRef = null; }
+    if (unsubscribeViewers) { unsubscribeViewers(); unsubscribeViewers = null; }
+
+    currentRoomIdStr = newEndTime ? `room_${newEndTime}` : 'room_default';
+    myViewerRef = ref(db, `rooms/${currentRoomIdStr}/viewers/${mySessionId}`);
+    onDisconnect(myViewerRef).remove();
+
+    const savedName = myNameInput && myNameInput.value.trim() !== '' ? myNameInput.value : localStorage.getItem('myName');
+    if (savedName) pushNameToFirebase(savedName);
+
+    roomViewersRef = ref(db, `rooms/${currentRoomIdStr}/viewers`);
+    unsubscribeViewers = onValue(roomViewersRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            const names = Object.values(data).filter(n => n.trim() !== '');
+            const uniqueNames = [...new Set(names)];
+            if (uniqueNames.length > 0) viewersList.innerHTML = `<b>${uniqueNames.join(', ')}</b> đang cày chung`;
+            else viewersList.innerHTML = `Chưa có ai điểm danh`;
+        } else {
+            viewersList.innerHTML = `Chưa có ai điểm danh`;
+        }
+    });
+}
 
 function pushNameToFirebase(name) {
-    if (name && name.trim() !== '') {
-        set(myViewerRef, name.trim().toUpperCase());
-    } else {
-        remove(myViewerRef); 
+    if (myViewerRef) {
+        if (name && name.trim() !== '') {
+            set(myViewerRef, name.trim().toUpperCase());
+        } else {
+            remove(myViewerRef); 
+        }
     }
 }
 
@@ -75,26 +97,121 @@ if (myNameInput) {
     });
 }
 
-const roomViewersRef = ref(db, `rooms/${roomId}/viewers`);
-onValue(roomViewersRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-        const names = Object.values(data).filter(n => n.trim() !== '');
-        const uniqueNames = [...new Set(names)];
-        
-        if (uniqueNames.length > 0) {
-            viewersList.innerHTML = `<b>${uniqueNames.join(', ')}</b> đang cày chung`;
-        } else {
-            viewersList.innerHTML = `Chưa có ai điểm danh`;
-        }
-    } else {
-        viewersList.innerHTML = `Chưa có ai điểm danh`;
-    }
-});
-
+// Khởi chạy Firebase Room lần đầu
+setupRoomViewers(endTime);
 
 // ============================================================== //
-// LOGIC CHUYỂN ĐỔI CHẾ ĐỘ SÁNG / TỐI (DARK MODE)                 //
+// HỆ THỐNG WEBSOCKET (BẮT RƯƠNG CHUỖI REALTIME)                  //
+// ============================================================== //
+let nextBoxesQueue = [];
+let liveRoomId = '';
+
+if (tiktokLink) {
+    const match = tiktokLink.match(/live\/(\d+)/);
+    if (match) liveRoomId = match[1];
+}
+
+const customWsUrl = localStorage.getItem('ws_url');
+let ws = null;
+
+function connectWebSocket() {
+    if (!customWsUrl) return; 
+    
+    ws = new WebSocket(customWsUrl);
+    
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (liveRoomId && data.room_id === liveRoomId) {
+                const nowSec = Math.floor(Date.now() / 1000);
+                // CHỈ LẤY RƯƠNG CÁCH >= 20s VÀ CHƯA HẾT HẠN
+                if (data.end_time >= (endTime + 20) && data.end_time > nowSec) {
+                    const exists = nextBoxesQueue.some(b => b.end_time === data.end_time);
+                    if (!exists) {
+                        nextBoxesQueue.push(data);
+                        nextBoxesQueue.sort((a, b) => a.end_time - b.end_time);
+                        updateNextBoxUI();
+                    }
+                }
+            }
+        } catch(e) {}
+    };
+    
+    ws.onclose = () => {
+        setTimeout(connectWebSocket, 3000); // Mất kết nối thì tự thử lại
+    };
+}
+
+if (liveRoomId) {
+    connectWebSocket();
+}
+
+function updateNextBoxUI() {
+    const nextBoxWrapper = document.getElementById('nextBoxWrapper');
+    const nextBoxCount = document.getElementById('nextBoxCount');
+    if (!nextBoxWrapper || !nextBoxCount) return;
+    
+    if (nextBoxesQueue.length > 0) {
+        const nowSec = Math.floor(Date.now() / 1000);
+        nextBoxesQueue = nextBoxesQueue.filter(b => b.end_time > nowSec); // Lọc rác
+        
+        if (nextBoxesQueue.length > 0) {
+            nextBoxCount.textContent = nextBoxesQueue.length;
+            nextBoxWrapper.style.display = 'block';
+        } else {
+            nextBoxWrapper.style.display = 'none';
+        }
+    } else {
+        nextBoxWrapper.style.display = 'none';
+    }
+}
+
+const nextBoxBtnEl = document.getElementById('nextBoxBtn');
+if (nextBoxBtnEl) {
+    nextBoxBtnEl.addEventListener('click', () => {
+        if (nextBoxesQueue.length === 0) return;
+        
+        const nextBox = nextBoxesQueue.shift();
+        
+        endTime = nextBox.end_time;
+        paramM = nextBox.m; 
+        
+        const parts = nextBox.r_params.split('|');
+        if (parts.length >= 1 && parts[0]) coins = parseInt(parts[0]) || 0;
+        if (parts.length >= 2 && parts[1]) canOpen = parseInt(parts[1]) || 0;
+        if (parts.length >= 3) hotBoxStr = parts[2] || '🏅🇩🇪';
+        if (parts.length >= 4) latestViewersStr = parts[3] || '';
+        
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('m', nextBox.m);
+        newUrl.searchParams.set('r', nextBox.r_params);
+        window.history.replaceState({}, '', newUrl);
+
+        if (usernameDisplayEl) usernameDisplayEl.textContent = nextBox.m;
+        if (viewCountEl) viewCountEl.textContent = coins;
+        if (peopleCountEl) peopleCountEl.textContent = canOpen;
+        if (hotBoxFlagEl) hotBoxFlagEl.textContent = hotBoxStr;
+        if (viewersDisplayEl) viewersDisplayEl.textContent = latestViewersStr;
+        if (endTimeDisplayEl) endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
+        
+        if (countdownEl) {
+            countdownEl.style.fontSize = ''; 
+            countdownEl.style.color = '';
+        }
+        document.body.style.backgroundColor = ''; 
+        currentBgState = 'default';
+        
+        isDestroyed = false;
+        zeroHitTime = 0;
+        
+        setupRoomViewers(endTime); 
+        updateNextBoxUI();
+        updateClock();
+    });
+}
+
+// ============================================================== //
+// UI & LOGIC KHÁC                                                //
 // ============================================================== //
 let isDarkMode = false;
 const btnTheme = document.getElementById('btn-theme');
@@ -121,9 +238,6 @@ if (btnTheme) {
     });
 }
 
-// ============================================================== //
-// CƠ CHẾ ĐỒNG BỘ THỜI GIAN THEO PING MẠNG TIKTOK                 //
-// ============================================================== //
 let isSyncOn = false;
 let networkTimeOffset = 0; 
 let syncInterval = null;
@@ -136,9 +250,7 @@ async function pingTimeServer() {
     if (!isSyncOn) return;
     try {
         const start = Date.now();
-        
         await fetch('https://www.tiktok.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' });
-        
         const pingMs = Date.now() - start; 
         
         networkTimeOffset = Math.round(pingMs / 2);
@@ -152,10 +264,8 @@ async function pingTimeServer() {
             let pingColor = '#22c55e'; 
             if (pingMs >= 150 && pingMs < 300) pingColor = '#f59e0b';
             if (pingMs >= 300) pingColor = '#ef4444'; 
-
             pingDisplay.innerHTML = `Ping mạng: <span style="color: ${pingColor};">${pingMs}ms</span>`;
         }
-
     } catch (error) {
         if (syncStatus) {
             syncStatus.textContent = 'LỖI PING';
@@ -186,11 +296,9 @@ function applySyncState(state) {
             syncStatus.textContent = 'OFF';
             syncStatus.style.color = '#ef4444'; 
         }
-        
         if (pingDisplay) {
             pingDisplay.innerHTML = `Ping mạng: --`;
         }
-
         try { localStorage.setItem('isSyncOn', 'false'); } catch (e) {}
     }
 }
@@ -205,7 +313,6 @@ function getCurrentTimeMs() {
     return Date.now() + (isSyncOn ? networkTimeOffset : 0);
 }
 
-// ===== CẤU HÌNH NHÁY MÀU NỀN =====
 let colorConfig = {
     active: false,
     start: 0.6,
@@ -238,14 +345,10 @@ function applyBackgroundColor(state, colorHex = '') {
     } else if (state === 'flash') {
         document.body.style.backgroundColor = colorHex;
         document.querySelector('.app-card').style.backgroundColor = colorHex;
-        
-        // Đã xóa sạch thuật toán YIQ đổi màu chữ thành Trắng.
-        // Chữ giờ đây sẽ tự nhiên giữ nguyên màu Đen thẫm (Hoặc Trắng nếu đang bật Dark Mode)
     }
     updateDTOffset();
 }
 
-// ===== KHÔI PHỤC TOÀN BỘ CẤU HÌNH ĐÃ LƯU KHI MỞ LINK MỚI =====
 (function loadSavedState() {
     try {
         var testKey = '__test_ls__';
@@ -267,13 +370,18 @@ function applyBackgroundColor(state, colorHex = '') {
         var savedConfig = localStorage.getItem('colorConfig');
         if (savedConfig) {
             colorConfig = JSON.parse(savedConfig);
-
             const startInput = document.getElementById('start_seconds');
             const endInput = document.getElementById('end_seconds');
             const colorInput = document.getElementById('hex_background_color');
             if (startInput) startInput.value = colorConfig.start;
             if (endInput) endInput.value = colorConfig.end;
             if (colorInput) colorInput.value = colorConfig.color;
+        }
+
+        var savedWsUrl = localStorage.getItem('ws_url');
+        if (savedWsUrl) {
+            const wsInput = document.getElementById('ws_url_input');
+            if (wsInput) wsInput.value = savedWsUrl;
         }
 
         var savedSync = localStorage.getItem('isSyncOn');
@@ -296,7 +404,6 @@ function applyBackgroundColor(state, colorHex = '') {
     } catch (e) {}
 })();
 
-// ===== DOM refs =====
 const countdownEl = document.getElementById('countdown');
 const endTimeDisplayEl = document.getElementById('endTimeDisplay');
 const viewCountEl = document.getElementById('viewCount');
@@ -354,7 +461,7 @@ function formatTimeMMSSF(totalSeconds) {
 }
 
 // ============================================================== //
-// THUẬT TOÁN HỦY DIỆT ĐA TẦNG (CHỐNG NGỦ ĐÔNG CỦA IOS)           //
+// THUẬT TOÁN HỦY DIỆT VÀ CHUYỂN RƯƠNG CHUỖI                      //
 // ============================================================== //
 let zeroHitTime = 0;
 let isDestroyed = false;
@@ -363,14 +470,11 @@ function destroyApp() {
     if (isDestroyed) return;
     isDestroyed = true;
     
-    // 1. Xóa kết nối Firebase khi hủy App
-    remove(myViewerRef);
+    if (myViewerRef) remove(myViewerRef);
 
-    // 2. Giết sạch tiến trình tính toán để giải phóng 100% CPU
     clearInterval(mainClockInterval);
     if (syncInterval) clearInterval(syncInterval);
 
-    // 3. Phá hủy toàn bộ mã HTML cũ để giải phóng RAM
     document.body.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; width: 100vw; text-align:center; padding: 20px; background: var(--bg-page);">
             <h2 style="color: var(--text-main); margin-bottom: 15px;">Đã xong nhiệm vụ! ✅</h2>
@@ -379,23 +483,36 @@ function destroyApp() {
     `;
 }
 
+function checkAndDestroy() {
+    if (nextBoxesQueue.length > 0) {
+        if (countdownEl) {
+            countdownEl.innerHTML = '<span style="font-size: clamp(2rem, 6vw, 2.5rem); color: #3b82f6;">BẤM NEXT ➔</span>';
+        }
+        document.body.style.backgroundColor = '#dbeafe'; 
+        return; 
+    }
+    destroyApp();
+}
+
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
-        remove(myViewerRef);
+        if (myViewerRef) remove(myViewerRef);
         if (endTime && getCurrentTimeMs() >= (endTime * 1000 + timeOffset * 1000)) {
-            destroyApp();
+            checkAndDestroy();
         }
     } else {
         if (myNameInput && myNameInput.value.trim() !== '') {
             pushNameToFirebase(myNameInput.value);
         }
         if (zeroHitTime > 0 && Date.now() - zeroHitTime >= 3000) {
-            destroyApp();
+            checkAndDestroy();
         }
     }
 });
 
 function updateClock() {
+    updateNextBoxUI(); // Liên tục dọn dẹp mảng rương chờ
+
     if (!endTime) {
         if (countdownEl) countdownEl.textContent = '00.0';
         return;
@@ -419,22 +536,20 @@ function updateClock() {
         }
 
         if (Date.now() - zeroHitTime >= 3000) {
-            destroyApp();
+            checkAndDestroy();
         }
         return;
     }
 
     const diffSeconds = diffMs / 1000;
-    
-    // Đã thay đổi: Lấy TRỰC TIẾP con số hiển thị trên màn hình để làm mốc nháy màu
     const displayedText = formatTimeMMSSF(diffSeconds);
-    if (countdownEl) countdownEl.textContent = displayedText;
+    
+    if (countdownEl && zeroHitTime === 0) {
+        countdownEl.textContent = displayedText;
+    }
 
-    if (colorConfig.active) {
-        // Chuyển đổi con số trên màn hình thành dạng số thập phân (VD: "0.7" thành 0.7)
+    if (colorConfig.active && zeroHitTime === 0) {
         const currentDisplayNum = parseFloat(displayedText);
-
-        // So sánh trực tiếp với con số màn hình thay vì thời gian thực
         if (currentDisplayNum <= colorConfig.start && currentDisplayNum >= colorConfig.end) {
             if (currentBgState !== 'flash') {
                 currentBgState = 'flash';
@@ -526,9 +641,15 @@ document.getElementById('btn-submit').addEventListener('click', function () {
     colorConfig.color = document.getElementById('hex_background_color').value;
     colorConfig.active = true;
 
-    try {
-        localStorage.setItem('colorConfig', JSON.stringify(colorConfig));
-    } catch (e) {}
+    try { localStorage.setItem('colorConfig', JSON.stringify(colorConfig)); } catch (e) {}
+    
+    // LƯU CLOUDFLARE TUNNEL URL
+    const wsUrlVal = document.getElementById('ws_url_input').value.trim();
+    if (wsUrlVal) {
+        localStorage.setItem('ws_url', wsUrlVal);
+    } else {
+        localStorage.removeItem('ws_url');
+    }
 
     updateConfigDisplayUI();
 
@@ -536,7 +657,10 @@ document.getElementById('btn-submit').addEventListener('click', function () {
     applyBackgroundColor('default');
 
     var modal = document.getElementById('modal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.style.display = 'none';
+        if (wsUrlVal && (!ws || ws.url !== wsUrlVal)) location.reload(); // Reload để áp dụng Tunnel mới
+    }
 });
 
 document.getElementById('configDelBtn').addEventListener('click', function() {
