@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Canh thời gian T3</title>
+    <link rel="stylesheet" href="style.css?v=60">
+    <!-- TRÍ NHỚ ĐIỀU HƯỚNG: Tự động chuyển sang T1 nếu đã lưu -->
+    <script>
+        if (localStorage.getItem('active_ui') === 'T1' || !localStorage.getItem('active_ui')) {
+            window.location.replace('index.html' + window.location.search);
+        }
+    </script>
+</head>
+<body class="t3-body">
+
+    <!-- TOP BAR -->
+    <div class="t3-top-bar">
+        <button type="button" class="t3-switch-btn" id="btn-switch-ui">🔄 Sang T1</button>
+        <button type="button" class="t3-settings-btn" id="btn-open">Cài đặt</button>
+    </div>
+
+    <div class="t3-app-card">
+        <!-- HEADER STATS -->
+        <div class="t3-header">
+            <div class="t3-username" id="usernameDisplay">@user</div>
+            <div class="t3-stats">
+                <span id="viewCount">0</span>/<span id="peopleCount">0</span> — <span id="hotBoxFlag">🏅🇩🇪</span> — 👀 <span id="viewersDisplay">0</span>
+            </div>
+        </div>
+
+        <!-- COUNTDOWN & RƯƠNG CHUỖI -->
+        <div class="t3-countdown-area">
+            <!-- Nút Back rương -->
+            <button type="button" class="t3-nav-btn t3-nav-prev" id="prevBoxBtn" style="display: none;">⬅ <span id="prevBoxCount" style="font-size: 0.9rem;">0</span></button>
+            
+            <div class="t3-cd" id="countdown">00.0</div>
+            
+            <!-- Nút Next rương -->
+            <button type="button" class="t3-nav-btn t3-nav-next" id="nextBoxBtn" style="display: none;"><span id="nextBoxCount" style="font-size: 0.9rem;">0</span> ➔</button>
+        </div>
+
+        <!-- PING & THỜI GIAN -->
+        <div class="t3-time-info">
+            <div class="t3-time-range"><span id="serverTimeDisplay">--:--:--</span> ➔ <span id="endTimeDisplay">--:--:--</span></div>
+            <div class="t3-ping" id="pingDisplay">Ping --s (syncing - ⏳ waiting)</div>
+        </div>
+
+        <!-- CONTROLS OFFSET -->
+        <div class="t3-controls-row">
+            <button type="button" class="t3-btn-red" id="btn-decrease-0.01">-0.01</button>
+            <button type="button" class="t3-btn-red" id="btn-decrease-0.05">-0.05</button>
+            
+            <div class="t3-offset-value" id="d-t"><b>0.00s</b></div>
+
+            <button type="button" class="t3-btn-green" id="btn-increase-0.05">+0.05</button>
+            <button type="button" class="t3-btn-green" id="btn-increase-0.01">+0.01</button>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="t3-actions-row">
+            <button type="button" class="t3-btn-copy" id="claimBtn">COPY</button>
+            <button type="button" class="t3-btn-plus" id="claimChangeBtn">+</button>
+        </div>
+
+        <!-- FIREBASE (Thay thế vùng nháy màu) -->
+        <div class="t3-firebase-box">
+            <div class="t3-firebase-content">
+                <span style="font-size: 1.1rem;">🔥</span> <span id="viewers-list">Đang kết nối phòng xem...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CÀI ĐẶT RIÊNG CHO T3 (Chỉ hiện tên & Link WS) -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-title">Cài đặt Web (T3)</div>
+            
+            <div class="form-group">
+                <label for="my-name-input" style="color: #3b82f6;">Tên hiển thị (Điểm danh xem chung):</label>
+                <input type="text" id="my-name-input" placeholder="Nhập tên của bạn..." style="width: 100%; padding: 12px 16px; border-radius: 12px; background: var(--bg-page); border: 2px solid var(--border-color); font-size: 1.05rem; font-weight: 600; color: var(--text-main); outline: none;">
+            </div>
+
+            <div class="form-group" style="margin-top: 20px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
+                <label for="ws_url_input" style="color: #3b82f6;">Link Cloudflare Tunnel (Bắt rương chuỗi):</label>
+                <input type="text" id="ws_url_input" placeholder="VD: wss://tool-cua-toi.trycloudflare.com" style="width: 100%; padding: 12px 16px; border-radius: 12px; background: var(--bg-page); border: 2px solid var(--border-color); font-size: 0.95rem; color: var(--text-main); outline: none;">
+            </div>
+
+            <!-- Các input ẩn để không bị lỗi JS khi dùng chung script.js -->
+            <input type="hidden" id="start_seconds" value="0">
+            <input type="hidden" id="end_seconds" value="0">
+            <input type="hidden" id="hex_background_color" value="#000000">
+
+            <div class="modal-actions">
+                <button type="button" class="modal-btn mbc" id="btn-cancel">Hủy</button>
+                <button type="button" class="modal-btn mbs" id="btn-submit">Lưu cấu hình</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js?v=60"></script>
+</body>
+</html>
