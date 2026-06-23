@@ -138,7 +138,8 @@ function connectWebSocket() {
                 const nowSec = Math.floor(Date.now() / 1000);
                 
                 // QUÉT RỘNG: Lấy TẤT CẢ các rương miễn là chưa hết hạn (Gỡ bỏ mốc >= 20s)
-                if (data.end_time > nowSec) {
+                if (data.end_time + 300 > nowSec) {
+
                     const exists = allBoxes.some(b => b.end_time === data.end_time);
                     if (!exists) {
                         allBoxes.push(data);
