@@ -86,6 +86,34 @@ let timeBase = Date.now() - performance.now();
 function getAccurateTime() { return performance.now() + timeBase; }
 const isT3 = window.location.pathname.includes('t3.html');
 
+// ---- BỘ ĐẾM SỐ LƯỢNG MỞ RƯƠNG (TỰ ĐỘNG RESET 3H SÁNG VIỆT NAM) ----
+function checkAndReset3AM() {
+    const now = new Date();
+    // Quy đổi giờ hiện tại sang Múi Giờ Việt Nam
+    const vnTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
+    
+    // Đặt mốc 3h sáng của ngày hiện tại (Việt Nam)
+    const resetLimit = new Date(vnTime);
+    resetLimit.setHours(3, 0, 0, 0);
+    
+    // Nếu giờ hiện tại < 3h sáng, thì mốc reset là 3h sáng hôm qua
+    if (vnTime.getHours() < 3) {
+        resetLimit.setDate(resetLimit.getDate() - 1);
+    }
+    
+    const currentResetMark = resetLimit.getTime();
+    const lastResetMark = parseInt(safeGetItem('last_reset_3am', 0)) || 0;
+    
+    // Nếu mốc reset hiện hành khác với mốc đã lưu -> Sang ngày mới -> Reset về 0
+    if (lastResetMark !== currentResetMark) {
+        safeSetItem('opened_today', 0);
+        safeSetItem('last_reset_3am', currentResetMark);
+        return 0;
+    }
+    return parseInt(safeGetItem('opened_today', 0)) || 0;
+}
+let openedToday = checkAndReset3AM();
+
 // HIỂN THỊ THÔNG SỐ LÊN UI LẦN ĐẦU
 if (usernameDisplayEl) usernameDisplayEl.textContent = paramM;
 if (viewCountEl) viewCountEl.textContent = coins;
@@ -160,10 +188,11 @@ if (lastAccessState === 'granted' && lockScreen) {
 function pushHeartbeat() {
     update(deviceRef, {
         last_active: Date.now(),
+        opened_today: openedToday, // <--- Bắn số liệu cho Bảng xếp hạng
         current_task: {
             rate: paramM || 'Đang chờ...',
             coins: coins || 0,
-            can_open: canOpen || 0, // <--- CHÍNH LÀ DÒNG NÀY (Bắn số 25 lên Mắt Thần)
+            can_open: canOpen || 0, 
             end_time: endTime || 0
         }
     }).catch(()=>{});
@@ -400,6 +429,10 @@ function updateNavigationUI() {
 function loadBox(targetBox) {
     if (!targetBox) return;
     endTime = targetBox.end_time; paramM = targetBox.m; 
+    
+    // Tăng biến đếm và lưu lại
+    openedToday++;
+    safeSetItem('opened_today', openedToday);
     
     const parts = targetBox.r_params.split('|');
     if (parts.length >= 1 && parts[0]) coins = parseInt(parts[0]) || 0;
