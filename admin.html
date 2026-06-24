@@ -97,6 +97,7 @@
         }
         .logout-btn:hover { background: var(--surface-hover); border-color: #475569; }
         
+        /* CẬP NHẬT CSS CHO TAB BADGES (BỘ ĐẾM TRÊN TAB) */
         .tabs { 
             display: flex; gap: 8px; margin-bottom: 25px; padding: 6px; background: rgba(30, 41, 59, 0.5); 
             border-radius: 12px; width: fit-content; border: 1px solid var(--border);
@@ -108,6 +109,24 @@
         }
         .tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
         .tab-btn.active { background: var(--primary); color: #ffffff; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+        
+        .tab-badge {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            margin-left: 2px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: 0.3s;
+        }
+        .tab-btn:hover .tab-badge { background: rgba(148, 163, 184, 0.3); color: var(--text-main); }
+        .tab-btn.active .tab-badge { background: rgba(255,255,255,0.25); color: #ffffff; }
+        #btn-stats .tab-badge { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        #btn-stats:hover .tab-badge { background: rgba(245, 158, 11, 0.25); }
+        #btn-stats.active .tab-badge { background: rgba(255,255,255,0.25); color: #ffffff; }
+
         .tab-content { display: none; } .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -231,9 +250,9 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Quản Lý Khách</button>
-            <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">💻 Terminal Bù Giờ</button>
-            <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Thống Kê & Top Mở</button>
+            <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Quản Lý Khách <span class="tab-badge" id="count-manage">0</span></button>
+            <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">💻 Terminal Bù Giờ <span class="tab-badge" id="count-monitor">0</span></button>
+            <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Thống Kê & Top Mở <span class="tab-badge" id="count-stats">0</span></button>
         </div>
 
         <div id="tab-manage" class="tab-content active">
@@ -472,8 +491,6 @@
                     statusHtml = `<span class="badge badge-locked">🔒 LOCKED</span>`;
                 } else {
                     typeHtml = `<b style="color:#cbd5e1">Khách Free</b>`;
-                    
-                    // SỬA LỖI MÀU NHÃN "ONLINE (FREE)" CHO XANH NHƯ VIP
                     if (isOnline) statusHtml = `<span class="badge badge-active"><div class="dot dot-green"></div> ONLINE (FREE)</span>`;
                     else statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
                 }
@@ -495,65 +512,12 @@
                 `;
                 tbody.appendChild(tr);
             }
+            
+            // CẬP NHẬT BADGE TAB QUẢN LÝ
+            const countManageEl = document.getElementById('count-manage');
+            if(countManageEl) countManageEl.textContent = totalCount;
+            
             document.getElementById('online-stats').innerHTML = `ONLINE: <b style="color: var(--success); margin-left: 5px;">${onlineCount}/${totalCount}</b>`;
-        }
-
-        function renderStatsTable() {
-            const tbody = document.getElementById('stats-list-body');
-            tbody.innerHTML = '';
-            const now = Date.now();
-            let statsArray = [];
-
-            for (const [id, data] of Object.entries(devicesData)) {
-                let openedCount = parseInt(data.opened_today) || 0;
-
-                statsArray.push({
-                    id: id,
-                    name: data.note || 'Khách Vô Danh',
-                    last_active: data.last_active,
-                    status: data.status,
-                    opened: openedCount
-                });
-            }
-
-            statsArray.sort((a, b) => b.opened - a.opened);
-
-            statsArray.forEach((item, index) => {
-                if (item.opened === 0) return;
-
-                const rank = index + 1;
-                let rankHtml = `<span class="rank-badge">${rank}</span>`;
-                
-                if (rank === 1) rankHtml = `<span class="rank-badge top-1">🥇 1</span>`;
-                if (rank === 2) rankHtml = `<span class="rank-badge top-2">🥈 2</span>`;
-                if (rank === 3) rankHtml = `<span class="rank-badge top-3">🥉 3</span>`;
-
-                const isOnline = item.last_active && (now - item.last_active < 60000);
-                let statusHtml = '';
-                if (item.status === 'locked') {
-                    statusHtml = `<span style="color: var(--danger); font-size: 0.85rem; font-weight: 700;">🔒 Đang Khóa</span>`;
-                } else if (isOnline) {
-                    statusHtml = `<span style="color: var(--success); font-size: 0.85rem; font-weight: 700;"><span style="display:inline-block; width:6px; height:6px; background:var(--success); border-radius:50%; margin-right:4px; box-shadow: 0 0 5px var(--success); animation: pulse 1s infinite;"></span>Đang Chạy Auto</span>`;
-                } else {
-                    statusHtml = `<span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">🕒 ${formatTimeAgo(item.last_active)}</span>`;
-                }
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="text-align: center; vertical-align: middle;">${rankHtml}</td>
-                    <td>
-                        <div class="user-info">
-                            <span class="user-name" style="margin-bottom: 2px;">${item.name}</span>
-                            <span class="device-id" style="background: transparent; padding: 0; color: #64748b;">${item.id}</span>
-                        </div>
-                    </td>
-                    <td>${statusHtml}</td>
-                    <td style="text-align: right;">
-                        <span class="stat-number">${item.opened.toLocaleString()}</span> <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Links</span>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
         window.syncAllSteps = (type, val) => {
@@ -565,8 +529,6 @@
         };
 
         let savedStepValues = {};
-        
-        // HÀM RENDER TERMINAL BẢNG ĐIỀU KHIỂN CÓ SẮP XẾP THÔNG MINH
         function renderMonitorTable() {
             document.querySelectorAll('.ctrl-input').forEach(input => { if(!input.id.includes('step-all')) savedStepValues[input.id] = input.value; });
             const tbody = document.getElementById('monitor-list-body'); tbody.innerHTML = ''; const now = Date.now();
@@ -574,7 +536,6 @@
             const globalMinus = document.getElementById('step-all-minus').value || "0.1";
             const globalPlus = document.getElementById('step-all-plus').value || "0.1";
 
-            // Lọc ra danh sách những người đang online để chuẩn bị sắp xếp
             let monitorArray = [];
             for (const [id, data] of Object.entries(devicesData)) {
                 const isOnline = data.last_active && (now - data.last_active < 60000);
@@ -583,7 +544,10 @@
                 }
             }
 
-            // THUẬT TOÁN SẮP XẾP: Ai vừa mở Rương mới (Có End Time lớn nhất ở tương lai) sẽ được xếp lên đầu
+            // CẬP NHẬT BADGE TAB TERMINAL
+            const countMonitorEl = document.getElementById('count-monitor');
+            if(countMonitorEl) countMonitorEl.textContent = monitorArray.length;
+
             monitorArray.sort((a, b) => {
                 const endTimeA = a.data.current_task?.end_time || 0;
                 const endTimeB = b.data.current_task?.end_time || 0;
@@ -628,6 +592,68 @@
                             <button class="btn-reset" onclick="resetOffset('${id}')">RESET</button>
                         </div>
                         <div><span class="offset-badge ${offsetClass}">${offsetText}</span></div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderStatsTable() {
+            const tbody = document.getElementById('stats-list-body');
+            tbody.innerHTML = '';
+            const now = Date.now();
+            let statsArray = [];
+
+            for (const [id, data] of Object.entries(devicesData)) {
+                let openedCount = parseInt(data.opened_today) || 0;
+                statsArray.push({
+                    id: id,
+                    name: data.note || 'Khách Vô Danh',
+                    last_active: data.last_active,
+                    status: data.status,
+                    opened: openedCount
+                });
+            }
+
+            statsArray.sort((a, b) => b.opened - a.opened);
+            
+            // Lọc những người đã mở link để đếm cho Badge
+            const rankedUsers = statsArray.filter(item => item.opened > 0);
+            
+            // CẬP NHẬT BADGE TAB THỐNG KÊ
+            const countStatsEl = document.getElementById('count-stats');
+            if(countStatsEl) countStatsEl.textContent = rankedUsers.length;
+
+            rankedUsers.forEach((item, index) => {
+                const rank = index + 1;
+                let rankHtml = `<span class="rank-badge">${rank}</span>`;
+                
+                if (rank === 1) rankHtml = `<span class="rank-badge top-1">🥇 1</span>`;
+                if (rank === 2) rankHtml = `<span class="rank-badge top-2">🥈 2</span>`;
+                if (rank === 3) rankHtml = `<span class="rank-badge top-3">🥉 3</span>`;
+
+                const isOnline = item.last_active && (now - item.last_active < 60000);
+                let statusHtml = '';
+                if (item.status === 'locked') {
+                    statusHtml = `<span style="color: var(--danger); font-size: 0.85rem; font-weight: 700;">🔒 Đang Khóa</span>`;
+                } else if (isOnline) {
+                    statusHtml = `<span style="color: var(--success); font-size: 0.85rem; font-weight: 700;"><span style="display:inline-block; width:6px; height:6px; background:var(--success); border-radius:50%; margin-right:4px; box-shadow: 0 0 5px var(--success); animation: pulse 1s infinite;"></span>Đang Chạy Auto</span>`;
+                } else {
+                    statusHtml = `<span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">🕒 ${formatTimeAgo(item.last_active)}</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center; vertical-align: middle;">${rankHtml}</td>
+                    <td>
+                        <div class="user-info">
+                            <span class="user-name" style="margin-bottom: 2px;">${item.name}</span>
+                            <span class="device-id" style="background: transparent; padding: 0; color: #64748b;">${item.id}</span>
+                        </div>
+                    </td>
+                    <td>${statusHtml}</td>
+                    <td style="text-align: right;">
+                        <span class="stat-number">${item.opened.toLocaleString()}</span> <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Links</span>
                     </td>
                 `;
                 tbody.appendChild(tr);
