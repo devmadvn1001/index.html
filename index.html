@@ -5,14 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Canh thời gian T1</title>
     <link rel="stylesheet" href="style.css?v=60">
-    <!-- TRÍ NHỚ ĐIỀU HƯỚNG: Tự động chuyển sang T3 nếu đã lưu -->
-   <script>
+    <script>
         if (localStorage.getItem('active_ui') === 'T3') {
             window.location.replace('t3.html' + window.location.search);
-        }
-        // Chống chớp màn hình đen
-        if (localStorage.getItem('vip_access') === 'true') {
-            document.write('<style id="antiFlash">#vipLockScreen { display: none !important; }</style>');
         }
     </script>
 </head>
@@ -133,6 +128,6 @@
         </div>
     </div>
 
-    <script type="module" src="script.js?v=116"></script>
+    <script type="module" src="script.js?v=222"></script>
 </body>
 </html>
