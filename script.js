@@ -1,9 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getDatabase, ref, set, update, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-// ============================================================== //
-// 0. BỌC THÉP HỆ THỐNG LƯU TRỮ (CHỐNG CRASH TRÊN TRÌNH DUYỆT ẨN) //
-// ============================================================== //
 function safeGetItem(key, defaultVal = null) {
     try { return localStorage.getItem(key) || defaultVal; } catch(e) { return defaultVal; }
 }
@@ -14,9 +11,6 @@ function safeRemoveItem(key) {
     try { localStorage.removeItem(key); } catch(e) {}
 }
 
-// ============================================================== //
-// 1. KHỞI TẠO CÁC BIẾN TOÀN CỤC TRƯỚC                           //
-// ============================================================== //
 const urlParams = new URLSearchParams(window.location.search);
 let paramM = urlParams.get('m') || 'user';
 const paramR = urlParams.get('r') || '';
@@ -38,9 +32,6 @@ let timeBase = Date.now() - performance.now();
 function getAccurateTime() { return performance.now() + timeBase; }
 const isT3 = window.location.pathname.includes('t3.html');
 
-// ============================================================== //
-// 2. KẾT NỐI FIREBASE                                            //
-// ============================================================== //
 const firebaseConfig = {
     apiKey: "AIzaSyAOzLEX4hjRbp3pEbEm5dL2iqHUWZ0EZCM",
     authDomain: "canh-ruong-tiktok.firebaseapp.com",
@@ -53,9 +44,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ============================================================== //
-// 3. TẠO ĐỊNH DANH MÁY (DEVICE ID) BẢO MẬT                       //
-// ============================================================== //
 let deviceId = safeGetItem('vip_device_id');
 if (!deviceId) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -77,17 +65,25 @@ if (btnCopyDeviceId) {
 }
 
 // ============================================================== //
-// 4. LẮNG NGHE LỆNH TỪ LÃNH CHÚA (CHỐNG CHỚP MÀN HÌNH)           //
+// XỬ LÝ QUYỀN TRUY CẬP (KHÔNG CHỚP & ĐÁP ỨNG TỨC THÌ)            //
 // ============================================================== //
 let isFreeMode = false;
 let deviceStatus = 'unknown'; 
 let adminOffset = 0; 
-
-// Cờ báo hiệu Firebase đã load xong thông tin (Chống chớp)
 let isFreeModeLoaded = false;
 let isDeviceLoaded = false;
 
 const deviceRef = ref(db, `devices/${deviceId}`);
+const lockScreen = document.getElementById('vipLockScreen');
+
+// KIỂM TRA LỊCH SỬ CỤC BỘ TRƯỚC (CHỐNG CHỚP LÚC MỚI MỞ WEB)
+// Nếu lần trước khách đã được vào, tạm thời giấu màn hình đen đi để chờ kết quả mạng.
+const lastAccessState = safeGetItem('last_access_state');
+if (lastAccessState === 'granted' && lockScreen) {
+    lockScreen.style.display = 'none';
+} else if (lockScreen) {
+    lockScreen.style.display = 'flex';
+}
 
 function pushHeartbeat() {
     update(deviceRef, {
@@ -100,39 +96,39 @@ function pushHeartbeat() {
     }).catch(()=>{});
 }
 
-// Hàm quyết định sinh tử (Chỉ chạy khi có đủ dữ liệu)
+// HÀM QUYẾT ĐỊNH QUYỀN TRUY CẬP CHÍNH THỨC
 function checkAccess() {
-    // BẮT BUỘC CHỜ LOAD XONG 2 BIẾN MỚI CHO RA QUYẾT ĐỊNH
     if (!isFreeModeLoaded || !isDeviceLoaded) return;
-
-    const lockScreen = document.getElementById('vipLockScreen');
     
-    // 1. Khách bị sếp Khóa thẳng tay -> Sập màn hình đen (bất kể đang có Free Mode hay không)
+    // Nếu khách bị Khóa Đích Danh (Sếp nhấn nút Khóa) -> Chặn đứng
     if (deviceStatus === 'locked') {
         if (lockScreen) lockScreen.style.display = 'flex';
+        safeSetItem('last_access_state', 'denied');
         return;
     }
     
-    // 2. Khách VIP hoặc đang có Free Mode -> Giấu màn hình đen vĩnh viễn
+    // Nếu có quyền VIP hoặc đang bật Free Mode -> Mở cổng
     if (isFreeMode || deviceStatus === 'active') {
         if (lockScreen) lockScreen.style.display = 'none';
+        safeSetItem('last_access_state', 'granted');
         pushHeartbeat(); 
     } else {
-        // 3. Khách vãng lai & Tắt Free Mode -> Sập màn hình đen yêu cầu mã
+        // Tắt Free Mode & Khách không có VIP -> Đóng cổng
         if (lockScreen) lockScreen.style.display = 'flex';
+        safeSetItem('last_access_state', 'denied');
     }
 }
 
-// Lắng nghe công tắc Free Mode
+// Lắng nghe trạng thái Free Mode
 onValue(ref(db, 'global_settings/free_mode'), (snapshot) => {
     isFreeMode = !!snapshot.val();
-    isFreeModeLoaded = true; // Đánh dấu đã load xong
+    isFreeModeLoaded = true; 
     checkAccess();
 });
 
-// Lắng nghe dữ liệu khách VIP
+// Lắng nghe trạng thái Thiết Bị
 onValue(deviceRef, (snapshot) => {
-    isDeviceLoaded = true; // Đánh dấu đã load xong
+    isDeviceLoaded = true; 
     const data = snapshot.val();
     const nameInputEl = document.getElementById('my-name-input');
 
@@ -165,9 +161,6 @@ onValue(deviceRef, (snapshot) => {
 setInterval(pushHeartbeat, 30000);
 onDisconnect(deviceRef).update({ last_active: Date.now() });
 
-// ============================================================== //
-// CÁC HÀM CỐT LÕI (GIỮ NGUYÊN GỐC KHÔNG THAY ĐỔI)
-// ============================================================== //
 const btnSwitchUI = document.getElementById('btn-switch-ui');
 if (btnSwitchUI) {
     btnSwitchUI.addEventListener('click', () => {
@@ -648,3 +641,4 @@ function clockLoop() {
     requestAnimationFrame(clockLoop); 
 }
 requestAnimationFrame(clockLoop);
+}
