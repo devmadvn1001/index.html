@@ -89,14 +89,11 @@ const isT3 = window.location.pathname.includes('t3.html');
 // ---- BỘ ĐẾM SỐ LƯỢNG MỞ RƯƠNG (TỰ ĐỘNG RESET 3H SÁNG VIỆT NAM) ----
 function checkAndReset3AM() {
     const now = new Date();
-    // Quy đổi giờ hiện tại sang Múi Giờ Việt Nam
     const vnTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
     
-    // Đặt mốc 3h sáng của ngày hiện tại (Việt Nam)
     const resetLimit = new Date(vnTime);
     resetLimit.setHours(3, 0, 0, 0);
     
-    // Nếu giờ hiện tại < 3h sáng, thì mốc reset là 3h sáng hôm qua
     if (vnTime.getHours() < 3) {
         resetLimit.setDate(resetLimit.getDate() - 1);
     }
@@ -104,7 +101,6 @@ function checkAndReset3AM() {
     const currentResetMark = resetLimit.getTime();
     const lastResetMark = parseInt(safeGetItem('last_reset_3am', 0)) || 0;
     
-    // Nếu mốc reset hiện hành khác với mốc đã lưu -> Sang ngày mới -> Reset về 0
     if (lastResetMark !== currentResetMark) {
         safeSetItem('opened_today', 0);
         safeSetItem('last_reset_3am', currentResetMark);
@@ -113,6 +109,22 @@ function checkAndReset3AM() {
     return parseInt(safeGetItem('opened_today', 0)) || 0;
 }
 let openedToday = checkAndReset3AM();
+
+// ---- CƠ CHẾ ĐẾM THÔNG MINH CHỐNG F5 ----
+function recordBoxOpen(currentEndTime) {
+    if (!currentEndTime || currentEndTime <= 0) return;
+    const lastCounted = safeGetItem('last_counted_endtime');
+    
+    // Chỉ cộng điểm khi thời gian rương hiện tại khác với rương đã lưu trước đó
+    if (lastCounted !== currentEndTime.toString()) {
+        openedToday++;
+        safeSetItem('opened_today', openedToday);
+        safeSetItem('last_counted_endtime', currentEndTime.toString());
+    }
+}
+// Kích hoạt bộ đếm ngay khi tải trang
+recordBoxOpen(endTime);
+
 
 // HIỂN THỊ THÔNG SỐ LÊN UI LẦN ĐẦU
 if (usernameDisplayEl) usernameDisplayEl.textContent = paramM;
@@ -188,7 +200,7 @@ if (lastAccessState === 'granted' && lockScreen) {
 function pushHeartbeat() {
     update(deviceRef, {
         last_active: Date.now(),
-        opened_today: openedToday, // <--- Bắn số liệu cho Bảng xếp hạng
+        opened_today: openedToday, // Bắn số liệu lên Bảng xếp hạng Admin
         current_task: {
             rate: paramM || 'Đang chờ...',
             coins: coins || 0,
@@ -430,9 +442,8 @@ function loadBox(targetBox) {
     if (!targetBox) return;
     endTime = targetBox.end_time; paramM = targetBox.m; 
     
-    // Tăng biến đếm và lưu lại
-    openedToday++;
-    safeSetItem('opened_today', openedToday);
+    // Khi nhảy box tự động bằng nút, kích hoạt đếm rương
+    recordBoxOpen(endTime);
     
     const parts = targetBox.r_params.split('|');
     if (parts.length >= 1 && parts[0]) coins = parseInt(parts[0]) || 0;
