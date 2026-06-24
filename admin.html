@@ -3,117 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trạm Chỉ Huy - Tool VIP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Trạm Chỉ Huy Pro Analytics - Tool VIP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-page: #f0f4f8; 
-            --surface: #ffffff; 
-            --text-main: #1e293b; 
-            --text-muted: #64748b; 
-            --border: #e2e8f0; 
-            --primary: #3b82f6;
+            --bg-page: #0b1120; /* Xanh Navy cực sâu */
+            --surface: #1e293b; /* Nền thẻ (card) */
+            --surface-hover: #334155;
+            --text-main: #f8fafc; 
+            --text-muted: #94a3b8; 
+            --border: #334155; 
+            --primary: #3b82f6; /* Xanh dương sáng */
             --primary-hover: #2563eb;
             --success: #10b981; 
+            --warning: #f59e0b;
             --danger: #ef4444;
             --radius-card: 16px;
-            --radius-btn: 10px;
-            --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --radius-btn: 8px;
+            --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+            
+            /* Trophies colors */
+            --gold: linear-gradient(135deg, #fbbf24, #d97706);
+            --silver: linear-gradient(135deg, #cbd5e1, #64748b);
+            --bronze: linear-gradient(135deg, #fca5a5, #b91c1c);
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); line-height: 1.5; padding-bottom: 50px; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-page); 
+            color: var(--text-main); 
+            line-height: 1.5; 
+            padding-bottom: 50px;
+        }
+
+        /* TYPOGRAPHY UTILITIES */
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-muted { color: var(--text-muted); }
         
         /* MÀN HÌNH LOGIN */
         #login-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .login-card { background: var(--surface); padding: 40px 30px; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); width: 100%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.8); }
-        .login-card h2 { font-weight: 800; font-size: 1.6rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); }
-        .login-card p { color: var(--text-muted); margin-bottom: 25px; font-size: 0.95rem; }
+        .login-card { 
+            background: var(--surface); 
+            padding: 40px 30px; 
+            border-radius: var(--radius-card); 
+            box-shadow: var(--shadow-soft), 0 0 0 1px rgba(255,255,255,0.05); 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+        }
+        .login-card h2 { font-weight: 800; font-size: 1.6rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-main); }
+        .login-card p { color: var(--primary); margin-bottom: 25px; font-size: 0.9rem; font-weight: 600; }
         
         .input-group { text-align: left; margin-bottom: 20px; }
-        .input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .input-group input, .input-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-size: 1rem; outline: none; transition: 0.2s; font-family: 'Inter', sans-serif; background: #f8fafc; color: var(--text-main); font-weight: 500;}
-        .input-group input:focus { border-color: var(--primary); background: #ffffff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1); }
+        .input-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-group input, .input-group select { 
+            width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-btn); 
+            font-size: 1rem; outline: none; transition: 0.2s; font-family: 'JetBrains Mono', monospace; 
+            background: rgba(15, 23, 42, 0.6); color: var(--text-main); font-weight: 500;
+        }
+        .input-group input:focus { border-color: var(--primary); background: var(--bg-page); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         
-        .btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius-btn); font-size: 1rem; font-weight: 700; color: white; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); text-transform: uppercase; letter-spacing: 0.5px; }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4); }
-        .btn-primary:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3); }
+        .btn { 
+            width: 100%; padding: 14px; border: none; border-radius: var(--radius-btn); font-size: 0.95rem; 
+            font-weight: 700; color: white; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; 
+        }
+        .btn-primary { background: var(--primary); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4); }
+        .btn-primary:active { transform: translateY(0); }
         
         /* DASHBOARD HEADER */
         #admin-dashboard { display: none; padding: 30px 20px; max-width: 1440px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
-        .header h1 { font-weight: 800; font-size: 1.8rem; letter-spacing: -0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; background: linear-gradient(to right, #0f172a, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header h1 { 
+            font-weight: 800; font-size: 1.8rem; letter-spacing: -0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 12px; 
+            background: linear-gradient(to right, #60a5fa, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        }
         .header-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap;}
-        .logout-btn { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); padding: 10px 18px; border-radius: var(--radius-btn); font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.85rem; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 6px;}
-        .logout-btn:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-1px); }
         
-        /* TABS HIỆN ĐẠI */
-        .tabs { display: flex; gap: 8px; margin-bottom: 25px; padding: 4px; background: #e2e8f0; border-radius: 14px; width: fit-content; }
-        .tab-btn { padding: 12px 24px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; background: transparent; color: var(--text-muted); transition: 0.3s ease; display: flex; align-items: center; gap: 8px; }
-        .tab-btn:hover { color: var(--text-main); }
-        .tab-btn.active { background: var(--surface); color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .tab-content { display: none; } .tab-content.active { display: block; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .logout-btn { 
+            background: var(--surface); color: var(--text-main); border: 1px solid var(--border); padding: 10px 18px; 
+            border-radius: var(--radius-btn); font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.85rem; 
+            text-transform: uppercase; display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow-soft);
+        }
+        .logout-btn:hover { background: var(--surface-hover); border-color: #475569; }
+        
+        /* TABS HIỆN ĐẠI SAAS */
+        .tabs { 
+            display: flex; gap: 8px; margin-bottom: 25px; padding: 6px; background: rgba(30, 41, 59, 0.5); 
+            border-radius: 12px; width: fit-content; border: 1px solid var(--border);
+        }
+        .tab-btn { 
+            padding: 12px 24px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; 
+            cursor: pointer; background: transparent; color: var(--text-muted); transition: 0.3s ease; 
+            display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .tab-btn.active { background: var(--primary); color: #ffffff; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+        .tab-content { display: none; } .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* PANELS & LƯỚI */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 2.5fr; gap: 24px; }
-        .panel { background: var(--surface); border-radius: var(--radius-card); padding: 28px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-soft); position: relative; overflow: hidden; }
-        .panel::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--primary), #60a5fa); opacity: 0.8; }
-        .panel-title { font-weight: 800; font-size: 1.15rem; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; color: var(--text-main); letter-spacing: 0.5px;}
+        .panel { 
+            background: var(--surface); border-radius: var(--radius-card); padding: 28px; 
+            border: 1px solid var(--border); box-shadow: var(--shadow-soft); position: relative; 
+        }
+        .panel-title { 
+            font-weight: 800; font-size: 1.1rem; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; 
+            text-transform: uppercase; color: var(--text-main); letter-spacing: 0.5px;
+            padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
         
-        /* BẢNG DỮ LIỆU ĐẸP MẮT */
-        .table-responsive { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: 0 2px 8px rgba(0,0,0,0.02);}
+        /* BẢNG DỮ LIỆU ĐẸP MẮT (PRO STYLE) */
+        .table-responsive { overflow-x: auto; background: var(--bg-page); border-radius: 12px; border: 1px solid var(--border); }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { text-align: left; padding: 16px 20px; background: #f8fafc; color: var(--text-muted); font-size: 0.8rem; font-weight: 800; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 1px;}
-        td { padding: 18px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.95rem; font-weight: 500; transition: background 0.2s;}
+        th { 
+            text-align: left; padding: 18px 20px; background: rgba(30, 41, 59, 0.8); color: var(--text-muted); 
+            font-size: 0.8rem; font-weight: 800; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 1px;
+        }
+        td { padding: 18px 20px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 0.95rem; font-weight: 500; transition: background 0.2s;}
         tr:last-child td { border-bottom: none; }
-        tr:hover td { background-color: #f8fafc; } 
+        tr:hover td { background-color: rgba(255,255,255,0.02); } 
         
         /* TYPOGRAPHY TRONG BẢNG */
-        .user-name { font-weight: 800; color: var(--text-main); font-size: 1.05rem; display: block; margin-bottom: 4px;}
-        .device-id { font-family: 'Courier New', Courier, monospace; color: #94a3b8; font-size: 0.85rem; font-weight: 600; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
-        .live-cd { font-family: 'Courier New', Courier, monospace; font-size: 1.4rem; font-weight: 800; color: var(--danger); background: #fef2f2; border: 1px dashed #fecaca; padding: 4px 10px; border-radius: 8px; display: inline-block; }
+        .user-name { font-weight: 800; color: var(--text-main); font-size: 1.05rem; display: block; margin-bottom: 6px;}
+        .device-id { font-family: 'JetBrains Mono', monospace; color: #60a5fa; font-size: 0.8rem; font-weight: 700; background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 6px; }
+        .live-cd { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; color: var(--danger); background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 8px; display: inline-block; }
         
-        /* BADGES CẢI TIẾN */
-        .badge { padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .badge-active { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; } 
-        .badge-locked { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; } 
-        .badge-offline { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+        /* BADGES */
+        .badge { padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-active { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); } 
+        .badge-locked { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); } 
+        .badge-offline { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); border: 1px solid rgba(148, 163, 184, 0.2); }
         .dot { width: 8px; height: 8px; border-radius: 50%; } 
-        .dot-green { background: #10b981; box-shadow: 0 0 8px #10b981; animation: pulse 1.5s infinite; }
+        .dot-green { background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
         
-        /* NÚT THAO TÁC (ACTION) TRANG TRÍ */
+        /* RANKING BADGES (BẢNG XẾP HẠNG) */
+        .rank-badge { 
+            display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; 
+            border-radius: 8px; font-weight: 800; font-size: 1rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+        }
+        .rank-badge.top-1 { background: var(--gold); color: #fff; border: none; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4); width: 44px; font-size: 1.1rem; }
+        .rank-badge.top-2 { background: var(--silver); color: #fff; border: none; box-shadow: 0 4px 10px rgba(148, 163, 184, 0.4); width: 40px; }
+        .rank-badge.top-3 { background: var(--bronze); color: #fff; border: none; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); width: 36px; }
+        .stat-number { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; color: var(--warning); text-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
+
+        /* NÚT THAO TÁC (EDIT/LOCK/DELETE) */
         .action-group { display: flex; justify-content: flex-end; gap: 8px; }
-        .action-btn { background: #f8fafc; border: 1px solid var(--border); font-size: 1.1rem; cursor: pointer; padding: 8px 10px; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; justify-content: center;}
-        .action-btn:hover { background: #ffffff; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-color: var(--primary);}
+        .action-btn { background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); font-size: 1.1rem; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; justify-content: center;}
+        .action-btn:hover { background: var(--primary); color: white !important; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-color: var(--primary);}
         
-        /* BỘ NÚT THAO TÚNG (THỂ THAO & CÔNG NGHỆ) */
-        .ctrl-group { display: flex; align-items: center; gap: 12px; justify-content: flex-end; margin-top: 10px; }
-        .ctrl-box { display: flex; align-items: center; gap: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+        /* BỘ NÚT ĐIỀU KHIỂN & RESET */
+        .ctrl-group { display: flex; align-items: center; gap: 10px; justify-content: flex-end; margin-top: 10px; }
+        .ctrl-box { display: flex; align-items: center; background: rgba(15, 23, 42, 0.5); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
         
-        .ctrl-btn { width: 40px; height: 42px; border: none; font-weight: 800; font-size: 1.4rem; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
-        .ctrl-btn:hover { filter: brightness(1.1); }
-        .ctrl-btn:active { background: #0f172a; }
-        .btn-sub { background: var(--danger); } 
-        .btn-add { background: var(--success); } 
+        .ctrl-btn { width: 40px; height: 40px; border: none; font-weight: 800; font-size: 1.4rem; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .ctrl-btn:hover { filter: brightness(1.2); }
+        .btn-sub { background: rgba(239, 68, 68, 0.8); } 
+        .btn-add { background: rgba(16, 185, 129, 0.8); } 
         
-        .ctrl-input { width: 85px; height: 42px; text-align: center; border: none; border-left: 1px solid var(--border); border-right: 1px solid var(--border); font-weight: 800; font-size: 1.15rem; color: var(--text-main); outline: none; background: #f8fafc; font-family: 'Courier New', Courier, monospace;}
-        .ctrl-input:focus { background: white; color: var(--primary); }
+        .ctrl-input { width: 80px; height: 40px; text-align: center; border: none; border-left: 1px solid var(--border); border-right: 1px solid var(--border); font-weight: 800; font-size: 1.1rem; color: var(--text-main); outline: none; background: transparent; font-family: 'JetBrains Mono', monospace;}
+        .ctrl-input:focus { background: rgba(255,255,255,0.05); color: var(--primary); }
         
-        .btn-reset { background: var(--surface); color: var(--text-muted); font-size: 0.85rem; padding: 0 16px; font-weight: 800; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; height: 42px; display: flex; align-items: center; transition: all 0.2s; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .btn-reset:hover { background: #e2e8f0; color: var(--text-main); transform: translateY(-1px); }
+        .btn-reset { 
+            background: #334155; color: #f8fafc; font-size: 0.8rem; padding: 0 16px; font-weight: 800; 
+            border-radius: 8px; border: 1px solid #475569; cursor: pointer; height: 40px; display: flex; 
+            align-items: center; transition: all 0.2s; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); letter-spacing: 0.5px;
+        }
+        .btn-reset:hover { background: #475569; color: #ffffff; border-color: #64748b; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
         .btn-reset:active { transform: translateY(1px); box-shadow: none; }
         
-        .offset-badge { font-size: 0.8rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .offset-zero { background: #f8fafc; color: var(--text-muted); border: 1px dashed var(--border); } 
-        .offset-pos { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; } 
-        .offset-neg { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .offset-badge { font-size: 0.8rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace;}
+        .offset-zero { background: rgba(15, 23, 42, 0.5); color: var(--text-muted); border: 1px dashed var(--border); } 
+        .offset-pos { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); } 
+        .offset-neg { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
         
         /* MODAL */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
-        .modal-box { background: var(--surface); border-radius: var(--radius-card); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); border: 1px solid var(--border); animation: slideUp 0.3s ease; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.8); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
+        .modal-box { background: var(--surface); border-radius: var(--radius-card); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid var(--border); animation: fadeIn 0.3s ease; }
         
         @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } .header { justify-content: center; text-align: center; } .header-actions { justify-content: center; } }
     </style>
@@ -122,30 +193,31 @@
 
     <div id="login-screen">
         <div class="login-card">
-            <div style="font-size: 3rem; margin-bottom: 10px;">👑</div>
-            <h2>TRẠM CHỈ HUY</h2>
-            <p>Xác thực quyền Lãnh Chúa</p>
+            <div style="font-size: 3.5rem; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(59,130,246,0.5));">🛡️</div>
+            <h2>TRẠM CHỈ HUY VIP</h2>
+            <p>Hệ Thống Quản Trị Dữ Liệu BigData</p>
             <div class="input-group">
-                <label>Passcode</label>
+                <label>Passcode Hệ Thống</label>
                 <input type="password" id="admin-pwd" placeholder="••••••••">
             </div>
-            <button class="btn btn-primary" onclick="login()" id="btnLogin">XÁC NHẬN VÀO TRONG</button>
+            <button class="btn btn-primary" onclick="login()" id="btnLogin">ĐĂNG NHẬP HỆ THỐNG</button>
         </div>
     </div>
 
     <div id="admin-dashboard">
         <div class="header">
-            <h1><span style="font-size: 1.4em; vertical-align: bottom;">🛸</span> HỆ SINH THÁI TOOL VIP</h1>
+            <h1><span style="font-size: 1.4em; vertical-align: bottom;">📡</span> ANALYTICS DASHBOARD</h1>
             <div class="header-actions">
                 <button id="btn-free-mode" class="logout-btn" onclick="toggleFreeMode()">⏳ SYSTEM CHECK...</button>
-                <span class="logout-btn" id="online-stats" style="background: #f8fafc; border-style: dashed; cursor: default;">ONLINE: 0/0</span>
-                <button class="logout-btn" style="color: #ef4444; border-color: #fecaca; background: #fef2f2;" onclick="logout()">LOGOUT</button>
+                <span class="logout-btn mono" id="online-stats" style="background: rgba(15,23,42,0.8); border-style: solid; cursor: default;">ONLINE: 0/0</span>
+                <button class="logout-btn" style="color: var(--danger); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1);" onclick="logout()">ĐĂNG XUẤT</button>
             </div>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Quản Lý Khách Hàng</button>
-            <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">💻 Terminal Điều Khiển</button>
+            <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Quản Lý Khách</button>
+            <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">💻 Terminal Bù Giờ</button>
+            <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Bảng Xếp Hạng</button>
         </div>
 
         <div id="tab-manage" class="tab-content active">
@@ -154,15 +226,15 @@
                     <div class="panel-title">⚡ CẤP QUYỀN TRUY CẬP</div>
                     <div class="input-group">
                         <label>Mã thiết bị (Device ID)</label>
-                        <input type="text" id="new-device-id" placeholder="VIP-XXXX-YYYY" style="font-family: monospace; font-weight: 700; letter-spacing: 1px;">
+                        <input type="text" id="new-device-id" placeholder="VIP-XXXX-YYYY">
                     </div>
                     <div class="input-group">
                         <label>Tên Khách / Ghi chú</label>
-                        <input type="text" id="new-device-note" placeholder="Hùng 13 Pro Max">
+                        <input type="text" id="new-device-note" placeholder="Hùng 13 Pro Max" style="font-family: 'Inter', sans-serif;">
                     </div>
                     <div class="input-group">
                         <label>Thời hạn sử dụng</label>
-                        <select id="new-device-expiry">
+                        <select id="new-device-expiry" style="font-family: 'Inter', sans-serif;">
                             <option value="forever">Vĩnh viễn (Không giới hạn)</option>
                             <option value="7">7 Ngày</option>
                             <option value="30">30 Ngày</option>
@@ -195,15 +267,13 @@
                 <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 25px;">
                     <div class="panel-title" style="margin-bottom: 0; border-bottom: none;">🎛️ BẢNG ĐIỀU KHIỂN THỜI GIAN THỰC</div>
                     
-                    <div style="display: flex; align-items: center; gap: 15px; background: #f8fafc; padding: 12px 18px; border-radius: 12px; border: 1px dashed var(--primary);">
+                    <div style="display: flex; align-items: center; gap: 15px; background: rgba(15,23,42,0.8); padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.15);">
                         <span style="font-weight: 800; font-size: 0.9rem; color: var(--primary); text-transform: uppercase;">Thao tác hàng loạt:</span>
                         <div class="ctrl-group" style="margin-top: 0;">
-                            <!-- CỤM TRỪ -->
                             <div class="ctrl-box">
                                 <button class="ctrl-btn btn-sub" onclick="adjustAllOffset(-1)">-</button>
                                 <input type="number" id="step-all-minus" class="ctrl-input" value="0.1" step="0.01" oninput="syncAllSteps('minus', this.value)">
                             </div>
-                            <!-- CỤM CỘNG -->
                             <div class="ctrl-box">
                                 <button class="ctrl-btn btn-add" onclick="adjustAllOffset(1)">+</button>
                                 <input type="number" id="step-all-plus" class="ctrl-input" value="0.1" step="0.01" oninput="syncAllSteps('plus', this.value)">
@@ -228,26 +298,49 @@
                 </div>
             </div>
         </div>
+
+        <div id="tab-stats" class="tab-content">
+            <div class="panel">
+                <div class="panel-title" style="color: #fbbf24;">🏆 BẢNG XẾP HẠNG TOP MỞ TRONG NGÀY</div>
+                <div style="margin-bottom: 20px; color: var(--text-muted); font-size: 0.9rem;">
+                    Hệ thống tự động thống kê số lượng mở thành công của từng thiết bị và cập nhật theo thời gian thực (Real-time).
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; width: 80px;">TOP</th>
+                                <th>Khách Hàng / Thiết Bị</th>
+                                <th>Trạng Thái Tool</th>
+                                <th style="text-align: right;">Số Lượng Đã Mở (Hôm nay)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats-list-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- MODAL CHỈNH SỬA -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-box">
-            <h2 style="font-weight: 800; font-size: 1.4rem; margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 8px;">✏️ Sửa Thông Tin</h2>
+            <h2 style="font-weight: 800; font-size: 1.4rem; margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 8px;">✏️ Cập Nhật Dữ Liệu</h2>
             <input type="hidden" id="edit-old-id">
             
             <div class="input-group">
                 <label>Mã thiết bị ID</label>
-                <input type="text" id="edit-id" style="font-family: monospace; font-weight: 700; letter-spacing: 1px;">
+                <input type="text" id="edit-id">
             </div>
             <div class="input-group">
                 <label>Tên Khách / Ghi chú</label>
-                <input type="text" id="edit-note">
+                <input type="text" id="edit-note" style="font-family: 'Inter', sans-serif;">
             </div>
             
             <div style="display: flex; gap: 12px; margin-top: 30px;">
-                <button class="btn" style="background: var(--bg-page); color: var(--text-muted); border: 1px solid var(--border);" onclick="closeEditModal()">HỦY BỎ</button>
-                <button class="btn btn-primary" onclick="saveEditDevice()">CẬP NHẬT GHI CHÚ</button>
+                <button class="btn" style="background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border);" onclick="closeEditModal()">HỦY BỎ</button>
+                <button class="btn btn-primary" onclick="saveEditDevice()">CẬP NHẬT LƯU TRỮ</button>
             </div>
         </div>
     </div>
@@ -283,7 +376,7 @@
                     alert("❌ Mật khẩu không chính xác!");
                 }
             } catch (error) { alert("❌ Lỗi kết nối Firebase!"); }
-            btn.textContent = "XÁC NHẬN VÀO TRONG"; btn.disabled = false;
+            btn.textContent = "ĐĂNG NHẬP HỆ THỐNG"; btn.disabled = false;
         };
 
         window.logout = () => {
@@ -303,11 +396,13 @@
             if(isFreeMode) {
                 btn.innerHTML = '🟢 FREE MODE: ON';
                 btn.style.color = 'var(--success)';
-                btn.style.borderColor = 'var(--success)';
+                btn.style.borderColor = 'rgba(16,185,129,0.3)';
+                btn.style.background = 'rgba(16,185,129,0.1)';
             } else {
                 btn.innerHTML = '🔴 FREE MODE: OFF';
                 btn.style.color = 'var(--danger)';
-                btn.style.borderColor = 'var(--danger)';
+                btn.style.borderColor = 'rgba(239,68,68,0.3)';
+                btn.style.background = 'rgba(239,68,68,0.1)';
             }
             renderManageTable();
         });
@@ -324,6 +419,7 @@
             devicesData = snapshot.val() || {};
             renderManageTable();
             renderMonitorTable();
+            renderStatsTable();
         });
 
         function formatTimeAgo(ms) {
@@ -347,29 +443,28 @@
 
                 let statusHtml = ''; let typeHtml = '';
                 
-                // Fix lỗi undefined ngày
                 let expiryText = 'Không rõ';
                 if (data.expiry_days === 'forever') expiryText = 'Vĩnh viễn';
                 else if (data.expiry_days) expiryText = data.expiry_days + ' ngày';
 
                 if (data.status === 'active') {
-                    typeHtml = `<b>Khách VIP</b><br><small style="color:#64748b">${expiryText}</small>`;
+                    typeHtml = `<b style="color:var(--primary)">Khách VIP</b><br><small style="color:var(--text-muted)">${expiryText}</small>`;
                     if (isOnline) statusHtml = `<span class="badge badge-active"><div class="dot dot-green"></div> ONLINE</span>`;
                     else statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
                 } else if (data.status === 'locked') {
                     typeHtml = `<b style="color:var(--danger)">VIP Bị Khóa</b>`;
                     statusHtml = `<span class="badge badge-locked">🔒 LOCKED</span>`;
                 } else {
-                    typeHtml = `<b style="color:#3b82f6">Khách Free</b>`;
-                    if (isOnline) statusHtml = `<span class="badge" style="background:#f0f9ff; color:#0284c7; border-color: #bae6fd;"><div class="dot" style="background:#0ea5e9;"></div> ONLINE (FREE)</span>`;
+                    typeHtml = `<b style="color:#cbd5e1">Khách Free</b>`;
+                    if (isOnline) statusHtml = `<span class="badge" style="background:rgba(255,255,255,0.05); color:#cbd5e1; border-color: rgba(255,255,255,0.1);"><div class="dot" style="background:#cbd5e1;"></div> ONLINE (FREE)</span>`;
                     else statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
                 }
 
                 const actionBtn = `
                     <div class="action-group">
-                        <button class="action-btn" style="color: #3b82f6;" title="Edit" onclick="openEditModal('${id}')">✏️</button>
-                        <button class="action-btn" title="${data.status === 'locked' ? 'Mở khóa' : 'Khóa'}" onclick="toggleLock('${id}', '${data.status || 'free'}')">${data.status === 'locked' ? '🔓' : '🔒'}</button>
-                        <button class="action-btn" style="color: #ef4444;" title="Delete" onclick="deleteDevice('${id}')">🗑️</button>
+                        <button class="action-btn" style="color: var(--primary);" title="Edit" onclick="openEditModal('${id}')">✏️</button>
+                        <button class="action-btn" style="color: var(--warning)" title="${data.status === 'locked' ? 'Mở khóa' : 'Khóa'}" onclick="toggleLock('${id}', '${data.status || 'free'}')">${data.status === 'locked' ? '🔓' : '🔒'}</button>
+                        <button class="action-btn" style="color: var(--danger);" title="Delete" onclick="deleteDevice('${id}')">🗑️</button>
                     </div>
                 `;
 
@@ -382,7 +477,69 @@
                 `;
                 tbody.appendChild(tr);
             }
-            document.getElementById('online-stats').innerHTML = `ONLINE: <b style="color: var(--primary);">${onlineCount}/${totalCount}</b>`;
+            document.getElementById('online-stats').innerHTML = `ONLINE: <b style="color: var(--success);">${onlineCount}/${totalCount}</b>`;
+        }
+
+        // HÀM RENDER BẢNG XẾP HẠNG (LOGIC LẤY ĐÚNG SỐ LƯỢNG MỞ LINK)
+        function renderStatsTable() {
+            const tbody = document.getElementById('stats-list-body');
+            tbody.innerHTML = '';
+            const now = Date.now();
+            let statsArray = [];
+
+            for (const [id, data] of Object.entries(devicesData)) {
+                // Chỉ lấy biến opened_today đích thực từ Firebase
+                let openedCount = parseInt(data.opened_today) || 0;
+
+                statsArray.push({
+                    id: id,
+                    name: data.note || 'Khách Vô Danh',
+                    last_active: data.last_active,
+                    status: data.status,
+                    opened: openedCount
+                });
+            }
+
+            // Xếp hạng từ cao xuống thấp
+            statsArray.sort((a, b) => b.opened - a.opened);
+
+            statsArray.forEach((item, index) => {
+                // Bỏ qua người chưa mở link nào cho đỡ rác bảng
+                if (item.opened === 0) return;
+
+                const rank = index + 1;
+                let rankHtml = `<span class="rank-badge">${rank}</span>`;
+                
+                if (rank === 1) rankHtml = `<span class="rank-badge top-1">🥇 1</span>`;
+                if (rank === 2) rankHtml = `<span class="rank-badge top-2">🥈 2</span>`;
+                if (rank === 3) rankHtml = `<span class="rank-badge top-3">🥉 3</span>`;
+
+                const isOnline = item.last_active && (now - item.last_active < 60000);
+                let statusHtml = '';
+                if (item.status === 'locked') {
+                    statusHtml = `<span style="color: var(--danger); font-size: 0.85rem; font-weight: 700;">🔒 Đang Khóa</span>`;
+                } else if (isOnline) {
+                    statusHtml = `<span style="color: var(--success); font-size: 0.85rem; font-weight: 700;"><span style="display:inline-block; width:6px; height:6px; background:var(--success); border-radius:50%; margin-right:4px; box-shadow: 0 0 5px var(--success); animation: pulse 1s infinite;"></span>Đang Chạy Auto</span>`;
+                } else {
+                    statusHtml = `<span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">🕒 ${formatTimeAgo(item.last_active)}</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center; vertical-align: middle;">${rankHtml}</td>
+                    <td>
+                        <div class="user-info">
+                            <span class="user-name" style="margin-bottom: 2px;">${item.name}</span>
+                            <span class="device-id" style="background: transparent; padding: 0; color: #64748b;">${item.id}</span>
+                        </div>
+                    </td>
+                    <td>${statusHtml}</td>
+                    <td style="text-align: right;">
+                        <span class="stat-number">${item.opened.toLocaleString()}</span> <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Links</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
         window.syncAllSteps = (type, val) => {
@@ -424,8 +581,8 @@
                                 <span class="device-id">${id}</span>
                             </div>
                         </td>
-                        <td><span style="font-weight:800; color:var(--primary); font-size: 1.15rem;">${task.rate || 'Đang chờ...'}</span></td>
-                        <td><b style="font-size: 1.3rem; color: #b45309;">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700;">xu</span></td>
+                        <td><span style="font-family: 'JetBrains Mono', monospace; font-weight:800; color:var(--primary); font-size: 1.15rem;">${task.rate || 'Đang chờ...'}</span></td>
+                        <td><b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span></td>
                         <td style="text-align: right;">
                             <div><span class="live-cd" data-endtime="${endTime}">0.0</span></div>
                             <div class="ctrl-group">
@@ -484,7 +641,7 @@
             const id = document.getElementById('new-device-id').value.trim().toUpperCase();
             const note = document.getElementById('new-device-note').value.trim();
             if (!id || !note) return alert("Sếp phải nhập đầy đủ Mã thiết bị và Tên Khách!");
-            set(ref(db, 'devices/' + id), { status: 'active', note: note, created_at: Date.now(), expiry_days: document.getElementById('new-device-expiry').value, last_active: 0, admin_offset: 0, current_task: {} }).then(() => {
+            set(ref(db, 'devices/' + id), { status: 'active', note: note, created_at: Date.now(), expiry_days: document.getElementById('new-device-expiry').value, last_active: 0, admin_offset: 0, opened_today: 0, current_task: {} }).then(() => {
                 alert("✅ Đã cấp quyền VIP thành công!");
                 document.getElementById('new-device-id').value = ''; document.getElementById('new-device-note').value = '';
             });
@@ -530,8 +687,10 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
+            
             if (tabId === 'tab-manage') document.getElementById('btn-manage').classList.add('active');
             if (tabId === 'tab-monitor') document.getElementById('btn-monitor').classList.add('active');
+            if (tabId === 'tab-stats') document.getElementById('btn-stats').classList.add('active');
         };
 
         setInterval(() => {
@@ -541,7 +700,7 @@
                 el.textContent = (end && end > nowSec) ? (end - nowSec).toFixed(1) : '0.0';
             });
         }, 100);
-        setInterval(() => { renderManageTable(); }, 30000);
+        setInterval(() => { renderManageTable(); renderStatsTable(); }, 30000);
     </script>
 </body>
 </html>
