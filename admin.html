@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trạm Chỉ Huy Pro Analytics - Tool VIP</title>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -64,13 +63,12 @@
         }
         .input-group input:focus, .input-group select:focus { border-color: var(--primary); background: var(--bg-page); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         
-        /* CẬP NHẬT MŨI TÊN SELECT BOX DÀY VÀ THỤT VÀO TRONG */
         select#new-device-expiry {
             appearance: none;
             -webkit-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 18px center; /* Thụt vào trong 18px */
+            background-position: right 18px center; 
             background-size: 16px;
             padding-right: 45px;
             cursor: pointer;
@@ -227,10 +225,7 @@
             <h1><span style="font-size: 1.4em; vertical-align: bottom;">📡</span> ANALYTICS DASHBOARD</h1>
             <div class="header-actions">
                 <button id="btn-free-mode" class="logout-btn" onclick="toggleFreeMode()">⏳ SYSTEM CHECK...</button>
-                
-                <!-- CẬP NHẬT CSS Ô ONLINE: CĂN GIỮA, MỞ RỘNG VÀ ĐẢM BẢO CHỮ GIÃN RÕ RÀNG -->
                 <span class="logout-btn mono" id="online-stats" style="background: rgba(15,23,42,0.8); border-style: solid; border-color: var(--border); cursor: default; min-width: 150px; justify-content: center; letter-spacing: 1.5px; font-size: 0.9rem;">ONLINE: 0/0</span>
-                
                 <button class="logout-btn" style="color: var(--danger); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1);" onclick="logout()">ĐĂNG XUẤT</button>
             </div>
         </div>
@@ -337,8 +332,7 @@
                             </tr>
                         </thead>
                         <tbody id="stats-list-body">
-                            <!-- Dữ liệu render bằng JS -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>
@@ -346,7 +340,6 @@
 
     </div>
 
-    <!-- MODAL CHỈNH SỬA -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-box">
             <h2 style="font-weight: 800; font-size: 1.4rem; margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 8px;">✏️ Cập Nhật Dữ Liệu</h2>
@@ -479,7 +472,9 @@
                     statusHtml = `<span class="badge badge-locked">🔒 LOCKED</span>`;
                 } else {
                     typeHtml = `<b style="color:#cbd5e1">Khách Free</b>`;
-                    if (isOnline) statusHtml = `<span class="badge" style="background:rgba(255,255,255,0.05); color:#cbd5e1; border-color: rgba(255,255,255,0.1);"><div class="dot" style="background:#cbd5e1;"></div> ONLINE (FREE)</span>`;
+                    
+                    // SỬA LỖI MÀU NHÃN "ONLINE (FREE)" CHO XANH NHƯ VIP
+                    if (isOnline) statusHtml = `<span class="badge badge-active"><div class="dot dot-green"></div> ONLINE (FREE)</span>`;
                     else statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
                 }
 
@@ -500,7 +495,6 @@
                 `;
                 tbody.appendChild(tr);
             }
-            // CẬP NHẬT GIAO DIỆN HIỂN THỊ ONLINE
             document.getElementById('online-stats').innerHTML = `ONLINE: <b style="color: var(--success); margin-left: 5px;">${onlineCount}/${totalCount}</b>`;
         }
 
@@ -571,6 +565,8 @@
         };
 
         let savedStepValues = {};
+        
+        // HÀM RENDER TERMINAL BẢNG ĐIỀU KHIỂN CÓ SẮP XẾP THÔNG MINH
         function renderMonitorTable() {
             document.querySelectorAll('.ctrl-input').forEach(input => { if(!input.id.includes('step-all')) savedStepValues[input.id] = input.value; });
             const tbody = document.getElementById('monitor-list-body'); tbody.innerHTML = ''; const now = Date.now();
@@ -578,50 +574,64 @@
             const globalMinus = document.getElementById('step-all-minus').value || "0.1";
             const globalPlus = document.getElementById('step-all-plus').value || "0.1";
 
+            // Lọc ra danh sách những người đang online để chuẩn bị sắp xếp
+            let monitorArray = [];
             for (const [id, data] of Object.entries(devicesData)) {
                 const isOnline = data.last_active && (now - data.last_active < 60000);
-                
                 if (isOnline && data.status !== 'locked') {
-                    const task = data.current_task || {};
-                    const endTime = task.end_time || 0; 
-                    const adminOffset = data.admin_offset || 0; 
-                    
-                    let offsetClass = 'offset-zero'; let offsetText = 'Đang bù: 0.00s';
-                    if (adminOffset > 0) { offsetClass = 'offset-pos'; offsetText = `Đang bù: +${adminOffset.toFixed(2)}s`; }
-                    if (adminOffset < 0) { offsetClass = 'offset-neg'; offsetText = `Đang bù: ${adminOffset.toFixed(2)}s`; }
-                    
-                    const stepMinusVal = savedStepValues[`step-minus-${id}`] || globalMinus;
-                    const stepPlusVal = savedStepValues[`step-plus-${id}`] || globalPlus;
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>
-                            <div class="user-info">
-                                <span class="user-name">${data.note || 'Khách Vô Danh'}</span>
-                                <span class="device-id">${id}</span>
-                            </div>
-                        </td>
-                        <td><span style="font-family: 'JetBrains Mono', monospace; font-weight:800; color:var(--primary); font-size: 1.15rem;">${task.rate || 'Đang chờ...'}</span></td>
-                        <td><b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span></td>
-                        <td style="text-align: right;">
-                            <div><span class="live-cd" data-endtime="${endTime}">0.0</span></div>
-                            <div class="ctrl-group">
-                                <div class="ctrl-box">
-                                    <button class="ctrl-btn btn-sub" onclick="adjustOffset('${id}', -1)">-</button>
-                                    <input type="number" id="step-minus-${id}" class="ctrl-input step-minus" value="${stepMinusVal}" step="0.01">
-                                </div>
-                                <div class="ctrl-box">
-                                    <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)">+</button>
-                                    <input type="number" id="step-plus-${id}" class="ctrl-input step-plus" value="${stepPlusVal}" step="0.01">
-                                </div>
-                                <button class="btn-reset" onclick="resetOffset('${id}')">RESET</button>
-                            </div>
-                            <div><span class="offset-badge ${offsetClass}">${offsetText}</span></div>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
+                    monitorArray.push({ id, data });
                 }
             }
+
+            // THUẬT TOÁN SẮP XẾP: Ai vừa mở Rương mới (Có End Time lớn nhất ở tương lai) sẽ được xếp lên đầu
+            monitorArray.sort((a, b) => {
+                const endTimeA = a.data.current_task?.end_time || 0;
+                const endTimeB = b.data.current_task?.end_time || 0;
+                return endTimeB - endTimeA;
+            });
+
+            monitorArray.forEach(item => {
+                const id = item.id;
+                const data = item.data;
+                const task = data.current_task || {};
+                const endTime = task.end_time || 0; 
+                const adminOffset = data.admin_offset || 0; 
+                
+                let offsetClass = 'offset-zero'; let offsetText = 'Đang bù: 0.00s';
+                if (adminOffset > 0) { offsetClass = 'offset-pos'; offsetText = `Đang bù: +${adminOffset.toFixed(2)}s`; }
+                if (adminOffset < 0) { offsetClass = 'offset-neg'; offsetText = `Đang bù: ${adminOffset.toFixed(2)}s`; }
+                
+                const stepMinusVal = savedStepValues[`step-minus-${id}`] || globalMinus;
+                const stepPlusVal = savedStepValues[`step-plus-${id}`] || globalPlus;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="user-info">
+                            <span class="user-name">${data.note || 'Khách Vô Danh'}</span>
+                            <span class="device-id">${id}</span>
+                        </div>
+                    </td>
+                    <td><span style="font-family: 'JetBrains Mono', monospace; font-weight:800; color:var(--primary); font-size: 1.15rem;">${task.rate || 'Đang chờ...'}</span></td>
+                    <td><b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span></td>
+                    <td style="text-align: right;">
+                        <div><span class="live-cd" data-endtime="${endTime}">0.0</span></div>
+                        <div class="ctrl-group">
+                            <div class="ctrl-box">
+                                <button class="ctrl-btn btn-sub" onclick="adjustOffset('${id}', -1)">-</button>
+                                <input type="number" id="step-minus-${id}" class="ctrl-input step-minus" value="${stepMinusVal}" step="0.01">
+                            </div>
+                            <div class="ctrl-box">
+                                <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)">+</button>
+                                <input type="number" id="step-plus-${id}" class="ctrl-input step-plus" value="${stepPlusVal}" step="0.01">
+                            </div>
+                            <button class="btn-reset" onclick="resetOffset('${id}')">RESET</button>
+                        </div>
+                        <div><span class="offset-badge ${offsetClass}">${offsetText}</span></div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
         window.deleteDevice = (id) => {
