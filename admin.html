@@ -97,7 +97,7 @@
         }
         .logout-btn:hover { background: var(--surface-hover); border-color: #475569; }
         
-        /* CẬP NHẬT CSS CHO TAB BADGES (BỘ ĐẾM TRÊN TAB) */
+        /* CẬP NHẬT CSS CHO TAB & BADGES ĐỎ TO HƠN */
         .tabs { 
             display: flex; gap: 8px; margin-bottom: 25px; padding: 6px; background: rgba(30, 41, 59, 0.5); 
             border-radius: 12px; width: fit-content; border: 1px solid var(--border);
@@ -110,22 +110,26 @@
         .tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
         .tab-btn.active { background: var(--primary); color: #ffffff; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
         
+        /* BADGE ĐỎ & TĂNG KÍCH THƯỚC 20% */
         .tab-badge {
-            background: rgba(148, 163, 184, 0.2);
-            color: var(--text-muted);
-            padding: 2px 8px;
+            background: rgba(239, 68, 68, 0.15); /* Nền đỏ nhạt */
+            color: var(--danger); /* Chữ màu đỏ */
+            padding: 2px 10px;
             border-radius: 12px;
-            font-size: 0.75rem;
+            font-size: 0.9rem; /* Tăng từ 0.75 lên 0.9 */
             font-weight: 800;
-            margin-left: 2px;
+            margin-left: 4px;
             font-family: 'JetBrains Mono', monospace;
             transition: 0.3s;
         }
-        .tab-btn:hover .tab-badge { background: rgba(148, 163, 184, 0.3); color: var(--text-main); }
-        .tab-btn.active .tab-badge { background: rgba(255,255,255,0.25); color: #ffffff; }
-        #btn-stats .tab-badge { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-        #btn-stats:hover .tab-badge { background: rgba(245, 158, 11, 0.25); }
-        #btn-stats.active .tab-badge { background: rgba(255,255,255,0.25); color: #ffffff; }
+        .tab-btn:hover .tab-badge { 
+            background: rgba(239, 68, 68, 0.25); 
+        }
+        .tab-btn.active .tab-badge { 
+            background: var(--danger); /* Nền đỏ rực khi đang ở Tab đó */
+            color: #ffffff; /* Chữ trắng */
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
 
         .tab-content { display: none; } .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -252,7 +256,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Quản Lý Khách <span class="tab-badge" id="count-manage">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">💻 Terminal Bù Giờ <span class="tab-badge" id="count-monitor">0</span></button>
-            <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Thống Kê & Top Mở <span class="tab-badge" id="count-stats">0</span></button>
+            <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats">📊 Thống Kê & Top Mở <span class="tab-badge" id="count-stats">0</span></button>
         </div>
 
         <div id="tab-manage" class="tab-content active">
@@ -513,7 +517,6 @@
                 tbody.appendChild(tr);
             }
             
-            // CẬP NHẬT BADGE TAB QUẢN LÝ
             const countManageEl = document.getElementById('count-manage');
             if(countManageEl) countManageEl.textContent = totalCount;
             
@@ -544,7 +547,6 @@
                 }
             }
 
-            // CẬP NHẬT BADGE TAB TERMINAL
             const countMonitorEl = document.getElementById('count-monitor');
             if(countMonitorEl) countMonitorEl.textContent = monitorArray.length;
 
@@ -617,10 +619,8 @@
 
             statsArray.sort((a, b) => b.opened - a.opened);
             
-            // Lọc những người đã mở link để đếm cho Badge
             const rankedUsers = statsArray.filter(item => item.opened > 0);
             
-            // CẬP NHẬT BADGE TAB THỐNG KÊ
             const countStatsEl = document.getElementById('count-stats');
             if(countStatsEl) countStatsEl.textContent = rankedUsers.length;
 
