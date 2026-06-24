@@ -13,6 +13,14 @@
     </script>
 </head>
 <body>
+
+    <div id="vipLockScreen" class="vip-lock-overlay" style="display: flex;">
+        <h2>🔒 THIẾT BỊ CHƯA KÍCH HOẠT</h2>
+        <p>Vui lòng Copy Mã thiết bị dưới đây và gửi cho Admin để được cấp quyền truy cập Tool.</p>
+        <div class="device-id-box" id="displayDeviceId">ĐANG TẠO MÃ...</div>
+        <button class="btn-copy-id" id="btnCopyDeviceId">📋 COPY MÃ GỬI ADMIN</button>
+    </div>
+    
     <button type="button" class="sync-btn" id="btn-sync">
         <span class="sync-icon">⏱️</span> Sync: <b id="sync-status" style="color: #ef4444;">OFF</b>
     </button>
