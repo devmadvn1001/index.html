@@ -25,7 +25,7 @@ if (!deviceId) {
 }
 
 const displayDeviceId = document.getElementById('displayDeviceId');
-if (displayDeviceId) displayDeviceId.textContent = deviceId;
+if (displayDeviceId) displayDeviceId.textContent = deviceId; // In mã ra màn hình ngay lập tức
 
 const btnCopyDeviceId = document.getElementById('btnCopyDeviceId');
 if (btnCopyDeviceId) {
@@ -56,17 +56,17 @@ function pushHeartbeat() {
     }).catch(()=>{});
 }
 
-// Hàm kiểm tra Quyền truy cập
+// Hàm kiểm tra Quyền truy cập (Xử lý Màn hình khóa)
 function checkAccess() {
     const lockScreen = document.getElementById('vipLockScreen');
     
-    // Nếu bị Sếp khóa đích danh -> Chặn đứng, bất kể đang bật Free Mode
+    // Nếu bị Sếp khóa đích danh (Nút Khóa ở trang Admin) -> Chặn đứng, văng ra ngoài ngay
     if (deviceStatus === 'locked') {
         if (lockScreen) lockScreen.style.display = 'flex';
         return;
     }
     
-    // Nếu có quyền VIP HOẶC Admin đang mở cửa Free -> Cho phép vào
+    // Nếu Máy đã được cấp quyền VIP HOẶC Admin đang bật Công tắc Free Mode -> Mở cửa
     if (isFreeMode || deviceStatus === 'active') {
         if (lockScreen) lockScreen.style.display = 'none';
         pushHeartbeat(); 
@@ -76,20 +76,20 @@ function checkAccess() {
     }
 }
 
-// Lắng nghe Công tắc Free Mode toàn hệ thống
+// Lắng nghe Công tắc Free Mode toàn hệ thống (Real-time)
 onValue(ref(db, 'global_settings/free_mode'), (snapshot) => {
     isFreeMode = !!snapshot.val();
-    checkAccess();
+    checkAccess(); // Chạy lại logic check cửa
 });
 
-// Lắng nghe lệnh trực tiếp từ Lãnh Chúa cho riêng máy này
+// Lắng nghe lệnh trực tiếp từ Lãnh Chúa cho riêng máy này (Khóa tên, Khóa máy, Bù giờ)
 onValue(deviceRef, (snapshot) => {
     const data = snapshot.val();
     const nameInputEl = document.getElementById('my-name-input');
 
     if (data) {
         deviceStatus = data.status || 'unknown';
-        adminOffset = parseFloat(data.admin_offset) || 0; // Cập nhật bù giờ
+        adminOffset = parseFloat(data.admin_offset) || 0; // Cập nhật bù giờ bí mật
 
         // Nếu là khách VIP, khóa cứng tên hiển thị
         if (deviceStatus === 'active' && data.note) {
@@ -110,7 +110,7 @@ onValue(deviceRef, (snapshot) => {
         if (nameInputEl) nameInputEl.disabled = false;
     }
     
-    forceUpdateClock(); // Nảy số giờ liền nếu bị bù
+    forceUpdateClock(); // Ép đồng hồ nảy số liền nếu bị sếp tác động Offset
     checkAccess();
 });
 
@@ -547,7 +547,7 @@ document.addEventListener("visibilitychange", function() {
         if (myViewerRef) remove(myViewerRef);
     } else {
         if (myNameInput && myNameInput.value.trim() !== '') { pushNameToFirebase(myNameInput.value); }
-        pushHeartbeat(); // Cập nhật lại Mắt thần khi khách mở lại Web
+        pushHeartbeat(); 
     }
 });
 
@@ -701,3 +701,5 @@ function clockLoop() {
     requestAnimationFrame(clockLoop); 
 }
 requestAnimationFrame(clockLoop);
+
+}
