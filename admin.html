@@ -15,7 +15,7 @@
         .login-card p { color: var(--text-muted); margin-bottom: 25px; font-size: 0.95rem; }
         .input-group { text-align: left; margin-bottom: 20px; }
         .input-group label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
-        .input-group input, .input-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; outline: none; }
+        .input-group input, .input-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; outline: none; transition: 0.2s; font-family: 'Inter', sans-serif; }
         .input-group input:focus { border-color: var(--primary); }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; color: white; cursor: pointer; transition: 0.2s; }
         .btn-primary { background: var(--primary); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
@@ -34,7 +34,7 @@
         .panel-title { font-weight: 800; font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 700px; }
-        th { text-align: left; padding: 14px; background: #f8fafc; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; border-bottom: 2px solid var(--border); }
+        th { text-align: left; padding: 14px; background: #f8fafc; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; border-bottom: 2px solid var(--border); text-transform: uppercase;}
         td { padding: 16px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 0.95rem; font-weight: 500; }
         .user-name { font-weight: 800; color: var(--text-main); font-size: 1.05rem; display: block; }
         .device-id { font-family: monospace; color: var(--text-muted); font-size: 0.85rem; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 6px; font-weight: 600; }
@@ -42,7 +42,8 @@
         .badge-active { background: #dcfce7; color: #166534; } .badge-locked { background: #fee2e2; color: #991b1b; } .badge-offline { background: #f1f5f9; color: #475569; }
         .dot { width: 8px; height: 8px; border-radius: 50%; } .dot-green { background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
-        .action-btn { background: transparent; border: none; font-size: 1.3rem; cursor: pointer; padding: 6px; border-radius: 8px; }
+        .action-btn { background: transparent; border: none; font-size: 1.3rem; cursor: pointer; padding: 6px; border-radius: 8px; transition: 0.2s;}
+        .action-btn:hover { background: #f1f5f9; transform: scale(1.1); }
         .live-cd { font-family: monospace; font-size: 1.5rem; font-weight: 800; color: var(--danger); background: #fee2e2; padding: 4px 10px; border-radius: 8px; }
         .ctrl-group { display: flex; align-items: center; gap: 6px; justify-content: flex-end; margin-top: 10px; }
         .ctrl-btn { width: 32px; height: 32px; border-radius: 8px; border: none; font-weight: 800; font-size: 1.1rem; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; }
@@ -50,6 +51,11 @@
         .ctrl-input { width: 55px; height: 32px; text-align: center; border: 2px solid var(--border); border-radius: 8px; font-weight: 800; font-size: 0.95rem; }
         .offset-badge { font-size: 0.85rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 8px; }
         .offset-zero { background: #f1f5f9; color: var(--text-muted); } .offset-pos { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; } .offset-neg { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        
+        /* Modal Sửa Thông Tin */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
+        .modal-box { background: var(--surface); border-radius: 20px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        
         @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -113,7 +119,7 @@
                                     <th>Khách Hàng / ID</th>
                                     <th>Phân Loại</th>
                                     <th>Trạng Thái</th>
-                                    <th style="text-align: right;">Khóa VIP</th>
+                                    <th style="text-align: right;">Thao Tác</th>
                                 </tr>
                             </thead>
                             <tbody id="device-list-body"></tbody>
@@ -154,9 +160,30 @@
         </div>
     </div>
 
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="font-weight: 800; font-size: 1.4rem; margin-bottom: 20px;">✏️ Sửa Thông Tin</h2>
+            <input type="hidden" id="edit-old-id">
+            
+            <div class="input-group">
+                <label>Mã thiết bị ID</label>
+                <input type="text" id="edit-id" style="font-family: monospace; font-weight: 700; letter-spacing: 1px;">
+            </div>
+            <div class="input-group">
+                <label>Tên Khách / Ghi chú</label>
+                <input type="text" id="edit-note">
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn" style="background: #e2e8f0; color: #475569;" onclick="closeEditModal()">Hủy</button>
+                <button class="btn btn-primary" onclick="saveEditDevice()">Lưu Thay Đổi</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set, update, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        import { getDatabase, ref, set, update, onValue, get, child, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAOzLEX4hjRbp3pEbEm5dL2iqHUWZ0EZCM",
@@ -273,8 +300,14 @@
                     else statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
                 }
 
-                // Nếu là khách Free, hiển thị nút Khóa (để cấm mặt họ luôn)
-                const actionBtn = `<button class="action-btn" title="${data.status === 'locked' ? 'Mở khóa VIP' : 'Khóa Thiết Bị'}" onclick="toggleLock('${id}', '${data.status || 'free'}')">${data.status === 'locked' ? '🔓' : '🔒'}</button>`;
+                // Nhóm nút thao tác: SỬA | KHÓA | XÓA
+                const actionBtn = `
+                    <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                        <button class="action-btn" style="color: #3b82f6;" title="Sửa thông tin" onclick="openEditModal('${id}')">✏️</button>
+                        <button class="action-btn" title="${data.status === 'locked' ? 'Mở khóa VIP' : 'Khóa Thiết Bị'}" onclick="toggleLock('${id}', '${data.status || 'free'}')">${data.status === 'locked' ? '🔓' : '🔒'}</button>
+                        <button class="action-btn" style="color: #ef4444;" title="Xóa vĩnh viễn" onclick="deleteDevice('${id}')">🗑️</button>
+                    </div>
+                `;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -296,7 +329,6 @@
             for (const [id, data] of Object.entries(devicesData)) {
                 const isOnline = data.last_active && (now - data.last_active < 60000);
                 
-                // Mắt thần quét CẢ KHÁCH VIP LẪN KHÁCH FREE (Miễn là không bị khóa)
                 if (isOnline && data.status !== 'locked') {
                     const task = data.current_task || {};
                     const endTime = task.end_time || 0; 
@@ -327,6 +359,80 @@
             }
         }
 
+        // ==========================================
+        // CÁC HÀM XỬ LÝ (SỬA, XÓA, THÊM, BÙ GIỜ)
+        // ==========================================
+        
+        // HÀM XÓA
+        window.deleteDevice = (id) => {
+            const note = devicesData[id]?.note || id;
+            if(confirm(`⚠️ Sếp có CHẮC CHẮN muốn XÓA VĨNH VIỄN khách hàng [ ${note} ] không?\nThao tác này không thể hoàn tác!`)) {
+                remove(ref(db, 'devices/' + id));
+            }
+        };
+
+        // HÀM MỞ MODAL SỬA
+        window.openEditModal = (id) => {
+            const data = devicesData[id];
+            if(!data) return;
+            document.getElementById('edit-old-id').value = id;
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-note').value = data.note || '';
+            document.getElementById('editModal').style.display = 'flex';
+        };
+
+        window.closeEditModal = () => {
+            document.getElementById('editModal').style.display = 'none';
+        };
+
+        // HÀM LƯU CHỈNH SỬA
+        window.saveEditDevice = () => {
+            const oldId = document.getElementById('edit-old-id').value;
+            const newId = document.getElementById('edit-id').value.trim().toUpperCase();
+            const newNote = document.getElementById('edit-note').value.trim();
+
+            if(!newId || !newNote) return alert("Sếp không được để trống thông tin nhé!");
+
+            // Copy data cũ và đắp note mới vào
+            const dataToSave = { ...devicesData[oldId], note: newNote };
+
+            if(newId !== oldId) {
+                // Nếu sếp đổi cả Mã ID
+                if(devicesData[newId]) {
+                    if(!confirm("⚠️ Mã thiết bị mới này ĐÃ TỒN TẠI.\nSếp có muốn GHI ĐÈ lên nó không?")) return;
+                }
+                // Ghi vào ID mới, sau đó Xóa ID cũ đi
+                set(ref(db, 'devices/' + newId), dataToSave).then(() => {
+                    remove(ref(db, 'devices/' + oldId));
+                    closeEditModal();
+                });
+            } else {
+                // Chỉ sửa Tên, không sửa ID
+                update(ref(db, 'devices/' + oldId), { note: newNote }).then(() => {
+                    closeEditModal();
+                });
+            }
+        };
+
+        window.addDevice = () => {
+            const id = document.getElementById('new-device-id').value.trim().toUpperCase();
+            const note = document.getElementById('new-device-note').value.trim();
+            if (!id || !note) return alert("Sếp phải nhập đầy đủ Mã thiết bị và Tên Khách!");
+            set(ref(db, 'devices/' + id), { status: 'active', note: note, created_at: Date.now(), expiry_days: document.getElementById('new-device-expiry').value, last_active: 0, admin_offset: 0, current_task: {} }).then(() => {
+                alert("✅ Đã cấp quyền VIP cứng thành công!");
+                document.getElementById('new-device-id').value = ''; document.getElementById('new-device-note').value = '';
+            });
+        };
+
+        window.toggleLock = (id, currentStatus) => {
+            const actionText = currentStatus === 'locked' ? 'MỞ KHÓA cho thiết bị này?' : 'KHÓA thiết bị này?\n(Khách sẽ văng ra màn hình đen ngay lập tức dù đang có Free Mode)';
+            if(confirm(`Sếp có chắc chắn muốn ${actionText}`)) {
+                const newStatus = currentStatus === 'locked' ? 'active' : 'locked';
+                update(ref(db, 'devices/' + id), { status: newStatus });
+            }
+        };
+
+        // CÁC HÀM THAO TÚNG BÙ TRỪ GIỜ
         window.adjustOffset = (id, direction) => {
             const stepVal = parseFloat(document.getElementById(`step-${id}`).value) || 0.1;
             const currentOffset = devicesData[id]?.admin_offset || 0;
@@ -353,24 +459,7 @@
             if (Object.keys(updates).length > 0) update(ref(db), updates);
         };
 
-        window.addDevice = () => {
-            const id = document.getElementById('new-device-id').value.trim().toUpperCase();
-            const note = document.getElementById('new-device-note').value.trim();
-            if (!id || !note) return alert("Sếp phải nhập đầy đủ Mã thiết bị và Tên Khách!");
-            set(ref(db, 'devices/' + id), { status: 'active', note: note, created_at: Date.now(), expiry_days: document.getElementById('new-device-expiry').value, last_active: 0, admin_offset: 0, current_task: {} }).then(() => {
-                alert("✅ Đã cấp quyền VIP cứng thành công!");
-                document.getElementById('new-device-id').value = ''; document.getElementById('new-device-note').value = '';
-            });
-        };
-
-        window.toggleLock = (id, currentStatus) => {
-            const actionText = currentStatus === 'locked' ? 'MỞ KHÓA cho thiết bị này?' : 'KHÓA thiết bị này?\n(Khách sẽ văng ra màn hình đen ngay lập tức dù đang có Free Mode)';
-            if(confirm(`Sếp có chắc chắn muốn ${actionText}`)) {
-                const newStatus = currentStatus === 'locked' ? 'active' : 'locked';
-                update(ref(db, 'devices/' + id), { status: newStatus });
-            }
-        };
-
+        // CHUYỂN TAB VÀ VÒNG LẶP RENDER
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
