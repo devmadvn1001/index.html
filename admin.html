@@ -6,63 +6,106 @@
     <title>Trạm Chỉ Huy - Tool VIP</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-page: #f1f5f9; --surface: #ffffff; --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0; --primary: #3b82f6; --success: #10b981; --danger: #ef4444; }
+        :root { 
+            --bg-page: #f4f7f9; 
+            --surface: #ffffff; 
+            --text-main: #0f172a; 
+            --text-muted: #475569; 
+            --border: #cbd5e1; /* Viền đậm và sắc nét hơn */
+            --primary: #2563eb; 
+            --success: #059669; 
+            --danger: #dc2626; 
+        }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); line-height: 1.5; }
+        
+        /* MÀN HÌNH LOGIN */
         #login-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .login-card { background: var(--surface); padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
-        .login-card h2 { font-weight: 800; font-size: 1.5rem; margin-bottom: 5px; }
+        .login-card { background: var(--surface); padding: 40px 30px; border-radius: 4px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); }
+        .login-card h2 { font-weight: 800; font-size: 1.5rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
         .login-card p { color: var(--text-muted); margin-bottom: 25px; font-size: 0.95rem; }
+        
         .input-group { text-align: left; margin-bottom: 20px; }
-        .input-group label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
-        .input-group input, .input-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; outline: none; transition: 0.2s; font-family: 'Inter', sans-serif; }
-        .input-group input:focus { border-color: var(--primary); }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; color: white; cursor: pointer; transition: 0.2s; }
-        .btn-primary { background: var(--primary); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-        .btn-primary:active { transform: scale(0.98); }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 1rem; outline: none; transition: 0.2s; font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .input-group input:focus { border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; font-size: 0.95rem; font-weight: 700; color: white; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-primary { background: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .btn-primary:active { transform: translateY(1px); box-shadow: none; }
+        
+        /* DASHBOARD HEADER */
         #admin-dashboard { display: none; padding: 30px 20px; max-width: 1440px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
-        .header h1 { font-weight: 800; font-size: 1.8rem; letter-spacing: -0.5px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; border-bottom: 2px solid var(--text-main); padding-bottom: 15px;}
+        .header h1 { font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; text-transform: uppercase; }
         .header-actions { display: flex; gap: 15px; align-items: center; flex-wrap: wrap;}
-        .logout-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;}
-        .tabs { display: flex; gap: 10px; margin-bottom: 25px; }
-        .tab-btn { padding: 12px 24px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; background: #e2e8f0; color: var(--text-muted); transition: 0.2s; }
-        .tab-btn.active { background: var(--text-main); color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .tab-content { display: none; } .tab-content.active { display: block; }
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; }
-        .panel { background: var(--surface); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border); }
-        .panel-title { font-weight: 800; font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 700px; }
-        th { text-align: left; padding: 14px; background: #f8fafc; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; border-bottom: 2px solid var(--border); text-transform: uppercase;}
-        td { padding: 16px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 0.95rem; font-weight: 500; }
-        .badge { padding: 6px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
-        .badge-active { background: #dcfce7; color: #166534; } .badge-locked { background: #fee2e2; color: #991b1b; } .badge-offline { background: #f1f5f9; color: #475569; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; } .dot-green { background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
-        .action-btn { background: transparent; border: none; font-size: 1.3rem; cursor: pointer; padding: 6px; border-radius: 8px; transition: 0.2s;}
-        .action-btn:hover { background: #f1f5f9; transform: scale(1.1); }
+        .logout-btn { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); padding: 8px 16px; border-radius: 4px; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.85rem; text-transform: uppercase; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .logout-btn:hover { background: #f1f5f9; }
         
-        /* ĐIỀU CHỈNH GIAO DIỆN BẢNG & NÚT THAO TÚNG MỚI */
-        .user-name { font-weight: 800; color: var(--text-main); font-size: 1.05rem; display: block; }
-        .device-id { font-family: monospace; color: #94a3b8; font-size: 0.95rem; font-weight: 600; }
-        .live-cd { font-family: monospace; font-size: 1.5rem; font-weight: 800; color: var(--danger); background: #fee2e2; padding: 4px 10px; border-radius: 8px; }
-        
-        .ctrl-group { display: flex; align-items: center; gap: 8px; justify-content: flex-end; margin-top: 10px; }
-        .ctrl-btn { width: 55px; height: 38px; border-radius: 8px; border: none; font-weight: 800; font-size: 1.4rem; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; transition: 0.1s;}
-        .ctrl-btn:active { transform: scale(0.9); }
-        .btn-sub { background: var(--danger); } .btn-add { background: var(--success); } 
-        .btn-reset { background: #e2e8f0; color: #475569; font-size: 0.95rem; font-weight: 800; padding: 0 16px; border-radius: 8px; border: none; cursor: pointer; height: 38px; transition: 0.1s; }
-        .btn-reset:active { transform: scale(0.9); background: #cbd5e1; }
-        .ctrl-input { width: 90px; height: 38px; text-align: center; border: 2px solid var(--border); border-radius: 8px; font-weight: 800; font-size: 1.15rem; color: var(--text-main); outline: none;}
-        .ctrl-input:focus { border-color: var(--primary); }
+        /* TABS (CHUẨN KỸ THUẬT) */
+        .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 0; }
+        .tab-btn { padding: 12px 24px; border: 1px solid transparent; border-radius: 4px 4px 0 0; font-size: 0.9rem; font-weight: 700; cursor: pointer; background: transparent; color: var(--text-muted); transition: 0.2s; text-transform: uppercase; letter-spacing: 0.5px; position: relative; top: 2px; }
+        .tab-btn:hover { color: var(--text-main); }
+        .tab-btn.active { background: var(--surface); color: var(--primary); border-color: var(--border); border-bottom-color: var(--surface); }
+        .tab-content { display: none; } .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .offset-badge { font-size: 0.85rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 8px; }
-        .offset-zero { background: #f1f5f9; color: var(--text-muted); } .offset-pos { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; } .offset-neg { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        /* PANELS & LƯỚI */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 2.5fr; gap: 24px; }
+        .panel { background: var(--surface); border-radius: 4px; padding: 24px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .panel-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 10px; }
         
-        /* Modal Sửa Thông Tin */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
-        .modal-box { background: var(--surface); border-radius: 20px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        /* BẢNG CHUYÊN NGHIỆP (DATA GRID) */
+        .table-responsive { overflow-x: auto; border: 1px solid var(--border); border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; background: var(--surface); }
+        th { text-align: left; padding: 12px 16px; background: #f8fafc; color: var(--text-muted); font-size: 0.8rem; font-weight: 700; border-bottom: 2px solid var(--border); border-right: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px;}
+        th:last-child { border-right: none; }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); vertical-align: middle; font-size: 0.95rem; font-weight: 500; transition: background 0.1s;}
+        td:last-child { border-right: none; }
+        tr:hover td { background-color: #f8fafc; } /* Hiệu ứng hover dòng */
+        
+        /* TYPOGRAPHY TRONG BẢNG */
+        .user-name { font-weight: 700; color: var(--text-main); font-size: 1rem; display: block; }
+        .device-id { font-family: 'Courier New', Courier, monospace; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; }
+        
+        /* BADGES (VUÔNG VỨC) */
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid transparent; }
+        .badge-active { background: #ecfdf5; color: #047857; border-color: #a7f3d0; } 
+        .badge-locked { background: #fef2f2; color: #b91c1c; border-color: #fecaca; } 
+        .badge-offline { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; } 
+        .dot-green { background: #10b981; box-shadow: 0 0 6px #10b981; animation: pulse 1.5s infinite; }
+        
+        /* NÚT THAO TÁC (ACTION) */
+        .action-btn { background: transparent; border: 1px solid transparent; font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: 0.1s;}
+        .action-btn:hover { background: #f1f5f9; border-color: var(--border); }
+        .live-cd { font-family: 'Courier New', Courier, monospace; font-size: 1.3rem; font-weight: 800; color: var(--danger); background: #fef2f2; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 4px; }
+        
+        /* BỘ NÚT THAO TÚNG (VUÔNG VÀ TO HƠN) */
+        .ctrl-group { display: flex; align-items: center; gap: 20px; justify-content: flex-end; margin-top: 10px; }
+        .ctrl-box { display: flex; align-items: center; gap: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+        
+        .ctrl-btn { width: 45px; height: 40px; border: none; font-weight: 800; font-size: 1.4rem; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; transition: 0.1s; }
+        .ctrl-btn:active { opacity: 0.8; }
+        .btn-sub { background: var(--danger); } 
+        .btn-add { background: var(--success); } 
+        
+        .ctrl-input { width: 80px; height: 40px; text-align: center; border: none; border-left: 1px solid var(--border); border-right: 1px solid var(--border); font-weight: 800; font-size: 1.1rem; color: var(--text-main); outline: none; background: #f8fafc; font-family: 'Courier New', Courier, monospace;}
+        .ctrl-input:focus { background: white; }
+        
+        .btn-reset { background: var(--surface); color: var(--text-main); font-size: 0.85rem; padding: 0 16px; font-weight: 800; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; height: 40px; display: flex; align-items: center; transition: 0.1s; text-transform: uppercase; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-reset:hover { background: #f1f5f9; }
+        .btn-reset:active { transform: translateY(1px); box-shadow: none; }
+        
+        .offset-badge { font-size: 0.8rem; font-weight: 800; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .offset-zero { background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border); } 
+        .offset-pos { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; } 
+        .offset-neg { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(2px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
+        .modal-box { background: var(--surface); border-radius: 4px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid var(--border); }
         
         @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
     </style>
@@ -71,10 +114,11 @@
 
     <div id="login-screen">
         <div class="login-card">
-            <h2>👑 TRẠM CHỈ HUY</h2>
-            <p>Nhập mật khẩu Lãnh Chúa để truy cập</p>
+            <h2>TRẠM CHỈ HUY</h2>
+            <p>Xác thực quyền Lãnh Chúa</p>
             <div class="input-group">
-                <input type="password" id="admin-pwd" placeholder="Mật khẩu của sếp...">
+                <label>Passcode</label>
+                <input type="password" id="admin-pwd" placeholder="••••••••">
             </div>
             <button class="btn btn-primary" onclick="login()" id="btnLogin">ĐĂNG NHẬP ➔</button>
         </div>
@@ -84,42 +128,42 @@
         <div class="header">
             <h1>Hệ Sinh Thái Tool VIP</h1>
             <div class="header-actions">
-                <button id="btn-free-mode" class="logout-btn" onclick="toggleFreeMode()" style="font-weight: 800; border: none; padding: 10px 15px;">⏳ Đang tải...</button>
-                <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted);" id="online-stats">Đang online: 0/0</span>
-                <button class="logout-btn" onclick="logout()">Thoát</button>
+                <button id="btn-free-mode" class="logout-btn" onclick="toggleFreeMode()" style="border: 1px solid var(--border);">⏳ SYSTEM CHECK...</button>
+                <span style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted); border: 1px solid var(--border); padding: 8px 16px; border-radius: 4px; background: var(--surface);" id="online-stats">ONLINE: 0/0</span>
+                <button class="logout-btn" onclick="logout()">LOGOUT</button>
             </div>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">🔑 Quản Lý Key</button>
-            <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">👁️ Mắt Thần & Thao Túng</button>
+            <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">Quản Lý Khách Hàng</button>
+            <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">Terminal Điều Khiển</button>
         </div>
 
         <div id="tab-manage" class="tab-content active">
             <div class="dashboard-grid">
                 <div class="panel">
-                    <div class="panel-title">⚡ Cấp Quyền Thiết Bị VIP</div>
+                    <div class="panel-title">CẤP QUYỀN TRUY CẬP</div>
                     <div class="input-group">
-                        <label>Mã thiết bị (Khách gửi)</label>
-                        <input type="text" id="new-device-id" placeholder="VD: VIP-8A2F-9B1C" style="font-family: monospace; font-weight: 700; letter-spacing: 1px;">
+                        <label>Mã thiết bị (Device ID)</label>
+                        <input type="text" id="new-device-id" placeholder="VIP-XXXX-YYYY" style="font-family: monospace; font-weight: 700; letter-spacing: 1px;">
                     </div>
                     <div class="input-group">
-                        <label>Tên Khách / Ghi chú (Khóa cứng tên này)</label>
-                        <input type="text" id="new-device-note" placeholder="VD: Hùng 13 Pro Max">
+                        <label>Tên Khách / Ghi chú</label>
+                        <input type="text" id="new-device-note" placeholder="Hùng 13 Pro Max">
                     </div>
                     <div class="input-group">
                         <label>Thời hạn sử dụng</label>
                         <select id="new-device-expiry">
-                            <option value="forever">Vĩnh viễn (Không hết hạn)</option>
+                            <option value="forever">Vĩnh viễn (Không giới hạn)</option>
                             <option value="7">7 Ngày</option>
                             <option value="30">30 Ngày</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary" style="margin-top: 10px;" onclick="addDevice()">🚀 KÍCH HOẠT NGAY</button>
+                    <button class="btn btn-primary" style="margin-top: 10px;" onclick="addDevice()">KÍCH HOẠT ID</button>
                 </div>
 
                 <div class="panel">
-                    <div class="panel-title">📋 Danh Sách Khách Hàng</div>
+                    <div class="panel-title">CƠ SỞ DỮ LIỆU KHÁCH HÀNG</div>
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -139,26 +183,33 @@
 
         <div id="tab-monitor" class="tab-content">
             <div class="panel">
-                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 15px;">
-                    <div class="panel-title" style="margin-bottom: 0;">👁️ Màn Hình Giám Sát & Thao Túng Giờ</div>
-                    <div style="display: flex; align-items: center; gap: 15px; background: #f8fafc; padding: 10px 15px; border-radius: 12px; border: 1px solid var(--border);">
-                        <span style="font-weight: 800; font-size: 0.85rem; color: var(--text-main);">THAO TÚNG TẤT CẢ ONLINE:</span>
+                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 20px;">
+                    <div class="panel-title" style="margin-bottom: 0; border-bottom: none;">BẢNG ĐIỀU KHIỂN THỜI GIAN THỰC</div>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px; background: #f8fafc; padding: 12px 15px; border-radius: 4px; border: 1px solid var(--border);">
+                        <span style="font-weight: 800; font-size: 0.85rem; color: var(--text-main); text-transform: uppercase;">Thao tác hàng loạt:</span>
                         <div class="ctrl-group" style="margin-top: 0;">
-                            <button class="ctrl-btn btn-sub" onclick="adjustAllOffset(-1)">-</button>
-                            <button class="ctrl-btn btn-add" onclick="adjustAllOffset(1)">+</button>
-                            <input type="number" id="step-all" class="ctrl-input" value="0.1" step="0.01" oninput="syncAllSteps(this.value)">
-                            <button class="btn-reset" onclick="resetAllOffset()">Reset</button>
+                            <div class="ctrl-box">
+                                <button class="ctrl-btn btn-sub" onclick="adjustAllOffset(-1)">-</button>
+                                <input type="number" id="step-all-minus" class="ctrl-input" value="0.1" step="0.01" oninput="syncAllSteps('minus', this.value)">
+                            </div>
+                            <div class="ctrl-box">
+                                <button class="ctrl-btn btn-add" onclick="adjustAllOffset(1)">+</button>
+                                <input type="number" id="step-all-plus" class="ctrl-input" value="0.1" step="0.01" oninput="syncAllSteps('plus', this.value)">
+                            </div>
+                            <button class="btn-reset" onclick="resetAllOffset()">RESET</button>
                         </div>
                     </div>
                 </div>
+                
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
                                 <th>Người Đang Cày</th>
-                                <th>Đang Mở Link / Rate</th>
+                                <th>Đang Mở / Rate</th>
                                 <th>Thông Số Rương</th>
-                                <th style="text-align: right;">Thao Túng Giờ</th>
+                                <th style="text-align: right;">Bảng Điều Khiển Cá Nhân</th>
                             </tr>
                         </thead>
                         <tbody id="monitor-list-body"></tbody>
@@ -170,7 +221,7 @@
 
     <div id="editModal" class="modal-overlay">
         <div class="modal-box">
-            <h2 style="font-weight: 800; font-size: 1.4rem; margin-bottom: 20px;">✏️ Sửa Thông Tin</h2>
+            <h2 style="font-weight: 800; font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid var(--text-main); padding-bottom: 10px; text-transform: uppercase;">Sửa Thông Tin</h2>
             <input type="hidden" id="edit-old-id">
             
             <div class="input-group">
@@ -183,8 +234,8 @@
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <button class="btn" style="background: #e2e8f0; color: #475569;" onclick="closeEditModal()">Hủy</button>
-                <button class="btn btn-primary" onclick="saveEditDevice()">Lưu Thay Đổi</button>
+                <button class="btn" style="background: var(--surface); color: var(--text-main); border: 1px solid var(--border);" onclick="closeEditModal()">HỦY BỎ</button>
+                <button class="btn btn-primary" onclick="saveEditDevice()">CẬP NHẬT</button>
             </div>
         </div>
     </div>
@@ -205,14 +256,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // ==========================================
-        // ĐĂNG NHẬP BẢO MẬT FIREBASE
-        // ==========================================
         window.login = async () => {
             const pwdInput = document.getElementById('admin-pwd').value.trim();
             if (!pwdInput) return alert("⚠️ Sếp chưa nhập mật khẩu kìa!");
             const btn = document.getElementById('btnLogin');
-            btn.textContent = "ĐANG KIỂM TRA..."; btn.disabled = true;
+            btn.textContent = "VERIFYING..."; btn.disabled = true;
 
             try {
                 const snapshot = await get(child(ref(db), 'admin_pwd'));
@@ -236,21 +284,20 @@
             if (e.key === "Enter") { e.preventDefault(); window.login(); }
         });
 
-        // ==========================================
-        // CÔNG TẮC FREE MODE (GLOBAL)
-        // ==========================================
         let isFreeMode = false;
         onValue(ref(db, 'global_settings/free_mode'), (snapshot) => {
             isFreeMode = !!snapshot.val();
             const btn = document.getElementById('btn-free-mode');
             if(isFreeMode) {
-                btn.innerHTML = '🌍 FREE MODE: ĐANG MỞ';
+                btn.innerHTML = 'FREE MODE: ON';
                 btn.style.background = 'var(--success)';
                 btn.style.color = 'white';
+                btn.style.borderColor = 'var(--success)';
             } else {
-                btn.innerHTML = '🔒 FREE MODE: ĐÃ TẮT';
-                btn.style.background = '#e2e8f0';
+                btn.innerHTML = 'FREE MODE: OFF';
+                btn.style.background = 'var(--surface)';
                 btn.style.color = 'var(--text-muted)';
+                btn.style.borderColor = 'var(--border)';
             }
             renderManageTable();
         });
@@ -262,9 +309,6 @@
             }
         };
 
-        // ==========================================
-        // LẤY DỮ LIỆU VÀ HIỂN THỊ
-        // ==========================================
         let devicesData = {};
         onValue(ref(db, 'devices'), (snapshot) => {
             devicesData = snapshot.val() || {};
@@ -273,7 +317,7 @@
         });
 
         function formatTimeAgo(ms) {
-            if (!ms) return 'Chưa từng online';
+            if (!ms) return 'Offline';
             const diff = Math.floor((Date.now() - ms) / 1000);
             if (diff < 60) return 'Vừa xong';
             if (diff < 3600) return Math.floor(diff/60) + ' phút trước';
@@ -298,47 +342,50 @@
                     if (isOnline) statusHtml = `<span class="badge badge-active"><div class="dot dot-green"></div> ONLINE</span>`;
                     else statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
                 } else if (data.status === 'locked') {
-                    typeHtml = `<b style="color:var(--danger)">Khách VIP (Bị Khóa)</b>`;
-                    statusHtml = `<span class="badge badge-locked">🔒 BỊ KHÓA</span>`;
+                    typeHtml = `<b style="color:var(--danger)">VIP Bị Khóa</b>`;
+                    statusHtml = `<span class="badge badge-locked">🔒 LOCKED</span>`;
                 } else {
                     typeHtml = `<b style="color:#3b82f6">Khách Free</b>`;
-                    if (isOnline) statusHtml = `<span class="badge" style="background:#e0f2fe; color:#0369a1;"><div class="dot" style="background:#0ea5e9;"></div> ĐANG DÙNG FREE</span>`;
+                    if (isOnline) statusHtml = `<span class="badge" style="background:#e0f2fe; color:#0369a1; border-color: #bae6fd;"><div class="dot" style="background:#0ea5e9;"></div> ONLINE (FREE)</span>`;
                     else statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
                 }
 
                 const actionBtn = `
                     <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                        <button class="action-btn" style="color: #3b82f6;" title="Sửa thông tin" onclick="openEditModal('${id}')">✏️</button>
-                        <button class="action-btn" title="${data.status === 'locked' ? 'Mở khóa VIP' : 'Khóa Thiết Bị'}" onclick="toggleLock('${id}', '${data.status || 'free'}')">${data.status === 'locked' ? '🔓' : '🔒'}</button>
-                        <button class="action-btn" style="color: #ef4444;" title="Xóa vĩnh viễn" onclick="deleteDevice('${id}')">🗑️</button>
+                        <button class="action-btn" style="color: #3b82f6;" title="Edit" onclick="openEditModal('${id}')">✏️</button>
+                        <button class="action-btn" title="${data.status === 'locked' ? 'Mở khóa' : 'Khóa'}" onclick="toggleLock('${id}', '${data.status || 'free'}')">${data.status === 'locked' ? '🔓' : '🔒'}</button>
+                        <button class="action-btn" style="color: #ef4444;" title="Delete" onclick="deleteDevice('${id}')">🗑️</button>
                     </div>
                 `;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><div class="user-info"><span class="user-name">${data.note || 'Khách Vô Danh'} <span class="device-id">/ ${id}</span></span></div></td>
+                    <td><div class="user-info"><span class="user-name">${data.note || 'Khách Vô Danh'}</span> <span class="device-id">${id}</span></div></td>
                     <td>${typeHtml}</td>
                     <td>${statusHtml}</td>
                     <td style="text-align: right;">${actionBtn}</td>
                 `;
                 tbody.appendChild(tr);
             }
-            document.getElementById('online-stats').innerHTML = `Đang online: <b style="color: var(--success);">${onlineCount}/${totalCount}</b>`;
+            document.getElementById('online-stats').innerHTML = `ONLINE: <b style="color: var(--success);">${onlineCount}/${totalCount}</b>`;
         }
 
         // ĐỒNG BỘ GIÁ TRỊ NHẬP TỪ "THAO TÚNG TẤT CẢ" XUỐNG CÁC Ô KHÁCH HÀNG
-        window.syncAllSteps = (val) => {
-            document.querySelectorAll('.step-individual').forEach(input => {
+        window.syncAllSteps = (type, val) => {
+            const className = type === 'plus' ? '.step-plus' : '.step-minus';
+            document.querySelectorAll(className).forEach(input => {
                 input.value = val;
-                savedStepValues[input.id] = val; // Lưu luôn vào bộ nhớ đệm
+                savedStepValues[input.id] = val; 
             });
         };
 
         let savedStepValues = {};
         function renderMonitorTable() {
-            document.querySelectorAll('.step-individual').forEach(input => { savedStepValues[input.id] = input.value; });
+            document.querySelectorAll('.ctrl-input').forEach(input => { if(!input.id.includes('step-all')) savedStepValues[input.id] = input.value; });
             const tbody = document.getElementById('monitor-list-body'); tbody.innerHTML = ''; const now = Date.now();
-            const globalStepVal = document.getElementById('step-all').value || "0.1";
+            
+            const globalMinus = document.getElementById('step-all-minus').value || "0.1";
+            const globalPlus = document.getElementById('step-all-plus').value || "0.1";
 
             for (const [id, data] of Object.entries(devicesData)) {
                 const isOnline = data.last_active && (now - data.last_active < 60000);
@@ -352,25 +399,31 @@
                     if (adminOffset > 0) { offsetClass = 'offset-pos'; offsetText = `Đang bù: +${adminOffset.toFixed(2)}s`; }
                     if (adminOffset < 0) { offsetClass = 'offset-neg'; offsetText = `Đang bù: ${adminOffset.toFixed(2)}s`; }
                     
-                    // Ưu tiên lấy giá trị đã nhập của riêng ô đó, nếu trống thì lấy theo ô Tổng
-                    const stepVal = savedStepValues[`step-${id}`] || globalStepVal;
+                    const stepMinusVal = savedStepValues[`step-minus-${id}`] || globalMinus;
+                    const stepPlusVal = savedStepValues[`step-plus-${id}`] || globalPlus;
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>
                             <div class="user-info">
-                                <span class="user-name">${data.note || 'Khách Vô Danh'} <span class="device-id">/ ${id}</span></span>
+                                <span class="user-name">${data.note || 'Khách Vô Danh'}</span>
+                                <span class="device-id">${id}</span>
                             </div>
                         </td>
                         <td><span style="font-weight:800; color:var(--primary); font-size: 1.1rem;">${task.rate || 'Đang chờ...'}</span></td>
-                        <td><b style="font-size: 1.2rem;">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.95rem;">xu</span></td>
+                        <td><b style="font-size: 1.2rem; color: #b45309;">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700;">xu</span></td>
                         <td style="text-align: right;">
-                            <div><span class="live-cd" data-endtime="${endTime}">0.0</span> <span style="color: var(--text-muted); font-weight: 700;">giây</span></div>
+                            <div><span class="live-cd" data-endtime="${endTime}">0.0</span></div>
                             <div class="ctrl-group">
-                                <button class="ctrl-btn btn-sub" onclick="adjustOffset('${id}', -1)">-</button>
-                                <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)">+</button>
-                                <input type="number" id="step-${id}" class="ctrl-input step-individual" value="${stepVal}" step="0.01">
-                                <button class="btn-reset" onclick="resetOffset('${id}')">Reset</button>
+                                <div class="ctrl-box">
+                                    <button class="ctrl-btn btn-sub" onclick="adjustOffset('${id}', -1)">-</button>
+                                    <input type="number" id="step-minus-${id}" class="ctrl-input step-minus" value="${stepMinusVal}" step="0.01">
+                                </div>
+                                <div class="ctrl-box">
+                                    <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)">+</button>
+                                    <input type="number" id="step-plus-${id}" class="ctrl-input step-plus" value="${stepPlusVal}" step="0.01">
+                                </div>
+                                <button class="btn-reset" onclick="resetOffset('${id}')">RESET</button>
                             </div>
                             <div><span class="offset-badge ${offsetClass}">${offsetText}</span></div>
                         </td>
@@ -380,9 +433,6 @@
             }
         }
 
-        // ==========================================
-        // CÁC HÀM XỬ LÝ (SỬA, XÓA, THÊM, BÙ GIỜ)
-        // ==========================================
         window.deleteDevice = (id) => {
             const note = devicesData[id]?.note || id;
             if(confirm(`⚠️ Sếp có CHẮC CHẮN muốn XÓA VĨNH VIỄN khách hàng [ ${note} ] không?\nThao tác này không thể hoàn tác!`)) {
@@ -435,14 +485,16 @@
         };
 
         window.adjustOffset = (id, direction) => {
-            const stepVal = parseFloat(document.getElementById(`step-${id}`).value) || 0.1;
+            const inputId = direction === 1 ? `step-plus-${id}` : `step-minus-${id}`;
+            const stepVal = parseFloat(document.getElementById(inputId).value) || 0.1;
             const currentOffset = devicesData[id]?.admin_offset || 0;
             update(ref(db, 'devices/' + id), { admin_offset: Math.round((currentOffset + (stepVal * direction)) * 100) / 100 });
         };
         window.resetOffset = (id) => update(ref(db, 'devices/' + id), { admin_offset: 0 });
 
         window.adjustAllOffset = (direction) => {
-            const stepVal = parseFloat(document.getElementById('step-all').value) || 0.1;
+            const inputId = direction === 1 ? 'step-all-plus' : 'step-all-minus';
+            const stepVal = parseFloat(document.getElementById(inputId).value) || 0.1;
             const now = Date.now(); let updates = {};
             for (const [id, data] of Object.entries(devicesData)) {
                 if (data.last_active && (now - data.last_active < 60000) && data.status !== 'locked') {
