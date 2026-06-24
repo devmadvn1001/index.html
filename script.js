@@ -1,6 +1,46 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getDatabase, ref, set, update, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
+// ============================================================== //
+// 0. BỌC THÉP HỆ THỐNG LƯU TRỮ (CHỐNG CRASH TRÊN TELEGRAM)       //
+// ============================================================== //
+function safeGetItem(key, defaultVal = null) {
+    try { return localStorage.getItem(key) || defaultVal; } catch(e) { return defaultVal; }
+}
+function safeSetItem(key, val) {
+    try { localStorage.setItem(key, val); } catch(e) {}
+}
+function safeRemoveItem(key) {
+    try { localStorage.removeItem(key); } catch(e) {}
+}
+
+// ============================================================== //
+// 1. KHỞI TẠO CÁC BIẾN TOÀN CỤC TRƯỚC (CHỐNG LỖI TDZ)           //
+// ============================================================== //
+const urlParams = new URLSearchParams(window.location.search);
+let paramM = urlParams.get('m') || 'user';
+const paramR = urlParams.get('r') || '';
+const tiktokLink = urlParams.get('link') || '';
+
+let coins = 80; let canOpen = 25; let hotBoxStr = '🏅🇩🇪'; let latestViewersStr = ''; let endTime = 0;
+
+if (paramR) {
+    const parts = paramR.split('|');
+    if (parts.length >= 1 && parts[0]) coins = parseInt(parts[0]) || 0;
+    if (parts.length >= 2 && parts[1]) canOpen = parseInt(parts[1]) || 0;
+    if (parts.length >= 3) hotBoxStr = parts[2] || '🏅🇩🇪';
+    if (parts.length >= 4) latestViewersStr = parts[3] || '';
+    if (parts.length >= 5) endTime = parseInt(parts[4]) || 0;
+}
+
+let timeOffset = 0; let link1 = null;
+let timeBase = Date.now() - performance.now();
+function getAccurateTime() { return performance.now() + timeBase; }
+const isT3 = window.location.pathname.includes('t3.html');
+
+// ============================================================== //
+// 2. KẾT NỐI FIREBASE                                            //
+// ============================================================== //
 const firebaseConfig = {
     apiKey: "AIzaSyAOzLEX4hjRbp3pEbEm5dL2iqHUWZ0EZCM",
     authDomain: "canh-ruong-tiktok.firebaseapp.com",
@@ -14,18 +54,18 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 // ============================================================== //
-// 1. TẠO ĐỊNH DANH BẢO MẬT (DEVICE ID)                           //
+// 3. TẠO ĐỊNH DANH MÁY (DEVICE ID) BẢO MẬT                       //
 // ============================================================== //
-let deviceId = localStorage.getItem('vip_device_id');
+let deviceId = safeGetItem('vip_device_id');
 if (!deviceId) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const randomStr = (length) => Array.from({length}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
     deviceId = `VIP-${randomStr(4)}-${randomStr(4)}`;
-    localStorage.setItem('vip_device_id', deviceId);
+    safeSetItem('vip_device_id', deviceId);
 }
 
 const displayDeviceId = document.getElementById('displayDeviceId');
-if (displayDeviceId) displayDeviceId.textContent = deviceId; // In mã ra màn hình ngay lập tức
+if (displayDeviceId) displayDeviceId.textContent = deviceId; // Ép in mã ra ngay lập tức
 
 const btnCopyDeviceId = document.getElementById('btnCopyDeviceId');
 if (btnCopyDeviceId) {
@@ -37,14 +77,13 @@ if (btnCopyDeviceId) {
 }
 
 // ============================================================== //
-// 2. KẾT NỐI TRẠM CHỈ HUY FIREBASE (LẮNG NGHE ADMIN)             //
+// 4. LẮNG NGHE LỆNH TỪ LÃNH CHÚA (FREE MODE & KHÓA VIP)          //
 // ============================================================== //
 let isFreeMode = false;
 let deviceStatus = 'unknown'; 
 let adminOffset = 0; 
 const deviceRef = ref(db, `devices/${deviceId}`);
 
-// Bắn nhịp tim lên Tab Mắt Thần của Admin
 function pushHeartbeat() {
     update(deviceRef, {
         last_active: Date.now(),
@@ -56,47 +95,42 @@ function pushHeartbeat() {
     }).catch(()=>{});
 }
 
-// Hàm kiểm tra Quyền truy cập (Xử lý Màn hình khóa)
 function checkAccess() {
     const lockScreen = document.getElementById('vipLockScreen');
     
-    // Nếu bị Sếp khóa đích danh (Nút Khóa ở trang Admin) -> Chặn đứng, văng ra ngoài ngay
+    // Nếu bị Sếp khóa đích danh -> Chặn văng ra ngoài ngay
     if (deviceStatus === 'locked') {
         if (lockScreen) lockScreen.style.display = 'flex';
         return;
     }
     
-    // Nếu Máy đã được cấp quyền VIP HOẶC Admin đang bật Công tắc Free Mode -> Mở cửa
+    // Nếu có quyền VIP hoặc Admin bật Free Mode -> Vào xài Tool
     if (isFreeMode || deviceStatus === 'active') {
         if (lockScreen) lockScreen.style.display = 'none';
         pushHeartbeat(); 
     } else {
-        // Chưa có quyền VIP và Admin đang khóa cửa -> Hiện màn đen
         if (lockScreen) lockScreen.style.display = 'flex';
     }
 }
 
-// Lắng nghe Công tắc Free Mode toàn hệ thống (Real-time)
 onValue(ref(db, 'global_settings/free_mode'), (snapshot) => {
     isFreeMode = !!snapshot.val();
-    checkAccess(); // Chạy lại logic check cửa
+    checkAccess();
 });
 
-// Lắng nghe lệnh trực tiếp từ Lãnh Chúa cho riêng máy này (Khóa tên, Khóa máy, Bù giờ)
 onValue(deviceRef, (snapshot) => {
     const data = snapshot.val();
     const nameInputEl = document.getElementById('my-name-input');
 
     if (data) {
         deviceStatus = data.status || 'unknown';
-        adminOffset = parseFloat(data.admin_offset) || 0; // Cập nhật bù giờ bí mật
+        adminOffset = parseFloat(data.admin_offset) || 0;
 
-        // Nếu là khách VIP, khóa cứng tên hiển thị
         if (deviceStatus === 'active' && data.note) {
             if (nameInputEl) {
                 if (nameInputEl.value !== data.note) {
                     nameInputEl.value = data.note;
-                    try { localStorage.setItem('myName', data.note); } catch(e){}
+                    safeSetItem('myName', data.note);
                     pushNameToFirebase(data.note);
                 }
                 nameInputEl.disabled = true;
@@ -109,8 +143,7 @@ onValue(deviceRef, (snapshot) => {
         adminOffset = 0;
         if (nameInputEl) nameInputEl.disabled = false;
     }
-    
-    forceUpdateClock(); // Ép đồng hồ nảy số liền nếu bị sếp tác động Offset
+    forceUpdateClock();
     checkAccess();
 });
 
@@ -118,43 +151,14 @@ setInterval(pushHeartbeat, 30000);
 onDisconnect(deviceRef).update({ last_active: Date.now() });
 
 // ============================================================== //
-// CÁC HÀM CỐT LÕI (GIỮ NGUYÊN GỐC CỦA SẾP)
+// CÁC HÀM CỐT LÕI CỦA TOOL (KHÔNG THAY ĐỔI)
 // ============================================================== //
-const urlParams = new URLSearchParams(window.location.search);
-let paramM = urlParams.get('m') || 'user';
-const paramR = urlParams.get('r') || '';
-const tiktokLink = urlParams.get('link') || '';
-
-let coins = 80;
-let canOpen = 25;
-let hotBoxStr = '🏅🇩🇪';
-let latestViewersStr = '';
-let endTime = 0;
-
-if (paramR) {
-    const parts = paramR.split('|');
-    if (parts.length >= 1 && parts[0]) coins = parseInt(parts[0]) || 0;
-    if (parts.length >= 2 && parts[1]) canOpen = parseInt(parts[1]) || 0;
-    if (parts.length >= 3) hotBoxStr = parts[2] || '🏅🇩🇪';
-    if (parts.length >= 4) latestViewersStr = parts[3] || '';
-    if (parts.length >= 5) endTime = parseInt(parts[4]) || 0;
-}
-
-let timeOffset = 0;
-let link1 = null;
-
-let timeBase = Date.now() - performance.now();
-function getAccurateTime() {
-    return performance.now() + timeBase;
-}
-
-const isT3 = window.location.pathname.includes('t3.html');
 const btnSwitchUI = document.getElementById('btn-switch-ui');
 if (btnSwitchUI) {
     btnSwitchUI.addEventListener('click', () => {
-        const currentUI = localStorage.getItem('active_ui') || 'T1';
+        const currentUI = safeGetItem('active_ui', 'T1');
         const newUI = currentUI === 'T1' ? 'T3' : 'T1';
-        localStorage.setItem('active_ui', newUI);
+        safeSetItem('active_ui', newUI);
         const targetPage = newUI === 'T3' ? 't3.html' : 'index.html';
         window.location.href = targetPage + window.location.search;
     });
@@ -162,16 +166,13 @@ if (btnSwitchUI) {
 
 const myNameInput = document.getElementById('my-name-input');
 const viewersList = document.getElementById('viewers-list');
-let mySessionId = localStorage.getItem('mySessionId');
+let mySessionId = safeGetItem('mySessionId');
 if (!mySessionId) {
     mySessionId = 'sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-    localStorage.setItem('mySessionId', mySessionId);
+    safeSetItem('mySessionId', mySessionId);
 }
 
-let currentRoomIdStr = '';
-let myViewerRef = null;
-let roomViewersRef = null;
-let unsubscribeViewers = null;
+let currentRoomIdStr = ''; let myViewerRef = null; let roomViewersRef = null; let unsubscribeViewers = null;
 
 function setupRoomViewers(newEndTime) {
     if (myViewerRef) { remove(myViewerRef); myViewerRef = null; }
@@ -181,7 +182,7 @@ function setupRoomViewers(newEndTime) {
     myViewerRef = ref(db, `rooms/${currentRoomIdStr}/viewers/${mySessionId}`);
     onDisconnect(myViewerRef).remove();
 
-    const savedName = myNameInput && myNameInput.value.trim() !== '' ? myNameInput.value : localStorage.getItem('myName');
+    const savedName = myNameInput && myNameInput.value.trim() !== '' ? myNameInput.value : safeGetItem('myName');
     if (savedName) pushNameToFirebase(savedName);
 
     roomViewersRef = ref(db, `rooms/${currentRoomIdStr}/viewers`);
@@ -192,60 +193,40 @@ function setupRoomViewers(newEndTime) {
             const uniqueNames = [...new Set(names)];
             if (uniqueNames.length > 0) {
                 if(viewersList) viewersList.innerHTML = `<b>${uniqueNames.join(', ')}</b> đang cày chung`;
-            } else {
-                if(viewersList) viewersList.innerHTML = `Chưa có ai điểm danh`;
-            }
-        } else {
-            if(viewersList) viewersList.innerHTML = `Chưa có ai điểm danh`;
-        }
+            } else { if(viewersList) viewersList.innerHTML = `Chưa có ai điểm danh`; }
+        } else { if(viewersList) viewersList.innerHTML = `Chưa có ai điểm danh`; }
     });
 }
 
 function pushNameToFirebase(name) {
     if (myViewerRef) {
-        if (name && name.trim() !== '') {
-            set(myViewerRef, name.trim().toUpperCase());
-        } else {
-            remove(myViewerRef); 
-        }
+        if (name && name.trim() !== '') { set(myViewerRef, name.trim().toUpperCase()); } 
+        else { remove(myViewerRef); }
     }
 }
 
 if (myNameInput) {
     myNameInput.addEventListener('input', function() {
         const val = this.value;
-        try { localStorage.setItem('myName', val); } catch(e){}
+        safeSetItem('myName', val);
         pushNameToFirebase(val);
     });
 }
 
 setupRoomViewers(endTime);
 
-let allBoxes = []; 
-let liveRoomId = '';
-
-if (tiktokLink) {
-    const match = tiktokLink.match(/live\/(\d+)/);
-    if (match) liveRoomId = match[1];
-}
-
-if (endTime && liveRoomId) {
-    allBoxes.push({ room_id: liveRoomId, end_time: endTime, m: paramM, r_params: paramR, tiktok_link: tiktokLink });
-}
+let allBoxes = []; let liveRoomId = '';
+if (tiktokLink) { const match = tiktokLink.match(/live\/(\d+)/); if (match) liveRoomId = match[1]; }
+if (endTime && liveRoomId) { allBoxes.push({ room_id: liveRoomId, end_time: endTime, m: paramM, r_params: paramR, tiktok_link: tiktokLink }); }
 
 const paramWs = urlParams.get('ws');
-const customWsUrl = paramWs || localStorage.getItem('ws_url');
-let ws = null;
-let wsPingInterval = null;
-let isSyncOn = isT3 ? true : false;
-let networkTimeOffset = 0; 
+const customWsUrl = paramWs || safeGetItem('ws_url');
+let ws = null; let wsPingInterval = null; let isSyncOn = isT3 ? true : false; let networkTimeOffset = 0; 
 
 function startWsPing() {
     if (wsPingInterval) clearInterval(wsPingInterval);
     wsPingInterval = setInterval(() => {
-        if (ws && ws.readyState === 1 && (isT3 || isSyncOn)) {
-            ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() }));
-        }
+        if (ws && ws.readyState === 1 && (isT3 || isSyncOn)) { ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() })); }
     }, 1500);
 }
 
@@ -303,9 +284,8 @@ function connectWebSocket() {
     
     ws.onclose = () => { 
         clearInterval(wsPingInterval);
-        if (isT3 && pingDisplay) {
-            pingDisplay.innerHTML = `Ping lỗi (syncing - ❌ offline)`;
-        } else if (!isT3 && isSyncOn && pingDisplay) {
+        if (isT3 && pingDisplay) { pingDisplay.innerHTML = `Ping lỗi (syncing - ❌ offline)`; } 
+        else if (!isT3 && isSyncOn && pingDisplay) {
             pingDisplay.innerHTML = `Ping ms : <span style="color: #ef4444;">LỖI</span>`;
             if (syncStatus) { syncStatus.textContent = 'LỖI WSS'; syncStatus.style.color = '#ef4444'; }
         }
@@ -338,16 +318,8 @@ function updateNavigationUI() {
 
     if (hasPrev || hasNext) {
         if(wrapper) wrapper.style.display = 'flex';
-        
-        if (hasPrev) {
-            btnPrev.style.display = 'flex';
-            if (prevCount) prevCount.textContent = currentIndex; 
-        } else { btnPrev.style.display = 'none'; }
-        
-        if (hasNext) {
-            btnNext.style.display = 'flex';
-            if (nextCount) nextCount.textContent = (allBoxes.length - 1 - currentIndex);
-        } else { btnNext.style.display = 'none'; }
+        if (hasPrev) { btnPrev.style.display = 'flex'; if (prevCount) prevCount.textContent = currentIndex; } else { btnPrev.style.display = 'none'; }
+        if (hasNext) { btnNext.style.display = 'flex'; if (nextCount) nextCount.textContent = (allBoxes.length - 1 - currentIndex); } else { btnNext.style.display = 'none'; }
     } else {
         if(wrapper) wrapper.style.display = 'none';
         btnPrev.style.display = 'none'; btnNext.style.display = 'none';
@@ -356,9 +328,7 @@ function updateNavigationUI() {
 
 function loadBox(targetBox) {
     if (!targetBox) return;
-
-    endTime = targetBox.end_time;
-    paramM = targetBox.m; 
+    endTime = targetBox.end_time; paramM = targetBox.m; 
     
     const parts = targetBox.r_params.split('|');
     if (parts.length >= 1 && parts[0]) coins = parseInt(parts[0]) || 0;
@@ -379,56 +349,35 @@ function loadBox(targetBox) {
     if (endTimeDisplayEl) endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
     
     if (countdownEl) { countdownEl.style.fontSize = ''; countdownEl.style.color = ''; }
-    document.body.style.backgroundColor = ''; 
-    currentBgState = 'default';
+    document.body.style.backgroundColor = ''; currentBgState = 'default';
     
-    setupRoomViewers(endTime); 
-    updateNavigationUI();
-    forceUpdateClock();
-    pushHeartbeat();
+    setupRoomViewers(endTime); updateNavigationUI(); forceUpdateClock(); pushHeartbeat();
 }
 
-const btnNextEl = document.getElementById('nextBoxBtn');
-const btnPrevEl = document.getElementById('prevBoxBtn');
+const btnNextEl = document.getElementById('nextBoxBtn'); const btnPrevEl = document.getElementById('prevBoxBtn');
+if (btnNextEl) { btnNextEl.addEventListener('click', () => { const currentIndex = allBoxes.findIndex(b => b.end_time === endTime); if (currentIndex !== -1 && currentIndex < allBoxes.length - 1) { loadBox(allBoxes[currentIndex + 1]); } }); }
+if (btnPrevEl) { btnPrevEl.addEventListener('click', () => { const currentIndex = allBoxes.findIndex(b => b.end_time === endTime); if (currentIndex > 0) { loadBox(allBoxes[currentIndex - 1]); } }); }
 
-if (btnNextEl) {
-    btnNextEl.addEventListener('click', () => {
-        const currentIndex = allBoxes.findIndex(b => b.end_time === endTime);
-        if (currentIndex !== -1 && currentIndex < allBoxes.length - 1) { loadBox(allBoxes[currentIndex + 1]); }
-    });
-}
-if (btnPrevEl) {
-    btnPrevEl.addEventListener('click', () => {
-        const currentIndex = allBoxes.findIndex(b => b.end_time === endTime);
-        if (currentIndex > 0) { loadBox(allBoxes[currentIndex - 1]); }
-    });
-}
-
-const btnSync = document.getElementById('btn-sync'); 
-const syncStatus = document.getElementById('sync-status');
-const pingDisplay = document.getElementById('pingDisplay'); 
+const btnSync = document.getElementById('btn-sync'); const syncStatus = document.getElementById('sync-status'); const pingDisplay = document.getElementById('pingDisplay'); 
 
 function applySyncState(state) {
     if (state) {
         isSyncOn = true;
         if (!isT3 && syncStatus) { syncStatus.textContent = 'WSS...'; syncStatus.style.color = '#f59e0b'; }
-        if (!isT3) { try { localStorage.setItem('isSyncOn', 'true'); } catch (e) {} }
+        if (!isT3) { safeSetItem('isSyncOn', 'true'); }
         if (ws && ws.readyState === 1) { ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() })); }
     } else {
-        isSyncOn = false;
-        networkTimeOffset = 0; 
+        isSyncOn = false; networkTimeOffset = 0; 
         if (!isT3 && syncStatus) { syncStatus.textContent = 'OFF'; syncStatus.style.color = '#ef4444'; }
         if (!isT3 && pingDisplay) { pingDisplay.innerHTML = `Ping ms : --`; }
-        if (!isT3) { try { localStorage.setItem('isSyncOn', 'false'); } catch (e) {} }
+        if (!isT3) { safeSetItem('isSyncOn', 'false'); }
     }
 }
 
 if (isT3) { applySyncState(true); }
 if (btnSync) { btnSync.addEventListener('click', function() { applySyncState(!isSyncOn); }); }
 
-function getCurrentTimeMs() {
-    return getAccurateTime() + (isSyncOn ? networkTimeOffset : 0);
-}
+function getCurrentTimeMs() { return getAccurateTime() + (isSyncOn ? networkTimeOffset : 0); }
 
 let colorConfig = { active: false, start: 0.6, end: 0.0, color: '#ff0000' };
 let currentBgState = 'default';
@@ -450,48 +399,41 @@ function applyBackgroundColor(state, colorHex = '') {
     if (isT3) return;
     if (state === 'default') {
         document.body.style.backgroundColor = ''; 
-        const card = document.querySelector('.app-card');
-        if(card) card.style.backgroundColor = ''; 
+        const card = document.querySelector('.app-card'); if(card) card.style.backgroundColor = ''; 
         document.documentElement.style.removeProperty('--text-main');
         document.documentElement.style.removeProperty('--text-muted');
     } else if (state === 'flash') {
         document.body.style.backgroundColor = colorHex;
-        const card = document.querySelector('.app-card');
-        if(card) card.style.backgroundColor = colorHex;
+        const card = document.querySelector('.app-card'); if(card) card.style.backgroundColor = colorHex;
     }
     updateDTOffset();
 }
 
 (function loadSavedState() {
     try {
-        var savedOffset = localStorage.getItem('timeOffset');
+        var savedOffset = safeGetItem('timeOffset');
         if (savedOffset) { timeOffset = parseFloat(savedOffset); if (isNaN(timeOffset)) timeOffset = 0; }
-        var savedLink1 = localStorage.getItem('link1');
+        var savedLink1 = safeGetItem('link1');
         if (savedLink1 && savedLink1 !== 'null') { link1 = savedLink1; }
 
-        var savedConfig = localStorage.getItem('colorConfig');
-        if (savedConfig && !isT3) {
-            colorConfig = JSON.parse(savedConfig);
+        var savedConfigStr = safeGetItem('colorConfig');
+        if (savedConfigStr && !isT3) {
+            colorConfig = JSON.parse(savedConfigStr);
             if (document.getElementById('start_seconds')) document.getElementById('start_seconds').value = colorConfig.start;
             if (document.getElementById('end_seconds')) document.getElementById('end_seconds').value = colorConfig.end;
             if (document.getElementById('hex_background_color')) document.getElementById('hex_background_color').value = colorConfig.color;
         }
 
-        var savedWsUrl = localStorage.getItem('ws_url');
-        if (savedWsUrl && document.getElementById('ws_url_input')) {
-            document.getElementById('ws_url_input').value = savedWsUrl;
-        }
+        var savedWsUrl = safeGetItem('ws_url');
+        if (savedWsUrl && document.getElementById('ws_url_input')) { document.getElementById('ws_url_input').value = savedWsUrl; }
 
         if (!isT3) {
-            var savedSync = localStorage.getItem('isSyncOn');
+            var savedSync = safeGetItem('isSyncOn');
             if (savedSync === 'true') applySyncState(true); else applySyncState(false);
         }
 
-        let savedName = localStorage.getItem('myName');
-        if (savedName && myNameInput) {
-            myNameInput.value = savedName;
-            pushNameToFirebase(savedName);
-        }
+        let savedName = safeGetItem('myName');
+        if (savedName && myNameInput) { myNameInput.value = savedName; pushNameToFirebase(savedName); }
         if(!isT3) updateConfigDisplayUI(); 
         applyBackgroundColor('default');
     } catch (e) {}
@@ -521,7 +463,6 @@ function formatEndTimeHHMMSS(timestampSeconds) {
     const s = String(date.getSeconds()).padStart(2, '0');
     return h + ':' + m + ':' + s;
 }
-
 if (endTimeDisplayEl) endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
 
 function updateDTOffset() {
@@ -543,17 +484,14 @@ function formatTimeMMSSF(totalSeconds) {
 }
 
 document.addEventListener("visibilitychange", function() {
-    if (document.hidden) {
-        if (myViewerRef) remove(myViewerRef);
-    } else {
+    if (document.hidden) { if (myViewerRef) remove(myViewerRef); } 
+    else {
         if (myNameInput && myNameInput.value.trim() !== '') { pushNameToFirebase(myNameInput.value); }
         pushHeartbeat(); 
     }
 });
 
-let lastCountdownText = "";
-let lastServerTimeText = "";
-let isPingDisplayFrozen = false;
+let lastCountdownText = ""; let lastServerTimeText = ""; let isPingDisplayFrozen = false;
 
 function forceUpdateClock() { updateClock(true); }
 
@@ -567,7 +505,7 @@ function updateClock(force = false) {
     const now = getCurrentTimeMs();
     const endTimeMs = endTime * 1000;
     
-    // --- LÕI BÀN TAY CHÚA: Can thiệp trực tiếp từ Firebase ---
+    // --- LÕI BÀN TAY CHÚA TỪ FIREBASE ---
     const secretAdminOffsetMs = adminOffset * 1000;
     const adjustedEndMs = endTimeMs + (timeOffset * 1000) + secretAdminOffsetMs;
     const diffMs = adjustedEndMs - now;
@@ -607,9 +545,8 @@ function updateClock(force = false) {
 }
 
 function adjustTime(seconds) {
-    timeOffset += seconds;
-    timeOffset = Math.round(timeOffset * 100) / 100;
-    try { localStorage.setItem('timeOffset', String(timeOffset)); } catch (e) {}
+    timeOffset += seconds; timeOffset = Math.round(timeOffset * 100) / 100;
+    safeSetItem('timeOffset', String(timeOffset));
     updateDTOffset(); forceUpdateClock();
 }
 
@@ -633,21 +570,16 @@ const claimChangeBtn = document.getElementById('claimChangeBtn');
 if (claimChangeBtn) {
     claimChangeBtn.addEventListener('click', function () {
         if (link1) {
-            link1 = null; try { localStorage.removeItem('link1'); } catch (e) {} alert('Đã xoá link(1)!');
+            link1 = null; safeRemoveItem('link1'); alert('Đã xoá link(1)!');
         } else {
             var input = prompt('Nhập link(1):');
-            if (input && input.trim() !== '') { link1 = input.trim(); try { localStorage.setItem('link1', String(link1)); } catch (e) {} alert('Đã lưu link(1): ' + link1); }
+            if (input && input.trim() !== '') { link1 = input.trim(); safeSetItem('link1', String(link1)); alert('Đã lưu link(1): ' + link1); }
         }
     });
 }
 
-function handleConfirm(ok) {
-    var modal = document.getElementById('confirmModal');
-    if (modal) modal.style.display = 'none';
-}
-
-var confirmCancelBtn = document.getElementById('confirmCancelBtn');
-var confirmOkBtn = document.getElementById('confirmOkBtn');
+function handleConfirm(ok) { var modal = document.getElementById('confirmModal'); if (modal) modal.style.display = 'none'; }
+var confirmCancelBtn = document.getElementById('confirmCancelBtn'); var confirmOkBtn = document.getElementById('confirmOkBtn');
 if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', function () { handleConfirm(false); });
 if (confirmOkBtn) confirmOkBtn.addEventListener('click', function () { handleConfirm(true); });
 
@@ -664,17 +596,17 @@ if (btnSubmit) {
             colorConfig.end = isNaN(endVal) ? 0 : endVal;
             colorConfig.color = document.getElementById('hex_background_color').value;
             colorConfig.active = true;
-            try { localStorage.setItem('colorConfig', JSON.stringify(colorConfig)); } catch (e) {}
+            safeSetItem('colorConfig', JSON.stringify(colorConfig));
             updateConfigDisplayUI(); currentBgState = 'default'; applyBackgroundColor('default');
         }
         
         const wsUrlVal = document.getElementById('ws_url_input').value.trim();
-        if (wsUrlVal) localStorage.setItem('ws_url', wsUrlVal); else localStorage.removeItem('ws_url');
+        if (wsUrlVal) safeSetItem('ws_url', wsUrlVal); else safeRemoveItem('ws_url');
 
         if (isT3) {
             const nameVal = document.getElementById('my-name-input').value.trim();
             if (nameVal && !document.getElementById('my-name-input').disabled) {
-                localStorage.setItem('myName', nameVal); pushNameToFirebase(nameVal);
+                safeSetItem('myName', nameVal); pushNameToFirebase(nameVal);
             }
         }
 
@@ -686,7 +618,7 @@ if (btnSubmit) {
 const configDelBtn = document.getElementById('configDelBtn');
 if (configDelBtn) {
     configDelBtn.addEventListener('click', function() {
-        colorConfig.active = false; try { localStorage.setItem('colorConfig', JSON.stringify(colorConfig)); } catch (e) {}
+        colorConfig.active = false; safeSetItem('colorConfig', JSON.stringify(colorConfig));
         updateConfigDisplayUI(); currentBgState = 'default'; applyBackgroundColor('default');
     });
 }
@@ -701,5 +633,3 @@ function clockLoop() {
     requestAnimationFrame(clockLoop); 
 }
 requestAnimationFrame(clockLoop);
-
-}
