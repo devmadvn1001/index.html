@@ -1,6 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getDatabase, ref, set, update, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
+// ============================================================== //
+// 0. BỌC THÉP HỆ THỐNG LƯU TRỮ (CHỐNG CRASH TRÊN TRÌNH DUYỆT ẨN) //
+// ============================================================== //
 function safeGetItem(key, defaultVal = null) {
     try { return localStorage.getItem(key) || defaultVal; } catch(e) { return defaultVal; }
 }
@@ -11,6 +14,57 @@ function safeRemoveItem(key) {
     try { localStorage.removeItem(key); } catch(e) {}
 }
 
+// ============================================================== //
+// 1. KHAI BÁO TOÀN BỘ GIAO DIỆN TRƯỚC (CHỐNG LỖI SẬP JAVASCRIPT) //
+// ============================================================== //
+const lockScreen = document.getElementById('vipLockScreen');
+const displayDeviceId = document.getElementById('displayDeviceId');
+const btnCopyDeviceId = document.getElementById('btnCopyDeviceId');
+const nameInputEl = document.getElementById('my-name-input');
+const btnSwitchUI = document.getElementById('btn-switch-ui');
+const viewersList = document.getElementById('viewers-list');
+const pingDisplay = document.getElementById('pingDisplay');
+const syncStatus = document.getElementById('sync-status');
+const nextBoxWrapper = document.getElementById('nextBoxWrapper');
+const btnPrevBox = document.getElementById('prevBoxBtn');
+const btnNextBox = document.getElementById('nextBoxBtn');
+const prevBoxCount = document.getElementById('prevBoxCount');
+const nextBoxCount = document.getElementById('nextBoxCount');
+const usernameDisplayEl = document.getElementById('usernameDisplay');
+const viewCountEl = document.getElementById('viewCount');
+const peopleCountEl = document.getElementById('peopleCount');
+const hotBoxFlagEl = document.getElementById('hotBoxFlag');
+const viewersDisplayEl = document.getElementById('viewersDisplay');
+const endTimeDisplayEl = document.getElementById('endTimeDisplay');
+const countdownEl = document.getElementById('countdown');
+const serverTimeDisplayEl = document.getElementById('serverTimeDisplay');
+const dTEl = document.getElementById('d-t');
+const btnSync = document.getElementById('btn-sync');
+const activeConfigDisplay = document.getElementById('activeConfigDisplay');
+const configColorDot = document.getElementById('configColorDot');
+const configText = document.getElementById('configText');
+const dec005 = document.getElementById('btn-decrease-0.05');
+const dec001 = document.getElementById('btn-decrease-0.01');
+const inc001 = document.getElementById('btn-increase-0.01');
+const inc005 = document.getElementById('btn-increase-0.05');
+const claimBtn = document.getElementById('claimBtn');
+const claimChangeBtn = document.getElementById('claimChangeBtn');
+const confirmModal = document.getElementById('confirmModal');
+const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+const confirmOkBtn = document.getElementById('confirmOkBtn');
+const btnOpen = document.getElementById('btn-open');
+const btnCancel = document.getElementById('btn-cancel');
+const btnSubmit = document.getElementById('btn-submit');
+const configDelBtn = document.getElementById('configDelBtn');
+const modalEl = document.getElementById('modal');
+const startSecondsEl = document.getElementById('start_seconds');
+const endSecondsEl = document.getElementById('end_seconds');
+const hexBgColorEl = document.getElementById('hex_background_color');
+const wsUrlInputEl = document.getElementById('ws_url_input');
+
+// ============================================================== //
+// 2. KHỞI TẠO CÁC BIẾN TOÀN CỤC THÔNG SỐ RƯƠNG                   //
+// ============================================================== //
 const urlParams = new URLSearchParams(window.location.search);
 let paramM = urlParams.get('m') || 'user';
 const paramR = urlParams.get('r') || '';
@@ -32,6 +86,26 @@ let timeBase = Date.now() - performance.now();
 function getAccurateTime() { return performance.now() + timeBase; }
 const isT3 = window.location.pathname.includes('t3.html');
 
+// HIỂN THỊ THÔNG SỐ LÊN UI LẦN ĐẦU
+if (usernameDisplayEl) usernameDisplayEl.textContent = paramM;
+if (viewCountEl) viewCountEl.textContent = coins;
+if (peopleCountEl) peopleCountEl.textContent = canOpen;
+if (hotBoxFlagEl) hotBoxFlagEl.textContent = hotBoxStr;
+if (viewersDisplayEl) viewersDisplayEl.textContent = latestViewersStr;
+
+function formatEndTimeHHMMSS(timestampSeconds) {
+    if (!timestampSeconds) return '--:--:--';
+    const date = new Date(timestampSeconds * 1000);
+    const h = String(date.getHours()).padStart(2, '0');
+    const m = String(date.getMinutes()).padStart(2, '0');
+    const s = String(date.getSeconds()).padStart(2, '0');
+    return h + ':' + m + ':' + s;
+}
+if (endTimeDisplayEl) endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
+
+// ============================================================== //
+// 3. KẾT NỐI FIREBASE                                            //
+// ============================================================== //
 const firebaseConfig = {
     apiKey: "AIzaSyAOzLEX4hjRbp3pEbEm5dL2iqHUWZ0EZCM",
     authDomain: "canh-ruong-tiktok.firebaseapp.com",
@@ -44,6 +118,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// ============================================================== //
+// 4. TẠO ĐỊNH DANH MÁY (DEVICE ID) BẢO MẬT                       //
+// ============================================================== //
 let deviceId = safeGetItem('vip_device_id');
 if (!deviceId) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -52,10 +129,7 @@ if (!deviceId) {
     safeSetItem('vip_device_id', deviceId);
 }
 
-const displayDeviceId = document.getElementById('displayDeviceId');
 if (displayDeviceId) displayDeviceId.textContent = deviceId; 
-
-const btnCopyDeviceId = document.getElementById('btnCopyDeviceId');
 if (btnCopyDeviceId) {
     btnCopyDeviceId.addEventListener('click', () => {
         navigator.clipboard.writeText(deviceId);
@@ -65,7 +139,7 @@ if (btnCopyDeviceId) {
 }
 
 // ============================================================== //
-// XỬ LÝ QUYỀN TRUY CẬP (KHÔNG CHỚP & ĐÁP ỨNG TỨC THÌ)            //
+// 5. LẮNG NGHE LỆNH TỪ LÃNH CHÚA (CHỐNG CHỚP & XỬ LÝ QUYỀN)      //
 // ============================================================== //
 let isFreeMode = false;
 let deviceStatus = 'unknown'; 
@@ -74,10 +148,8 @@ let isFreeModeLoaded = false;
 let isDeviceLoaded = false;
 
 const deviceRef = ref(db, `devices/${deviceId}`);
-const lockScreen = document.getElementById('vipLockScreen');
 
 // KIỂM TRA LỊCH SỬ CỤC BỘ TRƯỚC (CHỐNG CHỚP LÚC MỚI MỞ WEB)
-// Nếu lần trước khách đã được vào, tạm thời giấu màn hình đen đi để chờ kết quả mạng.
 const lastAccessState = safeGetItem('last_access_state');
 if (lastAccessState === 'granted' && lockScreen) {
     lockScreen.style.display = 'none';
@@ -100,37 +172,33 @@ function pushHeartbeat() {
 function checkAccess() {
     if (!isFreeModeLoaded || !isDeviceLoaded) return;
     
-    // Nếu khách bị Khóa Đích Danh (Sếp nhấn nút Khóa) -> Chặn đứng
     if (deviceStatus === 'locked') {
         if (lockScreen) lockScreen.style.display = 'flex';
         safeSetItem('last_access_state', 'denied');
         return;
     }
     
-    // Nếu có quyền VIP hoặc đang bật Free Mode -> Mở cổng
     if (isFreeMode || deviceStatus === 'active') {
         if (lockScreen) lockScreen.style.display = 'none';
         safeSetItem('last_access_state', 'granted');
         pushHeartbeat(); 
     } else {
-        // Tắt Free Mode & Khách không có VIP -> Đóng cổng
         if (lockScreen) lockScreen.style.display = 'flex';
         safeSetItem('last_access_state', 'denied');
     }
 }
 
-// Lắng nghe trạng thái Free Mode
+// Lắng nghe công tắc Free Mode
 onValue(ref(db, 'global_settings/free_mode'), (snapshot) => {
     isFreeMode = !!snapshot.val();
     isFreeModeLoaded = true; 
     checkAccess();
 });
 
-// Lắng nghe trạng thái Thiết Bị
+// Lắng nghe dữ liệu khách VIP
 onValue(deviceRef, (snapshot) => {
     isDeviceLoaded = true; 
     const data = snapshot.val();
-    const nameInputEl = document.getElementById('my-name-input');
 
     if (data) {
         deviceStatus = data.status || 'unknown';
@@ -161,7 +229,9 @@ onValue(deviceRef, (snapshot) => {
 setInterval(pushHeartbeat, 30000);
 onDisconnect(deviceRef).update({ last_active: Date.now() });
 
-const btnSwitchUI = document.getElementById('btn-switch-ui');
+// ============================================================== //
+// CÁC HÀM CỐT LÕI (GIỮ NGUYÊN GỐC KHÔNG THAY ĐỔI)
+// ============================================================== //
 if (btnSwitchUI) {
     btnSwitchUI.addEventListener('click', () => {
         const currentUI = safeGetItem('active_ui', 'T1');
@@ -172,8 +242,6 @@ if (btnSwitchUI) {
     });
 }
 
-const myNameInput = document.getElementById('my-name-input');
-const viewersList = document.getElementById('viewers-list');
 let mySessionId = safeGetItem('mySessionId');
 if (!mySessionId) {
     mySessionId = 'sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
@@ -190,7 +258,7 @@ function setupRoomViewers(newEndTime) {
     myViewerRef = ref(db, `rooms/${currentRoomIdStr}/viewers/${mySessionId}`);
     onDisconnect(myViewerRef).remove();
 
-    const savedName = myNameInput && myNameInput.value.trim() !== '' ? myNameInput.value : safeGetItem('myName');
+    const savedName = nameInputEl && nameInputEl.value.trim() !== '' ? nameInputEl.value : safeGetItem('myName');
     if (savedName) pushNameToFirebase(savedName);
 
     roomViewersRef = ref(db, `rooms/${currentRoomIdStr}/viewers`);
@@ -213,8 +281,8 @@ function pushNameToFirebase(name) {
     }
 }
 
-if (myNameInput) {
-    myNameInput.addEventListener('input', function() {
+if (nameInputEl) {
+    nameInputEl.addEventListener('input', function() {
         const val = this.value;
         safeSetItem('myName', val);
         pushNameToFirebase(val);
@@ -304,20 +372,14 @@ function connectWebSocket() {
 if (liveRoomId) { connectWebSocket(); }
 
 function updateNavigationUI() {
-    const wrapper = document.getElementById('nextBoxWrapper');
-    const btnPrev = document.getElementById('prevBoxBtn');
-    const btnNext = document.getElementById('nextBoxBtn');
-    const prevCount = document.getElementById('prevBoxCount');
-    const nextCount = document.getElementById('nextBoxCount');
-    
-    if (!btnPrev || !btnNext) return;
+    if (!btnPrevBox || !btnNextBox) return;
     
     allBoxes.sort((a, b) => a.end_time - b.end_time);
     const currentIndex = allBoxes.findIndex(b => b.end_time === endTime);
     
     if (currentIndex === -1) {
-        if(wrapper) wrapper.style.display = 'none';
-        btnPrev.style.display = 'none'; btnNext.style.display = 'none';
+        if(nextBoxWrapper) nextBoxWrapper.style.display = 'none';
+        btnPrevBox.style.display = 'none'; btnNextBox.style.display = 'none';
         return;
     }
 
@@ -325,12 +387,12 @@ function updateNavigationUI() {
     const hasNext = currentIndex < allBoxes.length - 1;
 
     if (hasPrev || hasNext) {
-        if(wrapper) wrapper.style.display = 'flex';
-        if (hasPrev) { btnPrev.style.display = 'flex'; if (prevCount) prevCount.textContent = currentIndex; } else { btnPrev.style.display = 'none'; }
-        if (hasNext) { btnNext.style.display = 'flex'; if (nextCount) nextCount.textContent = (allBoxes.length - 1 - currentIndex); } else { btnNext.style.display = 'none'; }
+        if(nextBoxWrapper) nextBoxWrapper.style.display = 'flex';
+        if (hasPrev) { btnPrevBox.style.display = 'flex'; if (prevBoxCount) prevBoxCount.textContent = currentIndex; } else { btnPrevBox.style.display = 'none'; }
+        if (hasNext) { btnNextBox.style.display = 'flex'; if (nextBoxCount) nextBoxCount.textContent = (allBoxes.length - 1 - currentIndex); } else { btnNextBox.style.display = 'none'; }
     } else {
-        if(wrapper) wrapper.style.display = 'none';
-        btnPrev.style.display = 'none'; btnNext.style.display = 'none';
+        if(nextBoxWrapper) nextBoxWrapper.style.display = 'none';
+        btnPrevBox.style.display = 'none'; btnNextBox.style.display = 'none';
     }
 }
 
@@ -362,11 +424,8 @@ function loadBox(targetBox) {
     setupRoomViewers(endTime); updateNavigationUI(); forceUpdateClock(); pushHeartbeat();
 }
 
-const btnNextEl = document.getElementById('nextBoxBtn'); const btnPrevEl = document.getElementById('prevBoxBtn');
-if (btnNextEl) { btnNextEl.addEventListener('click', () => { const currentIndex = allBoxes.findIndex(b => b.end_time === endTime); if (currentIndex !== -1 && currentIndex < allBoxes.length - 1) { loadBox(allBoxes[currentIndex + 1]); } }); }
-if (btnPrevEl) { btnPrevEl.addEventListener('click', () => { const currentIndex = allBoxes.findIndex(b => b.end_time === endTime); if (currentIndex > 0) { loadBox(allBoxes[currentIndex - 1]); } }); }
-
-const btnSync = document.getElementById('btn-sync'); const syncStatus = document.getElementById('sync-status'); const pingDisplay = document.getElementById('pingDisplay'); 
+if (btnNextBox) { btnNextBox.addEventListener('click', () => { const currentIndex = allBoxes.findIndex(b => b.end_time === endTime); if (currentIndex !== -1 && currentIndex < allBoxes.length - 1) { loadBox(allBoxes[currentIndex + 1]); } }); }
+if (btnPrevBox) { btnPrevBox.addEventListener('click', () => { const currentIndex = allBoxes.findIndex(b => b.end_time === endTime); if (currentIndex > 0) { loadBox(allBoxes[currentIndex - 1]); } }); }
 
 function applySyncState(state) {
     if (state) {
@@ -389,10 +448,6 @@ function getCurrentTimeMs() { return getAccurateTime() + (isSyncOn ? networkTime
 
 let colorConfig = { active: false, start: 0.6, end: 0.0, color: '#ff0000' };
 let currentBgState = 'default';
-
-const activeConfigDisplay = document.getElementById('activeConfigDisplay');
-const configColorDot = document.getElementById('configColorDot');
-const configText = document.getElementById('configText');
 
 function updateConfigDisplayUI() {
     if (!activeConfigDisplay) return;
@@ -427,13 +482,13 @@ function applyBackgroundColor(state, colorHex = '') {
         var savedConfigStr = safeGetItem('colorConfig');
         if (savedConfigStr && !isT3) {
             colorConfig = JSON.parse(savedConfigStr);
-            if (document.getElementById('start_seconds')) document.getElementById('start_seconds').value = colorConfig.start;
-            if (document.getElementById('end_seconds')) document.getElementById('end_seconds').value = colorConfig.end;
-            if (document.getElementById('hex_background_color')) document.getElementById('hex_background_color').value = colorConfig.color;
+            if (startSecondsEl) startSecondsEl.value = colorConfig.start;
+            if (endSecondsEl) endSecondsEl.value = colorConfig.end;
+            if (hexBgColorEl) hexBgColorEl.value = colorConfig.color;
         }
 
         var savedWsUrl = safeGetItem('ws_url');
-        if (savedWsUrl && document.getElementById('ws_url_input')) { document.getElementById('ws_url_input').value = savedWsUrl; }
+        if (savedWsUrl && wsUrlInputEl) { wsUrlInputEl.value = savedWsUrl; }
 
         if (!isT3) {
             var savedSync = safeGetItem('isSyncOn');
@@ -441,37 +496,11 @@ function applyBackgroundColor(state, colorHex = '') {
         }
 
         let savedName = safeGetItem('myName');
-        if (savedName && myNameInput) { myNameInput.value = savedName; pushNameToFirebase(savedName); }
+        if (savedName && nameInputEl) { nameInputEl.value = savedName; pushNameToFirebase(savedName); }
         if(!isT3) updateConfigDisplayUI(); 
         applyBackgroundColor('default');
     } catch (e) {}
 })();
-
-const countdownEl = document.getElementById('countdown');
-const endTimeDisplayEl = document.getElementById('endTimeDisplay');
-const serverTimeDisplayEl = document.getElementById('serverTimeDisplay');
-const viewCountEl = document.getElementById('viewCount');
-const peopleCountEl = document.getElementById('peopleCount');
-const dTEl = document.getElementById('d-t');
-const usernameDisplayEl = document.getElementById('usernameDisplay');
-const hotBoxFlagEl = document.getElementById('hotBoxFlag');
-const viewersDisplayEl = document.getElementById('viewersDisplay');
-
-if (usernameDisplayEl) usernameDisplayEl.textContent = paramM;
-if (viewCountEl) viewCountEl.textContent = coins;
-if (peopleCountEl) peopleCountEl.textContent = canOpen;
-if (hotBoxFlagEl) hotBoxFlagEl.textContent = hotBoxStr;
-if (viewersDisplayEl) viewersDisplayEl.textContent = latestViewersStr;
-
-function formatEndTimeHHMMSS(timestampSeconds) {
-    if (!timestampSeconds) return '--:--:--';
-    const date = new Date(timestampSeconds * 1000);
-    const h = String(date.getHours()).padStart(2, '0');
-    const m = String(date.getMinutes()).padStart(2, '0');
-    const s = String(date.getSeconds()).padStart(2, '0');
-    return h + ':' + m + ':' + s;
-}
-if (endTimeDisplayEl) endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
 
 function updateDTOffset() {
     if (!dTEl) return;
@@ -494,7 +523,7 @@ function formatTimeMMSSF(totalSeconds) {
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) { if (myViewerRef) remove(myViewerRef); } 
     else {
-        if (myNameInput && myNameInput.value.trim() !== '') { pushNameToFirebase(myNameInput.value); }
+        if (nameInputEl && nameInputEl.value.trim() !== '') { pushNameToFirebase(nameInputEl.value); }
         pushHeartbeat(); 
     }
 });
@@ -558,12 +587,11 @@ function adjustTime(seconds) {
     updateDTOffset(); forceUpdateClock();
 }
 
-const dec005 = document.getElementById('btn-decrease-0.05'); if (dec005) dec005.addEventListener('click', function () { adjustTime(-0.05); });
-const dec001 = document.getElementById('btn-decrease-0.01'); if (dec001) dec001.addEventListener('click', function () { adjustTime(-0.01); });
-const inc001 = document.getElementById('btn-increase-0.01'); if (inc001) inc001.addEventListener('click', function () { adjustTime(0.01); });
-const inc005 = document.getElementById('btn-increase-0.05'); if (inc005) inc005.addEventListener('click', function () { adjustTime(0.05); });
+if (dec005) dec005.addEventListener('click', function () { adjustTime(-0.05); });
+if (dec001) dec001.addEventListener('click', function () { adjustTime(-0.01); });
+if (inc001) inc001.addEventListener('click', function () { adjustTime(0.01); });
+if (inc005) inc005.addEventListener('click', function () { adjustTime(0.05); });
 
-const claimBtn = document.getElementById('claimBtn');
 if (claimBtn) {
     claimBtn.addEventListener('click', function () {
         if (tiktokLink) { navigator.clipboard.writeText(tiktokLink).catch(function () {}); }
@@ -574,7 +602,6 @@ if (claimBtn) {
     });
 }
 
-const claimChangeBtn = document.getElementById('claimChangeBtn');
 if (claimChangeBtn) {
     claimChangeBtn.addEventListener('click', function () {
         if (link1) {
@@ -586,44 +613,40 @@ if (claimChangeBtn) {
     });
 }
 
-function handleConfirm(ok) { var modal = document.getElementById('confirmModal'); if (modal) modal.style.display = 'none'; }
-var confirmCancelBtn = document.getElementById('confirmCancelBtn'); var confirmOkBtn = document.getElementById('confirmOkBtn');
+function handleConfirm(ok) { if (confirmModal) confirmModal.style.display = 'none'; }
 if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', function () { handleConfirm(false); });
 if (confirmOkBtn) confirmOkBtn.addEventListener('click', function () { handleConfirm(true); });
 
-const btnOpen = document.getElementById('btn-open'); if(btnOpen) btnOpen.addEventListener('click', function () { document.getElementById('modal').style.display = 'flex'; });
-const btnCancel = document.getElementById('btn-cancel'); if(btnCancel) btnCancel.addEventListener('click', function () { document.getElementById('modal').style.display = 'none'; });
+if(btnOpen) btnOpen.addEventListener('click', function () { if(modalEl) modalEl.style.display = 'flex'; });
+if(btnCancel) btnCancel.addEventListener('click', function () { if(modalEl) modalEl.style.display = 'none'; });
 
-const btnSubmit = document.getElementById('btn-submit');
 if (btnSubmit) {
     btnSubmit.addEventListener('click', function () {
         if (!isT3) {
-            const startVal = parseFloat(document.getElementById('start_seconds').value);
-            const endVal = parseFloat(document.getElementById('end_seconds').value);
+            const startVal = parseFloat(startSecondsEl.value);
+            const endVal = parseFloat(endSecondsEl.value);
             colorConfig.start = isNaN(startVal) ? 0 : startVal;
             colorConfig.end = isNaN(endVal) ? 0 : endVal;
-            colorConfig.color = document.getElementById('hex_background_color').value;
+            colorConfig.color = hexBgColorEl.value;
             colorConfig.active = true;
             safeSetItem('colorConfig', JSON.stringify(colorConfig));
             updateConfigDisplayUI(); currentBgState = 'default'; applyBackgroundColor('default');
         }
         
-        const wsUrlVal = document.getElementById('ws_url_input').value.trim();
+        const wsUrlVal = wsUrlInputEl ? wsUrlInputEl.value.trim() : '';
         if (wsUrlVal) safeSetItem('ws_url', wsUrlVal); else safeRemoveItem('ws_url');
 
         if (isT3) {
-            const nameVal = document.getElementById('my-name-input').value.trim();
-            if (nameVal && !document.getElementById('my-name-input').disabled) {
+            const nameVal = nameInputEl ? nameInputEl.value.trim() : '';
+            if (nameVal && !nameInputEl.disabled) {
                 safeSetItem('myName', nameVal); pushNameToFirebase(nameVal);
             }
         }
 
-        var modal = document.getElementById('modal');
-        if (modal) { modal.style.display = 'none'; if (wsUrlVal && (!ws || ws.url !== wsUrlVal)) location.reload(); }
+        if (modalEl) { modalEl.style.display = 'none'; if (wsUrlVal && (!ws || ws.url !== wsUrlVal)) location.reload(); }
     });
 }
 
-const configDelBtn = document.getElementById('configDelBtn');
 if (configDelBtn) {
     configDelBtn.addEventListener('click', function() {
         colorConfig.active = false; safeSetItem('colorConfig', JSON.stringify(colorConfig));
@@ -631,7 +654,6 @@ if (configDelBtn) {
     });
 }
 
-const modalEl = document.getElementById('modal');
 if (modalEl) modalEl.addEventListener('click', function (e) { if (e.target === this) this.style.display = 'none'; });
 
 updateDTOffset();
@@ -641,4 +663,3 @@ function clockLoop() {
     requestAnimationFrame(clockLoop); 
 }
 requestAnimationFrame(clockLoop);
-}
