@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Canh thời gian T3</title>
-    <!-- Đổi version v=69 để xóa cache cho chắc -->
-    <link rel="stylesheet" href="style.css?v=69">
+    <link rel="stylesheet" href="style.css?v=68">
     <script>
         if (localStorage.getItem('active_ui') === 'T1' || !localStorage.getItem('active_ui')) {
             window.location.replace('index.html' + window.location.search);
@@ -45,20 +44,9 @@
             <button type="button" class="t3-btn-green" id="btn-increase-0.01">+0.01</button>
         </div>
 
-        <!-- HÀNG CHỨA NÚT ACTION ĐÃ ĐƯỢC GỘP CHUNG VỚI RƯƠNG CHUỖI -->
         <div class="t3-actions-row">
             <button type="button" class="t3-btn-copy" id="claimBtn">COPY</button>
             <button type="button" class="t3-btn-plus" id="claimChangeBtn">+</button>
-
-            <!-- CỤC RƯƠNG CHUỖI ĐÃ ĐƯỢC DỜI LÊN ĐÂY -->
-            <div class="t3-chain-wrapper" id="nextBoxWrapper" style="display: none;">
-                <button type="button" class="btn-prev-box" id="prevBoxBtn" style="display: none;">
-                    <span style="font-size: 1.1rem;">⬅</span> <span id="prevBoxCount">0</span>
-                </button>
-                <button type="button" class="btn-next-box" id="nextBoxBtn" style="display: none;">
-                    <span id="nextBoxCount">0</span> <span style="font-size: 1.1rem;">➔</span>
-                </button>
-            </div>
         </div>
 
         <div class="t3-firebase-box">
@@ -67,6 +55,14 @@
             </div>
         </div>
 
+        <div class="t3-chain-wrapper" id="nextBoxWrapper" style="display: none;">
+            <button type="button" class="btn-prev-box" id="prevBoxBtn" style="display: none;">
+                <span style="font-size: 1.3rem;">⬅</span> <span id="prevBoxCount">0</span>
+            </button>
+            <button type="button" class="btn-next-box" id="nextBoxBtn" style="display: none;">
+                <span id="nextBoxCount">0</span> <span style="font-size: 1.3rem;">➔</span>
+            </button>
+        </div>
     </div>
 
     <div class="modal" id="modal">
@@ -90,7 +86,6 @@
         </div>
     </div>
 
-    <!-- Đổi version v=69 để xóa cache cho chắc -->
-    <script type="module" src="script.js?v=69"></script>
+    <script type="module" src="script.js?v=68"></script>
 </body>
 </html>
