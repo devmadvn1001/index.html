@@ -38,6 +38,15 @@ let timeOffset = 0;
 let link1 = null;
 
 // ============================================================== //
+// ĐỒNG HỒ VI PHÂN LƯỢNG TỬ (Khắc phục giật lag setInterval)      //
+// ============================================================== //
+let timeBase = Date.now() - performance.now();
+function getAccurateTime() {
+    // performance.now() đếm giờ bằng xung nhịp chip, chính xác đến 0.0001ms
+    return performance.now() + timeBase;
+}
+
+// ============================================================== //
 // XÁC ĐỊNH GIAO DIỆN & NÚT HOÁN ĐỔI T1 / T3                      //
 // ============================================================== //
 const isT3 = window.location.pathname.includes('t3.html');
@@ -144,16 +153,14 @@ const customWsUrl = paramWs || localStorage.getItem('ws_url');
 let ws = null;
 let wsPingInterval = null;
 
-// Biến quản lý trạng thái Sync của T1
 let isSyncOn = isT3 ? true : false;
 let networkTimeOffset = 0; 
 
 function startWsPing() {
     if (wsPingInterval) clearInterval(wsPingInterval);
     wsPingInterval = setInterval(() => {
-        // T3 luôn ping, T1 chỉ ping khi bật Sync ON
         if (ws && ws.readyState === 1 && (isT3 || isSyncOn)) {
-            ws.send(JSON.stringify({ action: 'ping', client_time: Date.now() }));
+            ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() }));
         }
     }, 1500);
 }
@@ -164,9 +171,8 @@ function connectWebSocket() {
     
     ws.onopen = () => {
         startWsPing();
-        // Nạp nhịp ping đầu tiên luôn cho T1 khi vừa kết nối nếu đang bật Sync
         if (!isT3 && isSyncOn && ws.readyState === 1) {
-            ws.send(JSON.stringify({ action: 'ping', client_time: Date.now() }));
+            ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() }));
         }
     };
     
@@ -174,14 +180,12 @@ function connectWebSocket() {
         try {
             const data = JSON.parse(event.data);
             
-            // 1. NẾU LÀ GÓI TIN "PONG" TRẢ VỀ TỪ PYTHON SERVER
             if (data.action === 'pong') {
-                const now = Date.now();
+                const now = getAccurateTime();
                 const rtt = now - data.client_time;
                 const pingMs = rtt / 2;
                 const pingS = (pingMs / 1000).toFixed(3);
                 
-                // Đồng bộ giờ máy chủ
                 if (data.server_time) {
                     networkTimeOffset = (data.server_time + pingMs) - now;
                 } else {
@@ -191,31 +195,28 @@ function connectWebSocket() {
                 const endTimeMs = endTime * 1000;
                 const diffMs = (endTimeMs + timeOffset * 1000) - now;
 
-                // Hiển thị ra UI Ping cho T3
                 if (isT3 && pingDisplay && diffMs > 0) {
                     let statusText = '✅ internet tốt';
                     if (pingMs > 150) statusText = '⚠️ mạng khá';
                     if (pingMs > 300) statusText = '❌ mạng kém';
                     pingDisplay.innerHTML = `Ping ${pingS}s (syncing - ${statusText})`;
                 }
-                // Hiển thị ra UI Ping cho T1 (Nằm trong form cũ)
                 else if (!isT3 && isSyncOn && pingDisplay) {
                     let pingColor = '#22c55e'; 
                     if (pingMs >= 150 && pingMs < 300) pingColor = '#f59e0b';
                     if (pingMs >= 300) pingColor = '#ef4444'; 
-                    pingDisplay.innerHTML = `Ping mạng: <span style="color: ${pingColor};">${Math.round(pingMs)}ms</span>`;
+                    pingDisplay.innerHTML = `Ping ms : <span style="color: ${pingColor};">${pingS}s</span>`;
                     
                     if (syncStatus) {
                         syncStatus.textContent = 'ON';
                         syncStatus.style.color = '#22c55e';
                     }
                 }
-                return; // Dừng, không xử lý xuống phần rương
+                return; 
             }
 
-            // 2. NẾU LÀ GÓI TIN ĐẨY RƯƠNG CHUỖI
             if (liveRoomId && data.room_id === liveRoomId) {
-                const nowSec = Math.floor(Date.now() / 1000);
+                const nowSec = Math.floor(getAccurateTime() / 1000);
                 if (data.end_time + 300 > nowSec) {
                     const exists = allBoxes.some(b => b.end_time === data.end_time);
                     if (!exists) {
@@ -233,7 +234,7 @@ function connectWebSocket() {
         if (isT3 && pingDisplay) {
             pingDisplay.innerHTML = `Ping lỗi (syncing - ❌ offline)`;
         } else if (!isT3 && isSyncOn && pingDisplay) {
-            pingDisplay.innerHTML = `Ping mạng: <span style="color: #ef4444;">MẤT KẾT NỐI</span>`;
+            pingDisplay.innerHTML = `Ping ms : <span style="color: #ef4444;">LỖI</span>`;
             if (syncStatus) { syncStatus.textContent = 'LỖI WSS'; syncStatus.style.color = '#ef4444'; }
         }
         setTimeout(connectWebSocket, 3000); 
@@ -322,7 +323,8 @@ function loadBox(targetBox) {
     
     setupRoomViewers(endTime); 
     updateNavigationUI();
-    updateClock();
+    // Kích ngay 1 nhịp update để màn hình nảy số ngay lập tức
+    forceUpdateClock();
 }
 
 const btnNextEl = document.getElementById('nextBoxBtn');
@@ -345,9 +347,6 @@ if (btnPrevEl) {
     });
 }
 
-// ============================================================== //
-// UI & LOGIC ĐỒNG BỘ THỜI GIAN THEO YÊU CẦU MỚI (T1 DÙNG WSS)    //
-// ============================================================== //
 const btnSync = document.getElementById('btn-sync'); 
 const syncStatus = document.getElementById('sync-status');
 const pingDisplay = document.getElementById('pingDisplay'); 
@@ -358,15 +357,14 @@ function applySyncState(state) {
         if (!isT3 && syncStatus) { syncStatus.textContent = 'WSS...'; syncStatus.style.color = '#f59e0b'; }
         if (!isT3) { try { localStorage.setItem('isSyncOn', 'true'); } catch (e) {} }
         
-        // Kích hoạt ping WSS liền lập tức cho T1 nếu websocket đã mở
         if (ws && ws.readyState === 1) {
-            ws.send(JSON.stringify({ action: 'ping', client_time: Date.now() }));
+            ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() }));
         }
     } else {
         isSyncOn = false;
-        networkTimeOffset = 0; // Trả về 0 khi OFF (Chạy bằng giờ điện thoại)
+        networkTimeOffset = 0; 
         if (!isT3 && syncStatus) { syncStatus.textContent = 'OFF'; syncStatus.style.color = '#ef4444'; }
-        if (!isT3 && pingDisplay) { pingDisplay.innerHTML = `Ping mạng: --`; }
+        if (!isT3 && pingDisplay) { pingDisplay.innerHTML = `Ping ms : --`; }
         if (!isT3) { try { localStorage.setItem('isSyncOn', 'false'); } catch (e) {} }
     }
 }
@@ -378,7 +376,7 @@ if (btnSync) {
 }
 
 function getCurrentTimeMs() {
-    return Date.now() + (isSyncOn ? networkTimeOffset : 0);
+    return getAccurateTime() + (isSyncOn ? networkTimeOffset : 0);
 }
 
 let colorConfig = { active: false, start: 0.6, end: 0.0, color: '#ff0000' };
@@ -505,7 +503,6 @@ function updateDTOffset() {
     else if (timeOffset < 0) { sign = '-'; color = '#ef4444'; } 
     else { sign = ''; color = isT3 ? '#1e293b' : (getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#1e293b'); }
 
-    // OFFSET LUÔN CÓ CHỮ S VÀ GIỮ NGUYÊN 0.00
     dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
 }
 
@@ -527,12 +524,25 @@ document.addEventListener("visibilitychange", function() {
     }
 });
 
-function updateClock() {
-    updateNavigationUI(); 
+// BỘ NHỚ ĐỆM (DOM CACHE) CHỐNG LAG MÀN HÌNH
+let lastCountdownText = "";
+let lastServerTimeText = "";
+let isPingDisplayFrozen = false;
 
+function forceUpdateClock() {
+    updateClock(true);
+}
+
+function updateClock(force = false) {
     if (!endTime) {
-        if (countdownEl) countdownEl.textContent = '0.0';
-        if (isT3 && serverTimeDisplayEl) serverTimeDisplayEl.textContent = '--:--:--';
+        if (countdownEl && lastCountdownText !== '0.0') {
+            countdownEl.textContent = '0.0';
+            lastCountdownText = '0.0';
+        }
+        if (isT3 && serverTimeDisplayEl && lastServerTimeText !== '--:--:--') {
+            serverTimeDisplayEl.textContent = '--:--:--';
+            lastServerTimeText = '--:--:--';
+        }
         return;
     }
 
@@ -543,12 +553,22 @@ function updateClock() {
 
     // KHI HẾT GIỜ (Đếm ngược về <= 0)
     if (diffMs <= 0) {
-        if (countdownEl) countdownEl.textContent = '0.0'; // CHUẨN 0.0 KHÔNG CÓ S
+        if (countdownEl && lastCountdownText !== '0.0') { 
+            countdownEl.textContent = '0.0'; 
+            lastCountdownText = '0.0';
+        }
         
-        // ĐÓNG BĂNG VÀ BÁO HẾT GIỜ (Màu xám gốc)
+        // ĐÓNG BĂNG VÀ BÁO HẾT GIỜ
         if (isT3) {
-            if (serverTimeDisplayEl) serverTimeDisplayEl.textContent = formatEndTimeHHMMSS(adjustedEndMs / 1000);
-            if (pingDisplay) pingDisplay.innerHTML = `<span style="font-weight: 600; color: #64748b;">Đã hết giờ !</span>`;
+            const finalSTimeText = formatEndTimeHHMMSS(adjustedEndMs / 1000);
+            if (serverTimeDisplayEl && lastServerTimeText !== finalSTimeText) {
+                serverTimeDisplayEl.textContent = finalSTimeText;
+                lastServerTimeText = finalSTimeText;
+            }
+            if (pingDisplay && !isPingDisplayFrozen) {
+                pingDisplay.innerHTML = `<span style="font-weight: 600; color: #64748b;">Đã hết giờ !</span>`;
+                isPingDisplayFrozen = true;
+            }
         }
 
         if (!isT3 && currentBgState !== 'default') {
@@ -559,14 +579,24 @@ function updateClock() {
     }
 
     // NẾU CÒN GIỜ (Đang chạy đếm ngược)
+    isPingDisplayFrozen = false;
+    
     if (isT3 && serverTimeDisplayEl) {
-        serverTimeDisplayEl.textContent = formatEndTimeHHMMSS(now / 1000);
+        const sTimeText = formatEndTimeHHMMSS(now / 1000);
+        if (lastServerTimeText !== sTimeText) {
+            serverTimeDisplayEl.textContent = sTimeText;
+            lastServerTimeText = sTimeText;
+        }
     }
 
     const diffSeconds = diffMs / 1000;
     const displayedText = formatTimeMMSSF(diffSeconds);
     
-    if (countdownEl) { countdownEl.textContent = displayedText; }
+    // BỘ LỌC DOM: Chặn không cho vẽ lại nếu con số giống y chang lúc nãy
+    if (countdownEl && (lastCountdownText !== displayedText || force)) { 
+        countdownEl.textContent = displayedText; 
+        lastCountdownText = displayedText;
+    }
 
     if (!isT3 && colorConfig.active) {
         const currentDisplayNum = parseFloat(displayedText);
@@ -589,7 +619,7 @@ function adjustTime(seconds) {
     timeOffset = Math.round(timeOffset * 100) / 100;
     try { localStorage.setItem('timeOffset', String(timeOffset)); } catch (e) {}
     updateDTOffset();
-    updateClock();
+    forceUpdateClock();
 }
 
 const dec005 = document.getElementById('btn-decrease-0.05');
@@ -720,7 +750,15 @@ if (modalEl) {
     });
 }
 
-updateClock();
 updateDTOffset();
 
-const mainClockInterval = setInterval(updateClock, 10);
+// ============================================================== //
+// VÒNG LẶP RENDER KHUNG HÌNH (THAY THẾ SET_INTERVAL)             //
+// ============================================================== //
+function clockLoop() {
+    updateClock();
+    requestAnimationFrame(clockLoop); // Màn hình điện thoại quét tới đâu, gọi hàm tới đó
+}
+
+// Kích hoạt động cơ
+requestAnimationFrame(clockLoop);
