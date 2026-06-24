@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebas
 import { getDatabase, ref, set, update, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
 // ============================================================== //
-// 0. BỌC THÉP HỆ THỐNG LƯU TRỮ (CHỐNG CRASH TRÊN TELEGRAM)       //
+// 0. BỌC THÉP HỆ THỐNG LƯU TRỮ (CHỐNG CRASH TRÊN TRÌNH DUYỆT ẨN) //
 // ============================================================== //
 function safeGetItem(key, defaultVal = null) {
     try { return localStorage.getItem(key) || defaultVal; } catch(e) { return defaultVal; }
@@ -15,7 +15,7 @@ function safeRemoveItem(key) {
 }
 
 // ============================================================== //
-// 1. KHỞI TẠO CÁC BIẾN TOÀN CỤC TRƯỚC (CHỐNG LỖI TDZ)           //
+// 1. KHỞI TẠO CÁC BIẾN TOÀN CỤC TRƯỚC                           //
 // ============================================================== //
 const urlParams = new URLSearchParams(window.location.search);
 let paramM = urlParams.get('m') || 'user';
@@ -65,7 +65,7 @@ if (!deviceId) {
 }
 
 const displayDeviceId = document.getElementById('displayDeviceId');
-if (displayDeviceId) displayDeviceId.textContent = deviceId; // Ép in mã ra ngay lập tức
+if (displayDeviceId) displayDeviceId.textContent = deviceId; 
 
 const btnCopyDeviceId = document.getElementById('btnCopyDeviceId');
 if (btnCopyDeviceId) {
@@ -77,11 +77,16 @@ if (btnCopyDeviceId) {
 }
 
 // ============================================================== //
-// 4. LẮNG NGHE LỆNH TỪ LÃNH CHÚA (FREE MODE & KHÓA VIP)          //
+// 4. LẮNG NGHE LỆNH TỪ LÃNH CHÚA (CHỐNG CHỚP MÀN HÌNH)           //
 // ============================================================== //
 let isFreeMode = false;
 let deviceStatus = 'unknown'; 
 let adminOffset = 0; 
+
+// Cờ báo hiệu Firebase đã load xong thông tin (Chống chớp)
+let isFreeModeLoaded = false;
+let isDeviceLoaded = false;
+
 const deviceRef = ref(db, `devices/${deviceId}`);
 
 function pushHeartbeat() {
@@ -95,37 +100,39 @@ function pushHeartbeat() {
     }).catch(()=>{});
 }
 
-// Hàm kiểm tra Quyền truy cập (Xử lý Màn hình khóa)
+// Hàm quyết định sinh tử (Chỉ chạy khi có đủ dữ liệu)
 function checkAccess() {
+    // BẮT BUỘC CHỜ LOAD XONG 2 BIẾN MỚI CHO RA QUYẾT ĐỊNH
+    if (!isFreeModeLoaded || !isDeviceLoaded) return;
+
     const lockScreen = document.getElementById('vipLockScreen');
-    const antiFlash = document.getElementById('antiFlash');
-    if (antiFlash) antiFlash.remove(); // Xóa thẻ ép ẩn để nhường lại quyền cho JS điều khiển
     
-    // Nếu bị Sếp khóa đích danh (Nút Khóa ở trang Admin) -> Chặn đứng, văng ra ngoài ngay
+    // 1. Khách bị sếp Khóa thẳng tay -> Sập màn hình đen (bất kể đang có Free Mode hay không)
     if (deviceStatus === 'locked') {
         if (lockScreen) lockScreen.style.display = 'flex';
-        safeSetItem('vip_access', 'false'); // Xóa trí nhớ
         return;
     }
     
-    // Nếu Máy đã được cấp quyền VIP HOẶC Admin đang bật Công tắc Free Mode -> Mở cửa
+    // 2. Khách VIP hoặc đang có Free Mode -> Giấu màn hình đen vĩnh viễn
     if (isFreeMode || deviceStatus === 'active') {
         if (lockScreen) lockScreen.style.display = 'none';
-        safeSetItem('vip_access', 'true'); // Lưu trí nhớ là đã được vào
         pushHeartbeat(); 
     } else {
-        // Chưa có quyền VIP và Admin đang khóa cửa -> Hiện màn đen
+        // 3. Khách vãng lai & Tắt Free Mode -> Sập màn hình đen yêu cầu mã
         if (lockScreen) lockScreen.style.display = 'flex';
-        safeSetItem('vip_access', 'false'); // Xóa trí nhớ
     }
 }
 
+// Lắng nghe công tắc Free Mode
 onValue(ref(db, 'global_settings/free_mode'), (snapshot) => {
     isFreeMode = !!snapshot.val();
+    isFreeModeLoaded = true; // Đánh dấu đã load xong
     checkAccess();
 });
 
+// Lắng nghe dữ liệu khách VIP
 onValue(deviceRef, (snapshot) => {
+    isDeviceLoaded = true; // Đánh dấu đã load xong
     const data = snapshot.val();
     const nameInputEl = document.getElementById('my-name-input');
 
@@ -150,7 +157,8 @@ onValue(deviceRef, (snapshot) => {
         adminOffset = 0;
         if (nameInputEl) nameInputEl.disabled = false;
     }
-    forceUpdateClock();
+    
+    forceUpdateClock(); 
     checkAccess();
 });
 
@@ -158,7 +166,7 @@ setInterval(pushHeartbeat, 30000);
 onDisconnect(deviceRef).update({ last_active: Date.now() });
 
 // ============================================================== //
-// CÁC HÀM CỐT LÕI CỦA TOOL (KHÔNG THAY ĐỔI)
+// CÁC HÀM CỐT LÕI (GIỮ NGUYÊN GỐC KHÔNG THAY ĐỔI)
 // ============================================================== //
 const btnSwitchUI = document.getElementById('btn-switch-ui');
 if (btnSwitchUI) {
