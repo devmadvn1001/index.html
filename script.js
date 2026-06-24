@@ -144,18 +144,29 @@ const customWsUrl = paramWs || localStorage.getItem('ws_url');
 let ws = null;
 let wsPingInterval = null;
 
+// Biến quản lý trạng thái Sync của T1
+let isSyncOn = isT3 ? true : false;
+let networkTimeOffset = 0; 
+
+function startWsPing() {
+    if (wsPingInterval) clearInterval(wsPingInterval);
+    wsPingInterval = setInterval(() => {
+        // T3 luôn ping, T1 chỉ ping khi bật Sync ON
+        if (ws && ws.readyState === 1 && (isT3 || isSyncOn)) {
+            ws.send(JSON.stringify({ action: 'ping', client_time: Date.now() }));
+        }
+    }, 1500);
+}
+
 function connectWebSocket() {
     if (!customWsUrl) return; 
     ws = new WebSocket(customWsUrl);
     
     ws.onopen = () => {
-        // T3: Kích hoạt động cơ Ping bằng WebSocket (1.5 giây bắn 1 nhịp tim)
-        if (isT3) {
-            wsPingInterval = setInterval(() => {
-                if (ws.readyState === 1) {
-                    ws.send(JSON.stringify({ action: 'ping', client_time: Date.now() }));
-                }
-            }, 1500); 
+        startWsPing();
+        // Nạp nhịp ping đầu tiên luôn cho T1 khi vừa kết nối nếu đang bật Sync
+        if (!isT3 && isSyncOn && ws.readyState === 1) {
+            ws.send(JSON.stringify({ action: 'ping', client_time: Date.now() }));
         }
     };
     
@@ -177,15 +188,27 @@ function connectWebSocket() {
                     networkTimeOffset = pingMs; 
                 }
 
-                // Hiển thị ra UI Ping cho T3
                 const endTimeMs = endTime * 1000;
                 const diffMs = (endTimeMs + timeOffset * 1000) - now;
 
+                // Hiển thị ra UI Ping cho T3
                 if (isT3 && pingDisplay && diffMs > 0) {
                     let statusText = '✅ internet tốt';
                     if (pingMs > 150) statusText = '⚠️ mạng khá';
                     if (pingMs > 300) statusText = '❌ mạng kém';
                     pingDisplay.innerHTML = `Ping ${pingS}s (syncing - ${statusText})`;
+                }
+                // Hiển thị ra UI Ping cho T1 (Nằm trong form cũ)
+                else if (!isT3 && isSyncOn && pingDisplay) {
+                    let pingColor = '#22c55e'; 
+                    if (pingMs >= 150 && pingMs < 300) pingColor = '#f59e0b';
+                    if (pingMs >= 300) pingColor = '#ef4444'; 
+                    pingDisplay.innerHTML = `Ping mạng: <span style="color: ${pingColor};">${Math.round(pingMs)}ms</span>`;
+                    
+                    if (syncStatus) {
+                        syncStatus.textContent = 'ON';
+                        syncStatus.style.color = '#22c55e';
+                    }
                 }
                 return; // Dừng, không xử lý xuống phần rương
             }
@@ -204,9 +227,15 @@ function connectWebSocket() {
             }
         } catch(e) {}
     };
+    
     ws.onclose = () => { 
         clearInterval(wsPingInterval);
-        if (isT3 && pingDisplay) pingDisplay.innerHTML = `Ping lỗi (syncing - ❌ offline)`;
+        if (isT3 && pingDisplay) {
+            pingDisplay.innerHTML = `Ping lỗi (syncing - ❌ offline)`;
+        } else if (!isT3 && isSyncOn && pingDisplay) {
+            pingDisplay.innerHTML = `Ping mạng: <span style="color: #ef4444;">MẤT KẾT NỐI</span>`;
+            if (syncStatus) { syncStatus.textContent = 'LỖI WSS'; syncStatus.style.color = '#ef4444'; }
+        }
         setTimeout(connectWebSocket, 3000); 
     };
 }
@@ -317,76 +346,25 @@ if (btnPrevEl) {
 }
 
 // ============================================================== //
-// UI & LOGIC ĐỒNG BỘ THỜI GIAN (HTTP FALLBACK)                   //
+// UI & LOGIC ĐỒNG BỘ THỜI GIAN THEO YÊU CẦU MỚI (T1 DÙNG WSS)    //
 // ============================================================== //
-let isSyncOn = isT3 ? true : false;
-let networkTimeOffset = 0; 
-let syncInterval = null;
-
 const btnSync = document.getElementById('btn-sync'); 
 const syncStatus = document.getElementById('sync-status');
 const pingDisplay = document.getElementById('pingDisplay'); 
 
-async function pingTimeServer() {
-    if (!isSyncOn) return;
-    
-    // T3: Nếu WebSocket đang sống và làm việc, HTTP rút lui không cần ping nữa
-    if (isT3 && ws && ws.readyState === 1) return; 
-
-    try {
-        const start = Date.now();
-        const response = await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
-        const end = Date.now();
-        const pingMs = end - start; 
-        
-        const dateHeader = response.headers.get('date');
-        if (dateHeader) {
-            const serverTimeMs = new Date(dateHeader).getTime() + (pingMs / 2);
-            networkTimeOffset = serverTimeMs - Date.now();
-        } else {
-            networkTimeOffset = Math.round(pingMs / 2);
-        }
-
-        const endTimeMs = endTime * 1000;
-        const diffMs = (endTimeMs + timeOffset * 1000) - Date.now();
-
-        if (isT3 && pingDisplay && diffMs > 0) {
-            let statusText = '✅ internet tốt';
-            let pingS = (pingMs / 1000).toFixed(3);
-            if (pingMs > 150) statusText = '⚠️ mạng khá';
-            if (pingMs > 300) statusText = '❌ mạng kém';
-            pingDisplay.innerHTML = `Ping ${pingS}s (syncing - ${statusText})`;
-        } else if (!isT3) {
-            if (syncStatus) { syncStatus.textContent = 'ON'; syncStatus.style.color = '#22c55e'; }
-            if (pingDisplay) {
-                let pingColor = '#22c55e'; 
-                if (pingMs >= 150 && pingMs < 300) pingColor = '#f59e0b';
-                if (pingMs >= 300) pingColor = '#ef4444'; 
-                pingDisplay.innerHTML = `Ping mạng: <span style="color: ${pingColor};">${pingMs}ms</span>`;
-            }
-        }
-    } catch (error) {
-        if (isT3 && pingDisplay) {
-            pingDisplay.innerHTML = `Ping lỗi (syncing - ❌ offline)`;
-        } else if (!isT3) {
-            if (syncStatus) { syncStatus.textContent = 'LỖI PING'; syncStatus.style.color = '#ef4444'; }
-            if (pingDisplay) { pingDisplay.innerHTML = `Ping mạng: <span style="color: #ef4444;">LỖI</span>`; }
-        }
-    }
-}
-
 function applySyncState(state) {
     if (state) {
         isSyncOn = true;
-        if (!isT3 && syncStatus) { syncStatus.textContent = 'PING...'; syncStatus.style.color = '#f59e0b'; }
-        pingTimeServer(); 
-        clearInterval(syncInterval);
-        syncInterval = setInterval(pingTimeServer, 5000);
+        if (!isT3 && syncStatus) { syncStatus.textContent = 'WSS...'; syncStatus.style.color = '#f59e0b'; }
         if (!isT3) { try { localStorage.setItem('isSyncOn', 'true'); } catch (e) {} }
+        
+        // Kích hoạt ping WSS liền lập tức cho T1 nếu websocket đã mở
+        if (ws && ws.readyState === 1) {
+            ws.send(JSON.stringify({ action: 'ping', client_time: Date.now() }));
+        }
     } else {
         isSyncOn = false;
-        networkTimeOffset = 0;
-        clearInterval(syncInterval);
+        networkTimeOffset = 0; // Trả về 0 khi OFF (Chạy bằng giờ điện thoại)
         if (!isT3 && syncStatus) { syncStatus.textContent = 'OFF'; syncStatus.style.color = '#ef4444'; }
         if (!isT3 && pingDisplay) { pingDisplay.innerHTML = `Ping mạng: --`; }
         if (!isT3) { try { localStorage.setItem('isSyncOn', 'false'); } catch (e) {} }
