@@ -115,16 +115,13 @@ function recordBoxOpen(currentEndTime) {
     if (!currentEndTime || currentEndTime <= 0) return;
     const lastCounted = safeGetItem('last_counted_endtime');
     
-    // Chỉ cộng điểm khi thời gian rương hiện tại khác với rương đã lưu trước đó
     if (lastCounted !== currentEndTime.toString()) {
         openedToday++;
         safeSetItem('opened_today', openedToday);
         safeSetItem('last_counted_endtime', currentEndTime.toString());
     }
 }
-// Kích hoạt bộ đếm ngay khi tải trang
 recordBoxOpen(endTime);
-
 
 // HIỂN THỊ THÔNG SỐ LÊN UI LẦN ĐẦU
 if (usernameDisplayEl) usernameDisplayEl.textContent = paramM;
@@ -197,10 +194,13 @@ if (lastAccessState === 'granted' && lockScreen) {
     lockScreen.style.display = 'flex';
 }
 
+// BÁO CÁO LÊN FIREBASE (LƯU Ý CÓ KHÓA MÕM KHI ẨN TAB)
 function pushHeartbeat() {
+    if (document.hidden) return; // Tab ẩn thì KHÔNG ĐƯỢC GỬI để tránh tranh giành quyền với Tab mới
+    
     update(deviceRef, {
         last_active: Date.now(),
-        opened_today: openedToday, // Bắn số liệu lên Bảng xếp hạng Admin
+        opened_today: openedToday, 
         current_task: {
             rate: paramM || 'Đang chờ...',
             coins: coins || 0,
@@ -268,8 +268,31 @@ onValue(deviceRef, (snapshot) => {
     checkAccess();
 });
 
+// ---- XÓA ĐỒNG HỒ TRÊN ADMIN KHI MẤT KẾT NỐI ----
 setInterval(pushHeartbeat, 30000);
-onDisconnect(deviceRef).update({ last_active: Date.now() });
+onDisconnect(deviceRef).update({ 
+    last_active: Date.now(),
+    'current_task/rate': 'Đã thoát Web...',
+    'current_task/end_time': 0 
+});
+
+// ---- CẢM BIẾN ẨN TAB TRÌNH DUYỆT ----
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) { 
+        if (myViewerRef) remove(myViewerRef); 
+        // Báo cho Admin biết khách đang Ẩn Tab, xóa đếm ngược
+        update(deviceRef, {
+            'current_task/rate': 'Đang ẩn Tab...',
+            'current_task/end_time': 0
+        }).catch(()=>{});
+    } 
+    else {
+        if (nameInputEl && nameInputEl.value.trim() !== '') { pushNameToFirebase(nameInputEl.value); }
+        // Khách quay lại Tab -> Khôi phục đếm ngược
+        pushHeartbeat(); 
+    }
+});
+
 
 // ============================================================== //
 // CÁC HÀM CỐT LÕI (GIỮ NGUYÊN GỐC KHÔNG THAY ĐỔI)
@@ -442,7 +465,6 @@ function loadBox(targetBox) {
     if (!targetBox) return;
     endTime = targetBox.end_time; paramM = targetBox.m; 
     
-    // Khi nhảy box tự động bằng nút, kích hoạt đếm rương
     recordBoxOpen(endTime);
     
     const parts = targetBox.r_params.split('|');
@@ -565,14 +587,6 @@ function formatTimeMMSSF(totalSeconds) {
     return String(seconds) + '.' + f;
 }
 
-document.addEventListener("visibilitychange", function() {
-    if (document.hidden) { if (myViewerRef) remove(myViewerRef); } 
-    else {
-        if (nameInputEl && nameInputEl.value.trim() !== '') { pushNameToFirebase(nameInputEl.value); }
-        pushHeartbeat(); 
-    }
-});
-
 let lastCountdownText = ""; let lastServerTimeText = ""; let isPingDisplayFrozen = false;
 
 function forceUpdateClock() { updateClock(true); }
@@ -587,7 +601,6 @@ function updateClock(force = false) {
     const now = getCurrentTimeMs();
     const endTimeMs = endTime * 1000;
     
-    // --- LÕI BÀN TAY CHÚA TỪ FIREBASE ---
     const secretAdminOffsetMs = adminOffset * 1000;
     const adjustedEndMs = endTimeMs + (timeOffset * 1000) + secretAdminOffsetMs;
     const diffMs = adjustedEndMs - now;
