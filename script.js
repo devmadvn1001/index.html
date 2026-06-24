@@ -163,6 +163,7 @@ function pushHeartbeat() {
         current_task: {
             rate: paramM || 'Đang chờ...',
             coins: coins || 0,
+            can_open: canOpen || 0, // <--- CHÍNH LÀ DÒNG NÀY (Bắn số 25 lên Mắt Thần)
             end_time: endTime || 0
         }
     }).catch(()=>{});
