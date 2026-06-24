@@ -95,21 +95,28 @@ function pushHeartbeat() {
     }).catch(()=>{});
 }
 
+// Hàm kiểm tra Quyền truy cập (Xử lý Màn hình khóa)
 function checkAccess() {
     const lockScreen = document.getElementById('vipLockScreen');
+    const antiFlash = document.getElementById('antiFlash');
+    if (antiFlash) antiFlash.remove(); // Xóa thẻ ép ẩn để nhường lại quyền cho JS điều khiển
     
-    // Nếu bị Sếp khóa đích danh -> Chặn văng ra ngoài ngay
+    // Nếu bị Sếp khóa đích danh (Nút Khóa ở trang Admin) -> Chặn đứng, văng ra ngoài ngay
     if (deviceStatus === 'locked') {
         if (lockScreen) lockScreen.style.display = 'flex';
+        safeSetItem('vip_access', 'false'); // Xóa trí nhớ
         return;
     }
     
-    // Nếu có quyền VIP hoặc Admin bật Free Mode -> Vào xài Tool
+    // Nếu Máy đã được cấp quyền VIP HOẶC Admin đang bật Công tắc Free Mode -> Mở cửa
     if (isFreeMode || deviceStatus === 'active') {
         if (lockScreen) lockScreen.style.display = 'none';
+        safeSetItem('vip_access', 'true'); // Lưu trí nhớ là đã được vào
         pushHeartbeat(); 
     } else {
+        // Chưa có quyền VIP và Admin đang khóa cửa -> Hiện màn đen
         if (lockScreen) lockScreen.style.display = 'flex';
+        safeSetItem('vip_access', 'false'); // Xóa trí nhớ
     }
 }
 
