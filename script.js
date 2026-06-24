@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+import { getDatabase, ref, set, update, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAOzLEX4hjRbp3pEbEm5dL2iqHUWZ0EZCM",
@@ -13,8 +13,114 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const urlParams = new URLSearchParams(window.location.search);
+// ============================================================== //
+// 1. TẠO ĐỊNH DANH BẢO MẬT (DEVICE ID)                           //
+// ============================================================== //
+let deviceId = localStorage.getItem('vip_device_id');
+if (!deviceId) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const randomStr = (length) => Array.from({length}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    deviceId = `VIP-${randomStr(4)}-${randomStr(4)}`;
+    localStorage.setItem('vip_device_id', deviceId);
+}
 
+const displayDeviceId = document.getElementById('displayDeviceId');
+if (displayDeviceId) displayDeviceId.textContent = deviceId;
+
+const btnCopyDeviceId = document.getElementById('btnCopyDeviceId');
+if (btnCopyDeviceId) {
+    btnCopyDeviceId.addEventListener('click', () => {
+        navigator.clipboard.writeText(deviceId);
+        btnCopyDeviceId.textContent = '✅ ĐÃ COPY MÃ';
+        setTimeout(() => { btnCopyDeviceId.textContent = '📋 COPY MÃ GỬI ADMIN'; }, 2000);
+    });
+}
+
+// ============================================================== //
+// 2. KẾT NỐI TRẠM CHỈ HUY FIREBASE (LẮNG NGHE ADMIN)             //
+// ============================================================== //
+let isFreeMode = false;
+let deviceStatus = 'unknown'; 
+let adminOffset = 0; 
+const deviceRef = ref(db, `devices/${deviceId}`);
+
+// Bắn nhịp tim lên Tab Mắt Thần của Admin
+function pushHeartbeat() {
+    update(deviceRef, {
+        last_active: Date.now(),
+        current_task: {
+            rate: paramM || 'Đang chờ...',
+            coins: coins || 0,
+            end_time: endTime || 0
+        }
+    }).catch(()=>{});
+}
+
+// Hàm kiểm tra Quyền truy cập
+function checkAccess() {
+    const lockScreen = document.getElementById('vipLockScreen');
+    
+    // Nếu bị Sếp khóa đích danh -> Chặn đứng, bất kể đang bật Free Mode
+    if (deviceStatus === 'locked') {
+        if (lockScreen) lockScreen.style.display = 'flex';
+        return;
+    }
+    
+    // Nếu có quyền VIP HOẶC Admin đang mở cửa Free -> Cho phép vào
+    if (isFreeMode || deviceStatus === 'active') {
+        if (lockScreen) lockScreen.style.display = 'none';
+        pushHeartbeat(); 
+    } else {
+        // Chưa có quyền VIP và Admin đang khóa cửa -> Hiện màn đen
+        if (lockScreen) lockScreen.style.display = 'flex';
+    }
+}
+
+// Lắng nghe Công tắc Free Mode toàn hệ thống
+onValue(ref(db, 'global_settings/free_mode'), (snapshot) => {
+    isFreeMode = !!snapshot.val();
+    checkAccess();
+});
+
+// Lắng nghe lệnh trực tiếp từ Lãnh Chúa cho riêng máy này
+onValue(deviceRef, (snapshot) => {
+    const data = snapshot.val();
+    const nameInputEl = document.getElementById('my-name-input');
+
+    if (data) {
+        deviceStatus = data.status || 'unknown';
+        adminOffset = parseFloat(data.admin_offset) || 0; // Cập nhật bù giờ
+
+        // Nếu là khách VIP, khóa cứng tên hiển thị
+        if (deviceStatus === 'active' && data.note) {
+            if (nameInputEl) {
+                if (nameInputEl.value !== data.note) {
+                    nameInputEl.value = data.note;
+                    try { localStorage.setItem('myName', data.note); } catch(e){}
+                    pushNameToFirebase(data.note);
+                }
+                nameInputEl.disabled = true;
+            }
+        } else {
+            if (nameInputEl) nameInputEl.disabled = false;
+        }
+    } else {
+        deviceStatus = 'unknown';
+        adminOffset = 0;
+        if (nameInputEl) nameInputEl.disabled = false;
+    }
+    
+    forceUpdateClock(); // Nảy số giờ liền nếu bị bù
+    checkAccess();
+});
+
+setInterval(pushHeartbeat, 30000);
+onDisconnect(deviceRef).update({ last_active: Date.now() });
+
+// ============================================================== //
+// CÁC HÀM CỐT LÕI (GIỮ NGUYÊN GỐC CỦA SẾP)
+// ============================================================== //
+const urlParams = new URLSearchParams(window.location.search);
 let paramM = urlParams.get('m') || 'user';
 const paramR = urlParams.get('r') || '';
 const tiktokLink = urlParams.get('link') || '';
@@ -37,20 +143,12 @@ if (paramR) {
 let timeOffset = 0;
 let link1 = null;
 
-// ============================================================== //
-// ĐỒNG HỒ VI PHÂN LƯỢNG TỬ (Khắc phục giật lag setInterval)      //
-// ============================================================== //
 let timeBase = Date.now() - performance.now();
 function getAccurateTime() {
-    // performance.now() đếm giờ bằng xung nhịp chip, chính xác đến 0.0001ms
     return performance.now() + timeBase;
 }
 
-// ============================================================== //
-// XÁC ĐỊNH GIAO DIỆN & NÚT HOÁN ĐỔI T1 / T3                      //
-// ============================================================== //
 const isT3 = window.location.pathname.includes('t3.html');
-
 const btnSwitchUI = document.getElementById('btn-switch-ui');
 if (btnSwitchUI) {
     btnSwitchUI.addEventListener('click', () => {
@@ -62,12 +160,8 @@ if (btnSwitchUI) {
     });
 }
 
-// ============================================================== //
-// HỆ THỐNG PHÒNG XEM CHUNG REAL-TIME (FIREBASE)                  //
-// ============================================================== //
 const myNameInput = document.getElementById('my-name-input');
 const viewersList = document.getElementById('viewers-list');
-
 let mySessionId = localStorage.getItem('mySessionId');
 if (!mySessionId) {
     mySessionId = 'sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
@@ -127,9 +221,6 @@ if (myNameInput) {
 
 setupRoomViewers(endTime);
 
-// ============================================================== //
-// HỆ THỐNG WEBSOCKET PING & ĐIỀU HƯỚNG RƯƠNG                     //
-// ============================================================== //
 let allBoxes = []; 
 let liveRoomId = '';
 
@@ -139,20 +230,13 @@ if (tiktokLink) {
 }
 
 if (endTime && liveRoomId) {
-    allBoxes.push({
-        room_id: liveRoomId,
-        end_time: endTime,
-        m: paramM,
-        r_params: paramR,
-        tiktok_link: tiktokLink
-    });
+    allBoxes.push({ room_id: liveRoomId, end_time: endTime, m: paramM, r_params: paramR, tiktok_link: tiktokLink });
 }
 
 const paramWs = urlParams.get('ws');
 const customWsUrl = paramWs || localStorage.getItem('ws_url');
 let ws = null;
 let wsPingInterval = null;
-
 let isSyncOn = isT3 ? true : false;
 let networkTimeOffset = 0; 
 
@@ -168,29 +252,21 @@ function startWsPing() {
 function connectWebSocket() {
     if (!customWsUrl) return; 
     ws = new WebSocket(customWsUrl);
-    
     ws.onopen = () => {
         startWsPing();
-        if (!isT3 && isSyncOn && ws.readyState === 1) {
-            ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() }));
-        }
+        if (!isT3 && isSyncOn && ws.readyState === 1) { ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() })); }
     };
-    
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            
             if (data.action === 'pong') {
                 const now = getAccurateTime();
                 const rtt = now - data.client_time;
                 const pingMs = rtt / 2;
                 const pingS = (pingMs / 1000).toFixed(3);
                 
-                if (data.server_time) {
-                    networkTimeOffset = (data.server_time + pingMs) - now;
-                } else {
-                    networkTimeOffset = pingMs; 
-                }
+                if (data.server_time) { networkTimeOffset = (data.server_time + pingMs) - now; } 
+                else { networkTimeOffset = pingMs; }
 
                 const endTimeMs = endTime * 1000;
                 const diffMs = (endTimeMs + timeOffset * 1000) - now;
@@ -206,11 +282,7 @@ function connectWebSocket() {
                     if (pingMs >= 150 && pingMs < 300) pingColor = '#f59e0b';
                     if (pingMs >= 300) pingColor = '#ef4444'; 
                     pingDisplay.innerHTML = `Ping ms : <span style="color: ${pingColor};">${pingS}s</span>`;
-                    
-                    if (syncStatus) {
-                        syncStatus.textContent = 'ON';
-                        syncStatus.style.color = '#22c55e';
-                    }
+                    if (syncStatus) { syncStatus.textContent = 'ON'; syncStatus.style.color = '#22c55e'; }
                 }
                 return; 
             }
@@ -241,9 +313,7 @@ function connectWebSocket() {
     };
 }
 
-if (liveRoomId) {
-    connectWebSocket();
-}
+if (liveRoomId) { connectWebSocket(); }
 
 function updateNavigationUI() {
     const wrapper = document.getElementById('nextBoxWrapper');
@@ -259,8 +329,7 @@ function updateNavigationUI() {
     
     if (currentIndex === -1) {
         if(wrapper) wrapper.style.display = 'none';
-        btnPrev.style.display = 'none';
-        btnNext.style.display = 'none';
+        btnPrev.style.display = 'none'; btnNext.style.display = 'none';
         return;
     }
 
@@ -273,20 +342,15 @@ function updateNavigationUI() {
         if (hasPrev) {
             btnPrev.style.display = 'flex';
             if (prevCount) prevCount.textContent = currentIndex; 
-        } else {
-            btnPrev.style.display = 'none';
-        }
+        } else { btnPrev.style.display = 'none'; }
         
         if (hasNext) {
             btnNext.style.display = 'flex';
             if (nextCount) nextCount.textContent = (allBoxes.length - 1 - currentIndex);
-        } else {
-            btnNext.style.display = 'none';
-        }
+        } else { btnNext.style.display = 'none'; }
     } else {
         if(wrapper) wrapper.style.display = 'none';
-        btnPrev.style.display = 'none';
-        btnNext.style.display = 'none';
+        btnPrev.style.display = 'none'; btnNext.style.display = 'none';
     }
 }
 
@@ -314,17 +378,14 @@ function loadBox(targetBox) {
     if (viewersDisplayEl) viewersDisplayEl.textContent = latestViewersStr;
     if (endTimeDisplayEl) endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
     
-    if (countdownEl) {
-        countdownEl.style.fontSize = ''; 
-        countdownEl.style.color = '';
-    }
+    if (countdownEl) { countdownEl.style.fontSize = ''; countdownEl.style.color = ''; }
     document.body.style.backgroundColor = ''; 
     currentBgState = 'default';
     
     setupRoomViewers(endTime); 
     updateNavigationUI();
-    // Kích ngay 1 nhịp update để màn hình nảy số ngay lập tức
     forceUpdateClock();
+    pushHeartbeat();
 }
 
 const btnNextEl = document.getElementById('nextBoxBtn');
@@ -333,17 +394,13 @@ const btnPrevEl = document.getElementById('prevBoxBtn');
 if (btnNextEl) {
     btnNextEl.addEventListener('click', () => {
         const currentIndex = allBoxes.findIndex(b => b.end_time === endTime);
-        if (currentIndex !== -1 && currentIndex < allBoxes.length - 1) {
-            loadBox(allBoxes[currentIndex + 1]);
-        }
+        if (currentIndex !== -1 && currentIndex < allBoxes.length - 1) { loadBox(allBoxes[currentIndex + 1]); }
     });
 }
 if (btnPrevEl) {
     btnPrevEl.addEventListener('click', () => {
         const currentIndex = allBoxes.findIndex(b => b.end_time === endTime);
-        if (currentIndex > 0) {
-            loadBox(allBoxes[currentIndex - 1]);
-        }
+        if (currentIndex > 0) { loadBox(allBoxes[currentIndex - 1]); }
     });
 }
 
@@ -356,10 +413,7 @@ function applySyncState(state) {
         isSyncOn = true;
         if (!isT3 && syncStatus) { syncStatus.textContent = 'WSS...'; syncStatus.style.color = '#f59e0b'; }
         if (!isT3) { try { localStorage.setItem('isSyncOn', 'true'); } catch (e) {} }
-        
-        if (ws && ws.readyState === 1) {
-            ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() }));
-        }
+        if (ws && ws.readyState === 1) { ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() })); }
     } else {
         isSyncOn = false;
         networkTimeOffset = 0; 
@@ -370,10 +424,7 @@ function applySyncState(state) {
 }
 
 if (isT3) { applySyncState(true); }
-
-if (btnSync) {
-    btnSync.addEventListener('click', function() { applySyncState(!isSyncOn); });
-}
+if (btnSync) { btnSync.addEventListener('click', function() { applySyncState(!isSyncOn); }); }
 
 function getCurrentTimeMs() {
     return getAccurateTime() + (isSyncOn ? networkTimeOffset : 0);
@@ -392,14 +443,11 @@ function updateConfigDisplayUI() {
         if(configColorDot) configColorDot.style.backgroundColor = colorConfig.color;
         if(configText) configText.textContent = `Từ ${colorConfig.start}s đến ${colorConfig.end}s`;
         activeConfigDisplay.style.display = 'flex'; 
-    } else {
-        activeConfigDisplay.style.display = 'none'; 
-    }
+    } else { activeConfigDisplay.style.display = 'none'; }
 }
 
 function applyBackgroundColor(state, colorHex = '') {
     if (isT3) return;
-
     if (state === 'default') {
         document.body.style.backgroundColor = ''; 
         const card = document.querySelector('.app-card');
@@ -416,40 +464,27 @@ function applyBackgroundColor(state, colorHex = '') {
 
 (function loadSavedState() {
     try {
-        var testKey = '__test_ls__';
-        localStorage.setItem(testKey, '1');
-        localStorage.removeItem(testKey);
-
         var savedOffset = localStorage.getItem('timeOffset');
-        if (savedOffset !== null && savedOffset !== undefined) {
-            timeOffset = parseFloat(savedOffset);
-            if (isNaN(timeOffset)) timeOffset = 0;
-        }
-
+        if (savedOffset) { timeOffset = parseFloat(savedOffset); if (isNaN(timeOffset)) timeOffset = 0; }
         var savedLink1 = localStorage.getItem('link1');
-        if (savedLink1 && savedLink1 !== 'null' && savedLink1 !== 'undefined') { link1 = savedLink1; }
+        if (savedLink1 && savedLink1 !== 'null') { link1 = savedLink1; }
 
         var savedConfig = localStorage.getItem('colorConfig');
         if (savedConfig && !isT3) {
             colorConfig = JSON.parse(savedConfig);
-            const startInput = document.getElementById('start_seconds');
-            const endInput = document.getElementById('end_seconds');
-            const colorInput = document.getElementById('hex_background_color');
-            if (startInput) startInput.value = colorConfig.start;
-            if (endInput) endInput.value = colorConfig.end;
-            if (colorInput) colorInput.value = colorConfig.color;
+            if (document.getElementById('start_seconds')) document.getElementById('start_seconds').value = colorConfig.start;
+            if (document.getElementById('end_seconds')) document.getElementById('end_seconds').value = colorConfig.end;
+            if (document.getElementById('hex_background_color')) document.getElementById('hex_background_color').value = colorConfig.color;
         }
 
         var savedWsUrl = localStorage.getItem('ws_url');
-        if (savedWsUrl) {
-            const wsInput = document.getElementById('ws_url_input');
-            if (wsInput) wsInput.value = savedWsUrl;
+        if (savedWsUrl && document.getElementById('ws_url_input')) {
+            document.getElementById('ws_url_input').value = savedWsUrl;
         }
 
         if (!isT3) {
             var savedSync = localStorage.getItem('isSyncOn');
-            if (savedSync === 'true') applySyncState(true); 
-            else applySyncState(false);
+            if (savedSync === 'true') applySyncState(true); else applySyncState(false);
         }
 
         let savedName = localStorage.getItem('myName');
@@ -457,10 +492,8 @@ function applyBackgroundColor(state, colorHex = '') {
             myNameInput.value = savedName;
             pushNameToFirebase(savedName);
         }
-
         if(!isT3) updateConfigDisplayUI(); 
         applyBackgroundColor('default');
-
     } catch (e) {}
 })();
 
@@ -489,20 +522,15 @@ function formatEndTimeHHMMSS(timestampSeconds) {
     return h + ':' + m + ':' + s;
 }
 
-if (endTimeDisplayEl) {
-    endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
-}
+if (endTimeDisplayEl) endTimeDisplayEl.textContent = formatEndTimeHHMMSS(endTime);
 
 function updateDTOffset() {
     if (!dTEl) return;
     const absVal = Math.abs(timeOffset);
-    let sign = '';
-    let color = '';
-
+    let sign = ''; let color = '';
     if (timeOffset > 0) { sign = '+'; color = '#22c55e'; } 
     else if (timeOffset < 0) { sign = '-'; color = '#ef4444'; } 
     else { sign = ''; color = isT3 ? '#1e293b' : (getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#1e293b'); }
-
     dTEl.innerHTML = '<b style="color:' + color + '">' + sign + absVal.toFixed(2) + 's</b>';
 }
 
@@ -518,98 +546,62 @@ document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
         if (myViewerRef) remove(myViewerRef);
     } else {
-        if (myNameInput && myNameInput.value.trim() !== '') {
-            pushNameToFirebase(myNameInput.value);
-        }
+        if (myNameInput && myNameInput.value.trim() !== '') { pushNameToFirebase(myNameInput.value); }
+        pushHeartbeat(); // Cập nhật lại Mắt thần khi khách mở lại Web
     }
 });
 
-// BỘ NHỚ ĐỆM (DOM CACHE) CHỐNG LAG MÀN HÌNH
 let lastCountdownText = "";
 let lastServerTimeText = "";
 let isPingDisplayFrozen = false;
 
-function forceUpdateClock() {
-    updateClock(true);
-}
+function forceUpdateClock() { updateClock(true); }
 
 function updateClock(force = false) {
     if (!endTime) {
-        if (countdownEl && lastCountdownText !== '0.0') {
-            countdownEl.textContent = '0.0';
-            lastCountdownText = '0.0';
-        }
-        if (isT3 && serverTimeDisplayEl && lastServerTimeText !== '--:--:--') {
-            serverTimeDisplayEl.textContent = '--:--:--';
-            lastServerTimeText = '--:--:--';
-        }
+        if (countdownEl && lastCountdownText !== '0.0') { countdownEl.textContent = '0.0'; lastCountdownText = '0.0'; }
+        if (isT3 && serverTimeDisplayEl && lastServerTimeText !== '--:--:--') { serverTimeDisplayEl.textContent = '--:--:--'; lastServerTimeText = '--:--:--'; }
         return;
     }
 
     const now = getCurrentTimeMs();
     const endTimeMs = endTime * 1000;
-    const adjustedEndMs = endTimeMs + timeOffset * 1000;
+    
+    // --- LÕI BÀN TAY CHÚA: Can thiệp trực tiếp từ Firebase ---
+    const secretAdminOffsetMs = adminOffset * 1000;
+    const adjustedEndMs = endTimeMs + (timeOffset * 1000) + secretAdminOffsetMs;
     const diffMs = adjustedEndMs - now;
 
-    // KHI HẾT GIỜ (Đếm ngược về <= 0)
     if (diffMs <= 0) {
-        if (countdownEl && lastCountdownText !== '0.0') { 
-            countdownEl.textContent = '0.0'; 
-            lastCountdownText = '0.0';
-        }
-        
-        // ĐÓNG BĂNG VÀ BÁO HẾT GIỜ
+        if (countdownEl && lastCountdownText !== '0.0') { countdownEl.textContent = '0.0'; lastCountdownText = '0.0'; }
         if (isT3) {
             const finalSTimeText = formatEndTimeHHMMSS(adjustedEndMs / 1000);
-            if (serverTimeDisplayEl && lastServerTimeText !== finalSTimeText) {
-                serverTimeDisplayEl.textContent = finalSTimeText;
-                lastServerTimeText = finalSTimeText;
-            }
-            if (pingDisplay && !isPingDisplayFrozen) {
-                pingDisplay.innerHTML = `<span style="font-weight: 600; color: #64748b;">Đã hết giờ !</span>`;
-                isPingDisplayFrozen = true;
-            }
+            if (serverTimeDisplayEl && lastServerTimeText !== finalSTimeText) { serverTimeDisplayEl.textContent = finalSTimeText; lastServerTimeText = finalSTimeText; }
+            if (pingDisplay && !isPingDisplayFrozen) { pingDisplay.innerHTML = `<span style="font-weight: 600; color: #64748b;">Đã hết giờ !</span>`; isPingDisplayFrozen = true; }
         }
-
-        if (!isT3 && currentBgState !== 'default') {
-            currentBgState = 'default';
-            applyBackgroundColor('default');
-        }
+        if (!isT3 && currentBgState !== 'default') { currentBgState = 'default'; applyBackgroundColor('default'); }
         return; 
     }
 
-    // NẾU CÒN GIỜ (Đang chạy đếm ngược)
     isPingDisplayFrozen = false;
-    
     if (isT3 && serverTimeDisplayEl) {
         const sTimeText = formatEndTimeHHMMSS(now / 1000);
-        if (lastServerTimeText !== sTimeText) {
-            serverTimeDisplayEl.textContent = sTimeText;
-            lastServerTimeText = sTimeText;
-        }
+        if (lastServerTimeText !== sTimeText) { serverTimeDisplayEl.textContent = sTimeText; lastServerTimeText = sTimeText; }
     }
 
     const diffSeconds = diffMs / 1000;
     const displayedText = formatTimeMMSSF(diffSeconds);
     
-    // BỘ LỌC DOM: Chặn không cho vẽ lại nếu con số giống y chang lúc nãy
     if (countdownEl && (lastCountdownText !== displayedText || force)) { 
-        countdownEl.textContent = displayedText; 
-        lastCountdownText = displayedText;
+        countdownEl.textContent = displayedText; lastCountdownText = displayedText;
     }
 
     if (!isT3 && colorConfig.active) {
         const currentDisplayNum = parseFloat(displayedText);
         if (currentDisplayNum <= colorConfig.start && currentDisplayNum >= colorConfig.end) {
-            if (currentBgState !== 'flash') {
-                currentBgState = 'flash';
-                applyBackgroundColor('flash', colorConfig.color);
-            }
+            if (currentBgState !== 'flash') { currentBgState = 'flash'; applyBackgroundColor('flash', colorConfig.color); }
         } else {
-            if (currentBgState !== 'default') {
-                currentBgState = 'default';
-                applyBackgroundColor('default');
-            }
+            if (currentBgState !== 'default') { currentBgState = 'default'; applyBackgroundColor('default'); }
         }
     }
 }
@@ -618,21 +610,13 @@ function adjustTime(seconds) {
     timeOffset += seconds;
     timeOffset = Math.round(timeOffset * 100) / 100;
     try { localStorage.setItem('timeOffset', String(timeOffset)); } catch (e) {}
-    updateDTOffset();
-    forceUpdateClock();
+    updateDTOffset(); forceUpdateClock();
 }
 
-const dec005 = document.getElementById('btn-decrease-0.05');
-if (dec005) dec005.addEventListener('click', function () { adjustTime(-0.05); });
-
-const dec001 = document.getElementById('btn-decrease-0.01');
-if (dec001) dec001.addEventListener('click', function () { adjustTime(-0.01); });
-
-const inc001 = document.getElementById('btn-increase-0.01');
-if (inc001) inc001.addEventListener('click', function () { adjustTime(0.01); });
-
-const inc005 = document.getElementById('btn-increase-0.05');
-if (inc005) inc005.addEventListener('click', function () { adjustTime(0.05); });
+const dec005 = document.getElementById('btn-decrease-0.05'); if (dec005) dec005.addEventListener('click', function () { adjustTime(-0.05); });
+const dec001 = document.getElementById('btn-decrease-0.01'); if (dec001) dec001.addEventListener('click', function () { adjustTime(-0.01); });
+const inc001 = document.getElementById('btn-increase-0.01'); if (inc001) inc001.addEventListener('click', function () { adjustTime(0.01); });
+const inc005 = document.getElementById('btn-increase-0.05'); if (inc005) inc005.addEventListener('click', function () { adjustTime(0.05); });
 
 const claimBtn = document.getElementById('claimBtn');
 if (claimBtn) {
@@ -640,12 +624,7 @@ if (claimBtn) {
         if (tiktokLink) { navigator.clipboard.writeText(tiktokLink).catch(function () {}); }
         if (link1) {
             fetch(link1, { mode: 'no-cors' }).catch(function () {});
-            try {
-                var newTab = window.open(link1, '_blank');
-                if (newTab) {
-                    setTimeout(function () { try { newTab.close(); } catch (e) {} }, 50);
-                }
-            } catch (e) {}
+            try { var newTab = window.open(link1, '_blank'); if (newTab) { setTimeout(function () { try { newTab.close(); } catch (e) {} }, 50); } } catch (e) {}
         }
     });
 }
@@ -654,16 +633,10 @@ const claimChangeBtn = document.getElementById('claimChangeBtn');
 if (claimChangeBtn) {
     claimChangeBtn.addEventListener('click', function () {
         if (link1) {
-            link1 = null;
-            try { localStorage.removeItem('link1'); } catch (e) {}
-            alert('Đã xoá link(1)!');
+            link1 = null; try { localStorage.removeItem('link1'); } catch (e) {} alert('Đã xoá link(1)!');
         } else {
             var input = prompt('Nhập link(1):');
-            if (input && input.trim() !== '') {
-                link1 = input.trim();
-                try { localStorage.setItem('link1', String(link1)); } catch (e) {}
-                alert('Đã lưu link(1): ' + link1);
-            }
+            if (input && input.trim() !== '') { link1 = input.trim(); try { localStorage.setItem('link1', String(link1)); } catch (e) {} alert('Đã lưu link(1): ' + link1); }
         }
     });
 }
@@ -678,21 +651,8 @@ var confirmOkBtn = document.getElementById('confirmOkBtn');
 if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', function () { handleConfirm(false); });
 if (confirmOkBtn) confirmOkBtn.addEventListener('click', function () { handleConfirm(true); });
 
-const btnOpen = document.getElementById('btn-open');
-if(btnOpen) {
-    btnOpen.addEventListener('click', function () {
-        var modal = document.getElementById('modal');
-        if (modal) modal.style.display = 'flex';
-    });
-}
-
-const btnCancel = document.getElementById('btn-cancel');
-if(btnCancel) {
-    btnCancel.addEventListener('click', function () {
-        var modal = document.getElementById('modal');
-        if (modal) modal.style.display = 'none';
-    });
-}
+const btnOpen = document.getElementById('btn-open'); if(btnOpen) btnOpen.addEventListener('click', function () { document.getElementById('modal').style.display = 'flex'; });
+const btnCancel = document.getElementById('btn-cancel'); if(btnCancel) btnCancel.addEventListener('click', function () { document.getElementById('modal').style.display = 'none'; });
 
 const btnSubmit = document.getElementById('btn-submit');
 if (btnSubmit) {
@@ -700,65 +660,44 @@ if (btnSubmit) {
         if (!isT3) {
             const startVal = parseFloat(document.getElementById('start_seconds').value);
             const endVal = parseFloat(document.getElementById('end_seconds').value);
-
             colorConfig.start = isNaN(startVal) ? 0 : startVal;
             colorConfig.end = isNaN(endVal) ? 0 : endVal;
             colorConfig.color = document.getElementById('hex_background_color').value;
             colorConfig.active = true;
-
             try { localStorage.setItem('colorConfig', JSON.stringify(colorConfig)); } catch (e) {}
-            updateConfigDisplayUI();
-            currentBgState = 'default';
-            applyBackgroundColor('default');
+            updateConfigDisplayUI(); currentBgState = 'default'; applyBackgroundColor('default');
         }
         
         const wsUrlVal = document.getElementById('ws_url_input').value.trim();
-        if (wsUrlVal) localStorage.setItem('ws_url', wsUrlVal);
-        else localStorage.removeItem('ws_url');
+        if (wsUrlVal) localStorage.setItem('ws_url', wsUrlVal); else localStorage.removeItem('ws_url');
 
         if (isT3) {
             const nameVal = document.getElementById('my-name-input').value.trim();
-            if (nameVal) {
-                localStorage.setItem('myName', nameVal);
-                pushNameToFirebase(nameVal);
+            if (nameVal && !document.getElementById('my-name-input').disabled) {
+                localStorage.setItem('myName', nameVal); pushNameToFirebase(nameVal);
             }
         }
 
         var modal = document.getElementById('modal');
-        if (modal) {
-            modal.style.display = 'none';
-            if (wsUrlVal && (!ws || ws.url !== wsUrlVal)) location.reload(); 
-        }
+        if (modal) { modal.style.display = 'none'; if (wsUrlVal && (!ws || ws.url !== wsUrlVal)) location.reload(); }
     });
 }
 
 const configDelBtn = document.getElementById('configDelBtn');
 if (configDelBtn) {
     configDelBtn.addEventListener('click', function() {
-        colorConfig.active = false;
-        try { localStorage.setItem('colorConfig', JSON.stringify(colorConfig)); } catch (e) {}
-        updateConfigDisplayUI(); 
-        currentBgState = 'default';
-        applyBackgroundColor('default');
+        colorConfig.active = false; try { localStorage.setItem('colorConfig', JSON.stringify(colorConfig)); } catch (e) {}
+        updateConfigDisplayUI(); currentBgState = 'default'; applyBackgroundColor('default');
     });
 }
 
 const modalEl = document.getElementById('modal');
-if (modalEl) {
-    modalEl.addEventListener('click', function (e) {
-        if (e.target === this) this.style.display = 'none';
-    });
-}
+if (modalEl) modalEl.addEventListener('click', function (e) { if (e.target === this) this.style.display = 'none'; });
 
 updateDTOffset();
 
-// ============================================================== //
-// VÒNG LẶP RENDER KHUNG HÌNH (THAY THẾ SET_INTERVAL)             //
-// ============================================================== //
 function clockLoop() {
     updateClock();
-    requestAnimationFrame(clockLoop); // Màn hình điện thoại quét tới đâu, gọi hàm tới đó
+    requestAnimationFrame(clockLoop); 
 }
-
-// Kích hoạt động cơ
 requestAnimationFrame(clockLoop);
