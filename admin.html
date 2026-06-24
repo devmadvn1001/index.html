@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trạm Chỉ Huy Pro Analytics - Tool VIP</title>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-page: #0b1120; /* Xanh Navy cực sâu */
-            --surface: #1e293b; /* Nền thẻ (card) */
+            --bg-page: #0b1120; 
+            --surface: #1e293b; 
             --surface-hover: #334155;
             --text-main: #f8fafc; 
             --text-muted: #94a3b8; 
             --border: #334155; 
-            --primary: #3b82f6; /* Xanh dương sáng */
+            --primary: #3b82f6; 
             --primary-hover: #2563eb;
             --success: #10b981; 
             --warning: #f59e0b;
@@ -22,7 +23,6 @@
             --radius-btn: 8px;
             --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
             
-            /* Trophies colors */
             --gold: linear-gradient(135deg, #fbbf24, #d97706);
             --silver: linear-gradient(135deg, #cbd5e1, #64748b);
             --bronze: linear-gradient(135deg, #fca5a5, #b91c1c);
@@ -37,13 +37,11 @@
             padding-bottom: 50px;
         }
 
-        /* TYPOGRAPHY UTILITIES */
         .mono { font-family: 'JetBrains Mono', monospace; }
         .text-success { color: var(--success); }
         .text-danger { color: var(--danger); }
         .text-muted { color: var(--text-muted); }
         
-        /* MÀN HÌNH LOGIN */
         #login-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .login-card { 
             background: var(--surface); 
@@ -64,7 +62,19 @@
             font-size: 1rem; outline: none; transition: 0.2s; font-family: 'JetBrains Mono', monospace; 
             background: rgba(15, 23, 42, 0.6); color: var(--text-main); font-weight: 500;
         }
-        .input-group input:focus { border-color: var(--primary); background: var(--bg-page); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary); background: var(--bg-page); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        
+        /* CẬP NHẬT MŨI TÊN SELECT BOX DÀY VÀ THỤT VÀO TRONG */
+        select#new-device-expiry {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center; /* Thụt vào trong 18px */
+            background-size: 16px;
+            padding-right: 45px;
+            cursor: pointer;
+        }
         
         .btn { 
             width: 100%; padding: 14px; border: none; border-radius: var(--radius-btn); font-size: 0.95rem; 
@@ -74,7 +84,6 @@
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4); }
         .btn-primary:active { transform: translateY(0); }
         
-        /* DASHBOARD HEADER */
         #admin-dashboard { display: none; padding: 30px 20px; max-width: 1440px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
         .header h1 { 
@@ -90,7 +99,6 @@
         }
         .logout-btn:hover { background: var(--surface-hover); border-color: #475569; }
         
-        /* TABS HIỆN ĐẠI SAAS */
         .tabs { 
             display: flex; gap: 8px; margin-bottom: 25px; padding: 6px; background: rgba(30, 41, 59, 0.5); 
             border-radius: 12px; width: fit-content; border: 1px solid var(--border);
@@ -105,7 +113,6 @@
         .tab-content { display: none; } .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* PANELS & LƯỚI */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 2.5fr; gap: 24px; }
         .panel { 
             background: var(--surface); border-radius: var(--radius-card); padding: 28px; 
@@ -117,7 +124,6 @@
             padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         
-        /* BẢNG DỮ LIỆU ĐẸP MẮT (PRO STYLE) */
         .table-responsive { overflow-x: auto; background: var(--bg-page); border-radius: 12px; border: 1px solid var(--border); }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { 
@@ -128,12 +134,10 @@
         tr:last-child td { border-bottom: none; }
         tr:hover td { background-color: rgba(255,255,255,0.02); } 
         
-        /* TYPOGRAPHY TRONG BẢNG */
         .user-name { font-weight: 800; color: var(--text-main); font-size: 1.05rem; display: block; margin-bottom: 6px;}
         .device-id { font-family: 'JetBrains Mono', monospace; color: #60a5fa; font-size: 0.8rem; font-weight: 700; background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 6px; }
         .live-cd { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; color: var(--danger); background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 8px; display: inline-block; }
         
-        /* BADGES */
         .badge { padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
         .badge-active { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); } 
         .badge-locked { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); } 
@@ -142,7 +146,6 @@
         .dot-green { background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
         
-        /* RANKING BADGES (BẢNG XẾP HẠNG) */
         .rank-badge { 
             display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; 
             border-radius: 8px; font-weight: 800; font-size: 1rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
@@ -152,12 +155,10 @@
         .rank-badge.top-3 { background: var(--bronze); color: #fff; border: none; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); width: 36px; }
         .stat-number { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; color: var(--warning); text-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
 
-        /* NÚT THAO TÁC (EDIT/LOCK/DELETE) */
         .action-group { display: flex; justify-content: flex-end; gap: 8px; }
         .action-btn { background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); font-size: 1.1rem; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; justify-content: center;}
         .action-btn:hover { background: var(--primary); color: white !important; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-color: var(--primary);}
         
-        /* BỘ NÚT ĐIỀU KHIỂN & RESET */
         .ctrl-group { display: flex; align-items: center; gap: 10px; justify-content: flex-end; margin-top: 10px; }
         .ctrl-box { display: flex; align-items: center; background: rgba(15, 23, 42, 0.5); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
         
@@ -170,11 +171,29 @@
         .ctrl-input:focus { background: rgba(255,255,255,0.05); color: var(--primary); }
         
         .btn-reset { 
-            background: #334155; color: #f8fafc; font-size: 0.8rem; padding: 0 16px; font-weight: 800; 
-            border-radius: 8px; border: 1px solid #475569; cursor: pointer; height: 40px; display: flex; 
-            align-items: center; transition: all 0.2s; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2); letter-spacing: 0.5px;
+            background: #334155; 
+            color: #f8fafc; 
+            font-size: 0.8rem; 
+            padding: 0 16px; 
+            font-weight: 800; 
+            border-radius: 8px; 
+            border: 1px solid #475569; 
+            cursor: pointer; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            transition: all 0.2s; 
+            text-transform: uppercase; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            letter-spacing: 0.5px;
         }
-        .btn-reset:hover { background: #475569; color: #ffffff; border-color: #64748b; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .btn-reset:hover { 
+            background: #475569; 
+            color: #ffffff; 
+            border-color: #64748b; 
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
         .btn-reset:active { transform: translateY(1px); box-shadow: none; }
         
         .offset-badge { font-size: 0.8rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace;}
@@ -182,7 +201,6 @@
         .offset-pos { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); } 
         .offset-neg { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
         
-        /* MODAL */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.8); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
         .modal-box { background: var(--surface); border-radius: var(--radius-card); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid var(--border); animation: fadeIn 0.3s ease; }
         
@@ -209,7 +227,10 @@
             <h1><span style="font-size: 1.4em; vertical-align: bottom;">📡</span> ANALYTICS DASHBOARD</h1>
             <div class="header-actions">
                 <button id="btn-free-mode" class="logout-btn" onclick="toggleFreeMode()">⏳ SYSTEM CHECK...</button>
-                <span class="logout-btn mono" id="online-stats" style="background: rgba(15,23,42,0.8); border-style: solid; cursor: default;">ONLINE: 0/0</span>
+                
+                <!-- CẬP NHẬT CSS Ô ONLINE: CĂN GIỮA, MỞ RỘNG VÀ ĐẢM BẢO CHỮ GIÃN RÕ RÀNG -->
+                <span class="logout-btn mono" id="online-stats" style="background: rgba(15,23,42,0.8); border-style: solid; border-color: var(--border); cursor: default; min-width: 150px; justify-content: center; letter-spacing: 1.5px; font-size: 0.9rem;">ONLINE: 0/0</span>
+                
                 <button class="logout-btn" style="color: var(--danger); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1);" onclick="logout()">ĐĂNG XUẤT</button>
             </div>
         </div>
@@ -217,7 +238,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Quản Lý Khách</button>
             <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">💻 Terminal Bù Giờ</button>
-            <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Bảng Xếp Hạng</button>
+            <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Thống Kê & Top Mở</button>
         </div>
 
         <div id="tab-manage" class="tab-content active">
@@ -316,7 +337,8 @@
                             </tr>
                         </thead>
                         <tbody id="stats-list-body">
-                            </tbody>
+                            <!-- Dữ liệu render bằng JS -->
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -324,6 +346,7 @@
 
     </div>
 
+    <!-- MODAL CHỈNH SỬA -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-box">
             <h2 style="font-weight: 800; font-size: 1.4rem; margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 8px;">✏️ Cập Nhật Dữ Liệu</h2>
@@ -477,10 +500,10 @@
                 `;
                 tbody.appendChild(tr);
             }
-            document.getElementById('online-stats').innerHTML = `ONLINE: <b style="color: var(--success);">${onlineCount}/${totalCount}</b>`;
+            // CẬP NHẬT GIAO DIỆN HIỂN THỊ ONLINE
+            document.getElementById('online-stats').innerHTML = `ONLINE: <b style="color: var(--success); margin-left: 5px;">${onlineCount}/${totalCount}</b>`;
         }
 
-        // HÀM RENDER BẢNG XẾP HẠNG (LOGIC LẤY ĐÚNG SỐ LƯỢNG MỞ LINK)
         function renderStatsTable() {
             const tbody = document.getElementById('stats-list-body');
             tbody.innerHTML = '';
@@ -488,7 +511,6 @@
             let statsArray = [];
 
             for (const [id, data] of Object.entries(devicesData)) {
-                // Chỉ lấy biến opened_today đích thực từ Firebase
                 let openedCount = parseInt(data.opened_today) || 0;
 
                 statsArray.push({
@@ -500,11 +522,9 @@
                 });
             }
 
-            // Xếp hạng từ cao xuống thấp
             statsArray.sort((a, b) => b.opened - a.opened);
 
             statsArray.forEach((item, index) => {
-                // Bỏ qua người chưa mở link nào cho đỡ rác bảng
                 if (item.opened === 0) return;
 
                 const rank = index + 1;
