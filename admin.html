@@ -3,100 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Quản Trị Tool VIP</title>
+    <title>Trạm Chỉ Huy - Tool VIP</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-page: #f1f5f9;
-            --surface: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --success: #10b981;
-            --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --warning: #f59e0b;
+            --bg-page: #f1f5f9; --surface: #ffffff; --text-main: #0f172a; --text-muted: #64748b;
+            --border: #e2e8f0; --primary: #3b82f6; --primary-hover: #2563eb;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-main); line-height: 1.5; }
 
-        /* MÀN HÌNH ĐĂNG NHẬP */
-        #login-screen {
-            display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;
-        }
-        .login-card {
-            background: var(--surface); padding: 40px 30px; border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center;
-        }
+        /* MÀN HÌNH LOGIN */
+        #login-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .login-card { background: var(--surface); padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
         .login-card h2 { font-weight: 800; font-size: 1.5rem; margin-bottom: 5px; }
         .login-card p { color: var(--text-muted); margin-bottom: 25px; font-size: 0.95rem; }
-        
         .input-group { text-align: left; margin-bottom: 20px; }
         .input-group label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
-        .input-group input, .input-group select {
-            width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px;
-            font-size: 1rem; outline: none; transition: border-color 0.2s; font-family: 'Inter', sans-serif;
-        }
-        .input-group input:focus, .input-group select:focus { border-color: var(--primary); }
-        
-        .btn {
-            width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700;
-            color: white; cursor: pointer; transition: all 0.2s;
-        }
+        .input-group input, .input-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-size: 1rem; outline: none; transition: 0.2s; font-family: 'Inter', sans-serif; }
+        .input-group input:focus { border-color: var(--primary); }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; color: white; cursor: pointer; transition: 0.2s; }
         .btn-primary { background: var(--primary); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
         .btn-primary:active { transform: scale(0.98); }
-        .btn-danger { background: var(--danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
-        .btn-danger:active { transform: scale(0.98); }
 
-        /* MÀN HÌNH QUẢN TRỊ DASHBOARD */
-        #admin-dashboard { display: none; padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        /* DASHBOARD & TABS */
+        /* ĐÃ MỞ RỘNG THÊM 20% (TỪ 1200px LÊN 1440px) */
+        #admin-dashboard { display: none; padding: 30px 20px; max-width: 1440px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .header h1 { font-weight: 800; font-size: 1.8rem; letter-spacing: -0.5px; }
-        .header-actions { display: flex; gap: 10px; align-items: center; }
-        .logout-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .logout-btn:hover { background: #f8fafc; color: var(--text-main); }
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+        .logout-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; }
+        .tab-btn { padding: 12px 24px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; background: #e2e8f0; color: var(--text-muted); transition: 0.2s; }
+        .tab-btn.active { background: var(--text-main); color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* LƯỚI QUẢN LÝ KEY */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; }
-        
         .panel { background: var(--surface); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border); }
-        .panel-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        .panel-title { font-weight: 800; font-size: 1.2rem; margin-bottom: 20px; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
 
-        /* BẢNG DANH SÁCH THIẾT BỊ */
+        /* BẢNG CHUNG */
         .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { text-align: left; padding: 14px; background: #f8fafc; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); }
-        td { padding: 16px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 0.95rem; }
-        tr:last-child td { border-bottom: none; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { text-align: left; padding: 14px; background: #f8fafc; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+        td { padding: 16px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 0.95rem; font-weight: 500; }
         
-        .user-info { display: flex; flex-direction: column; }
-        .user-name { font-weight: 700; color: var(--text-main); }
-        .device-id { font-family: monospace; color: var(--text-muted); font-size: 0.85rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+        .user-name { font-weight: 800; color: var(--text-main); font-size: 1.05rem; }
+        .device-id { font-family: monospace; color: var(--text-muted); font-size: 0.85rem; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 6px; font-weight: 600; }
 
-        .badge { padding: 6px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        /* BADGES TRẠNG THÁI */
+        .badge { padding: 6px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
         .badge-active { background: #dcfce7; color: #166534; }
         .badge-locked { background: #fee2e2; color: #991b1b; }
+        .badge-offline { background: #f1f5f9; color: #475569; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dot-green { background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        .action-btn { background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 6px; border-radius: 8px; transition: 0.2s; }
+        .action-btn { background: transparent; border: none; font-size: 1.3rem; cursor: pointer; padding: 6px; border-radius: 8px; transition: 0.2s; }
         .action-btn:hover { background: #f1f5f9; transform: scale(1.1); }
 
-        @media (max-width: 900px) {
-            .dashboard-grid { grid-template-columns: 1fr; }
-        }
+        /* MẮT THẦN & THAO TÚNG */
+        .live-cd { font-family: monospace; font-size: 1.5rem; font-weight: 800; color: var(--danger); background: #fee2e2; padding: 4px 10px; border-radius: 8px; letter-spacing: -1px; }
+        
+        .ctrl-group { display: flex; align-items: center; gap: 6px; justify-content: flex-end; margin-top: 10px; }
+        .ctrl-btn { width: 32px; height: 32px; border-radius: 8px; border: none; font-weight: 800; font-size: 1.1rem; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .ctrl-btn:active { transform: scale(0.9); }
+        .btn-sub { background: var(--danger); box-shadow: 0 3px 8px rgba(239, 68, 68, 0.3); }
+        .btn-add { background: var(--success); box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3); }
+        .btn-reset { background: #e2e8f0; color: var(--text-muted); font-size: 0.9rem; width: auto; padding: 0 10px; box-shadow: none; }
+        
+        .ctrl-input { width: 55px; height: 32px; text-align: center; border: 2px solid var(--border); border-radius: 8px; outline: none; font-weight: 800; font-family: 'Inter'; font-size: 0.95rem; }
+        .ctrl-input:focus { border-color: var(--primary); }
+
+        .offset-badge { font-size: 0.85rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 8px; }
+        .offset-zero { background: #f1f5f9; color: var(--text-muted); }
+        .offset-pos { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .offset-neg { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-card">
-            <h2>👑 KHU VỰC LÃNH CHÚA</h2>
-            <p>Nhập mật khẩu để truy cập trạm quản lý</p>
-            
+            <h2>👑 TRẠM CHỈ HUY</h2>
+            <p>Nhập mật khẩu Lãnh Chúa để truy cập</p>
             <div class="input-group">
-                <input type="password" id="admin-pwd" placeholder="Vui lòng nhập mật khẩu...">
+                <input type="password" id="admin-pwd" placeholder="Mật khẩu của sếp...">
             </div>
             <button class="btn btn-primary" onclick="login()">ĐĂNG NHẬP ➔</button>
         </div>
@@ -104,126 +105,363 @@
 
     <div id="admin-dashboard">
         <div class="header">
-            <h1>Quản Lý Key Telegram</h1>
+            <h1>Hệ Sinh Thái Tool VIP</h1>
             <div class="header-actions">
-                <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Đang online: <b style="color: var(--success);">3/5</b></span>
+                <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted);" id="online-stats">Đang online: 0/0</span>
                 <button class="logout-btn" onclick="logout()">Thoát</button>
             </div>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="panel">
-                <div class="panel-title">⚡ Cấp Quyền Thiết Bị</div>
-                
-                <div class="input-group">
-                    <label>Mã thiết bị (Khách gửi)</label>
-                    <input type="text" id="new-device-id" placeholder="VD: VIP-8A2F-9B1C" style="font-family: monospace; font-weight: 600; letter-spacing: 1px;">
-                </div>
-                
-                <div class="input-group">
-                    <label>Tên Khách / Ghi chú</label>
-                    <input type="text" id="new-device-note" placeholder="VD: Máy 13 Pro Max - Anh Hùng">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">🔑 Quản Lý Key</button>
+            <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">👁️ Mắt Thần & Thao Túng</button>
+        </div>
+
+        <div id="tab-manage" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="panel">
+                    <div class="panel-title">⚡ Cấp Quyền Thiết Bị</div>
+                    <div class="input-group">
+                        <label>Mã thiết bị (Khách gửi)</label>
+                        <input type="text" id="new-device-id" placeholder="VD: VIP-8A2F-9B1C" style="font-family: monospace; font-weight: 700; letter-spacing: 1px;">
+                    </div>
+                    <div class="input-group">
+                        <label>Tên Khách / Ghi chú (Khóa cứng tên này)</label>
+                        <input type="text" id="new-device-note" placeholder="VD: Hùng 13 Pro Max">
+                    </div>
+                    <div class="input-group">
+                        <label>Thời hạn sử dụng</label>
+                        <select id="new-device-expiry">
+                            <option value="forever">Vĩnh viễn (Không hết hạn)</option>
+                            <option value="7">7 Ngày</option>
+                            <option value="30">30 Ngày</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 10px;" onclick="addDevice()">🚀 KÍCH HOẠT NGAY</button>
                 </div>
 
-                <div class="input-group">
-                    <label>Thời hạn sử dụng</label>
-                    <select id="new-device-expiry">
-                        <option value="forever">Vĩnh viễn (Không hết hạn)</option>
-                        <option value="7">7 Ngày</option>
-                        <option value="30">30 Ngày</option>
-                    </select>
+                <div class="panel">
+                    <div class="panel-title">📋 Danh Sách Khách Hàng</div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Khách Hàng / ID</th>
+                                    <th>Ngày Cấp</th>
+                                    <th>Trạng Thái</th>
+                                    <th style="text-align: right;">Khóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="device-list-body">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
-
-                <button class="btn btn-primary" style="margin-top: 10px;">🚀 KÍCH HOẠT NGAY</button>
             </div>
+        </div>
 
+        <div id="tab-monitor" class="tab-content">
             <div class="panel">
-                <div class="panel-title">📋 Danh Sách Khách Hàng</div>
+                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 15px;">
+                    <div class="panel-title" style="margin-bottom: 0;">👁️ Màn Hình Giám Sát & Thao Túng Giờ</div>
+                    
+                    <div style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 8px 15px; border-radius: 12px; border: 1px solid var(--border);">
+                        <span style="font-weight: 800; font-size: 0.85rem; color: var(--text-main);">THAO TÚNG TẤT CẢ:</span>
+                        <div class="ctrl-group" style="margin-top: 0;">
+                            <button class="ctrl-btn btn-sub" onclick="adjustAllOffset(-1)" title="Trừ giờ tất cả đang Online">-</button>
+                            <input type="number" id="step-all" class="ctrl-input" value="0.1" step="0.01">
+                            <button class="ctrl-btn btn-add" onclick="adjustAllOffset(1)" title="Cộng bù giờ tất cả đang Online">+</button>
+                            <button class="ctrl-btn btn-reset" onclick="resetAllOffset()" title="Trả tất cả về 0">⟲</button>
+                        </div>
+                    </div>
+                </div>
+
+                <p style="color: var(--text-muted); margin-bottom: 20px; font-weight: 500;">Sếp có thể theo dõi thời gian đếm ngược của khách và âm thầm bù/trừ số giây mà khách không hề hay biết.</p>
+                
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>Khách Hàng / ID</th>
-                                <th>Ngày Cấp</th>
-                                <th>Trạng Thái</th>
-                                <th style="text-align: right;">Khóa</th>
+                                <th>Người Đang Cày</th>
+                                <th>Đang Mở Link / Rate</th>
+                                <th>Thông Số Rương</th>
+                                <th style="text-align: right;">Thao Túng Giờ</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div class="user-info">
-                                        <span class="user-name">Anh Hùng - 13 Pro Max</span>
-                                        <span class="device-id">VIP-8A2F-9B1C</span>
-                                    </div>
-                                </td>
-                                <td>24/06/2026<br><small style="color: #64748b;">(Vĩnh viễn)</small></td>
-                                <td><span class="badge badge-active">ĐANG HOẠT ĐỘNG</span></td>
-                                <td style="text-align: right;">
-                                    <button class="action-btn" title="Khóa thiết bị này">🔒</button>
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td>
-                                    <div class="user-info">
-                                        <span class="user-name">Thằng Đệ - Ké Tool</span>
-                                        <span class="device-id">VIP-X79K-L1M2</span>
-                                    </div>
-                                </td>
-                                <td>20/06/2026<br><small style="color: #ef4444;">(Còn 3 ngày)</small></td>
-                                <td><span class="badge badge-active">ĐANG HOẠT ĐỘNG</span></td>
-                                <td style="text-align: right;">
-                                    <button class="action-btn" title="Khóa thiết bị này">🔒</button>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    <div class="user-info">
-                                        <span class="user-name">Khách Chơi Thử - Hết Hạn</span>
-                                        <span class="device-id">VIP-P0O9-I8U7</span>
-                                    </div>
-                                </td>
-                                <td>15/05/2026<br><small style="color: #64748b;">(Đã hết hạn)</small></td>
-                                <td><span class="badge badge-locked">BỊ KHÓA</span></td>
-                                <td style="text-align: right;">
-                                    <button class="action-btn" title="Mở khóa lại">🔓</button>
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="monitor-list-body">
+                            </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Fake logic để test giao diện
-        function login() {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOzLEX4hjRbp3pEbEm5dL2iqHUWZ0EZCM",
+            authDomain: "canh-ruong-tiktok.firebaseapp.com",
+            databaseURL: "https://canh-ruong-tiktok-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "canh-ruong-tiktok",
+            storageBucket: "canh-ruong-tiktok.firebasestorage.app",
+            messagingSenderId: "180203178276",
+            appId: "1:180203178276:web:49509b237ec8a8fb578bb1"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let devicesData = {};
+
+        // Lấy dữ liệu Real-time từ Firebase
+        const devicesRef = ref(db, 'devices');
+        onValue(devicesRef, (snapshot) => {
+            devicesData = snapshot.val() || {};
+            renderManageTable();
+            renderMonitorTable();
+        });
+
+        function formatDate(ms) {
+            if (!ms) return '--/--/----';
+            const d = new Date(ms);
+            return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+        }
+
+        function formatTimeAgo(ms) {
+            if (!ms) return 'Chưa từng online';
+            const diffSecs = Math.floor((Date.now() - ms) / 1000);
+            if (diffSecs < 60) return 'Vừa xong';
+            if (diffSecs < 3600) return Math.floor(diffSecs/60) + ' phút trước';
+            if (diffSecs < 86400) return Math.floor(diffSecs/3600) + ' giờ trước';
+            return Math.floor(diffSecs/86400) + ' ngày trước';
+        }
+
+        function renderManageTable() {
+            const tbody = document.getElementById('device-list-body');
+            tbody.innerHTML = '';
+            let onlineCount = 0;
+            let totalCount = 0;
+            const now = Date.now();
+
+            for (const [id, data] of Object.entries(devicesData)) {
+                totalCount++;
+                const isOnline = data.last_active && (now - data.last_active < 60000);
+                if (isOnline) onlineCount++;
+
+                let statusHtml = '';
+                if (data.status === 'locked') {
+                    statusHtml = `<span class="badge badge-locked">🔒 BỊ KHÓA</span>`;
+                } else {
+                    if (isOnline) {
+                        statusHtml = `<span class="badge badge-active"><div class="dot dot-green"></div> ONLINE NGAY LÚC NÀY</span>`;
+                    } else {
+                        statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
+                    }
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="user-info">
+                            <span class="user-name">${data.note || 'Khách Vô Danh'}</span>
+                            <span class="device-id">${id}</span>
+                        </div>
+                    </td>
+                    <td>${formatDate(data.created_at)}<br><small style="color: #64748b; font-weight: 600;">(${data.expiry_days === 'forever' ? 'Vĩnh viễn' : data.expiry_days + ' ngày'})</small></td>
+                    <td>${statusHtml}</td>
+                    <td style="text-align: right;">
+                        <button class="action-btn" title="${data.status === 'locked' ? 'Mở khóa' : 'Khóa'}" onclick="toggleLock('${id}', '${data.status}')">
+                            ${data.status === 'locked' ? '🔓' : '🔒'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+            document.getElementById('online-stats').innerHTML = `Đang online: <b style="color: var(--success);">${onlineCount}/${totalCount}</b>`;
+        }
+
+        // BIẾN LƯU TRỮ GIÁ TRỊ Ô NHẬP SỐ ĐỂ KHÔNG BỊ MẤT KHI RENDER LẠI
+        let savedStepValues = {};
+
+        function renderMonitorTable() {
+            document.querySelectorAll('.ctrl-input').forEach(input => {
+                if(input.id !== 'step-all') savedStepValues[input.id] = input.value;
+            });
+
+            const tbody = document.getElementById('monitor-list-body');
+            tbody.innerHTML = '';
+            const now = Date.now();
+
+            for (const [id, data] of Object.entries(devicesData)) {
+                const isOnline = data.last_active && (now - data.last_active < 60000);
+                
+                if (isOnline && data.status === 'active') {
+                    const task = data.current_task || {};
+                    const endTime = task.end_time || 0; 
+                    const adminOffset = data.admin_offset || 0; 
+                    
+                    let offsetClass = 'offset-zero';
+                    let offsetText = 'Đang bù: 0.00s';
+                    if (adminOffset > 0) { offsetClass = 'offset-pos'; offsetText = `Đang bù: +${adminOffset.toFixed(2)}s`; }
+                    if (adminOffset < 0) { offsetClass = 'offset-neg'; offsetText = `Đang bù: ${adminOffset.toFixed(2)}s`; }
+
+                    const stepVal = savedStepValues[`step-${id}`] || "0.1";
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>
+                            <div class="user-info">
+                                <span class="user-name">${data.note || 'Khách'}</span>
+                                <span class="device-id">${id}</span>
+                            </div>
+                        </td>
+                        <td><span style="font-weight:800; color:var(--primary); font-size: 1.1rem;">${task.rate || 'Đang chờ rương...'}</span></td>
+                        <td><b style="font-size: 1.1rem;">${task.coins || '--'}</b> <span style="color: var(--text-muted)">xu</span></td>
+                        <td style="text-align: right;">
+                            <div>
+                                <span class="live-cd" data-endtime="${endTime}">0.0</span> <span style="color: var(--text-muted); font-weight: 700;">giây</span>
+                            </div>
+                            <div class="ctrl-group">
+                                <button class="ctrl-btn btn-sub" onclick="adjustOffset('${id}', -1)" title="Trừ giờ khách">-</button>
+                                <input type="number" id="step-${id}" class="ctrl-input" value="${stepVal}" step="0.01">
+                                <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)" title="Cộng bù giờ khách">+</button>
+                                <button class="ctrl-btn btn-reset" onclick="resetOffset('${id}')" title="Trả về 0">⟲</button>
+                            </div>
+                            <div>
+                                <span class="offset-badge ${offsetClass}">${offsetText}</span>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            }
+        }
+
+        // ==========================================
+        // CÁC HÀM TƯƠNG TÁC (THAO TÚNG & QUẢN LÝ)
+        // ==========================================
+        window.adjustOffset = (id, direction) => {
+            const stepInput = document.getElementById(`step-${id}`);
+            let stepVal = parseFloat(stepInput.value) || 0.1;
+            let currentOffset = devicesData[id]?.admin_offset || 0;
+            
+            let newOffset = currentOffset + (stepVal * direction);
+            newOffset = Math.round(newOffset * 100) / 100; 
+            
+            update(ref(db, 'devices/' + id), { admin_offset: newOffset });
+        };
+
+        window.resetOffset = (id) => {
+            update(ref(db, 'devices/' + id), { admin_offset: 0 });
+        };
+
+        // --- HÀM THAO TÚNG TẤT CẢ KẺ ĐANG ONLINE ---
+        window.adjustAllOffset = (direction) => {
+            const stepInput = document.getElementById('step-all');
+            let stepVal = parseFloat(stepInput.value) || 0.1;
+            const now = Date.now();
+            let updates = {};
+
+            for (const [id, data] of Object.entries(devicesData)) {
+                const isOnline = data.last_active && (now - data.last_active < 60000);
+                if (isOnline && data.status === 'active') {
+                    let currentOffset = data.admin_offset || 0;
+                    let newOffset = currentOffset + (stepVal * direction);
+                    newOffset = Math.round(newOffset * 100) / 100;
+                    updates[`devices/${id}/admin_offset`] = newOffset;
+                }
+            }
+            
+            if (Object.keys(updates).length > 0) {
+                update(ref(db), updates);
+            } else {
+                alert("Không có khách nào đang online để thao túng!");
+            }
+        };
+
+        window.resetAllOffset = () => {
+            const now = Date.now();
+            let updates = {};
+            for (const [id, data] of Object.entries(devicesData)) {
+                const isOnline = data.last_active && (now - data.last_active < 60000);
+                if (isOnline && data.status === 'active') {
+                    updates[`devices/${id}/admin_offset`] = 0;
+                }
+            }
+            if (Object.keys(updates).length > 0) {
+                update(ref(db), updates);
+            }
+        };
+        // ---------------------------------------------
+
+        window.addDevice = () => {
+            const id = document.getElementById('new-device-id').value.trim().toUpperCase();
+            const note = document.getElementById('new-device-note').value.trim();
+            const expiry = document.getElementById('new-device-expiry').value;
+            
+            if (!id) return alert("Sếp chưa nhập Mã thiết bị của khách!");
+            if (!note) return alert("Sếp phải nhập Tên Khách để khóa tên họ trong Room!");
+            
+            set(ref(db, 'devices/' + id), {
+                status: 'active',
+                note: note,
+                created_at: Date.now(),
+                expiry_days: expiry,
+                last_active: 0,
+                admin_offset: 0, 
+                current_task: {}
+            }).then(() => {
+                alert("✅ Đã cấp quyền và khóa tên thành công!");
+                document.getElementById('new-device-id').value = '';
+                document.getElementById('new-device-note').value = '';
+            });
+        };
+
+        window.toggleLock = (id, currentStatus) => {
+            const newStatus = currentStatus === 'locked' ? 'active' : 'locked';
+            update(ref(db, 'devices/' + id), { status: newStatus });
+        };
+
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (tabId === 'tab-manage') document.getElementById('btn-manage').classList.add('active');
+            if (tabId === 'tab-monitor') document.getElementById('btn-monitor').classList.add('active');
+        };
+
+        window.login = () => {
             const pwd = document.getElementById('admin-pwd').value;
-            // Ở đây pass mẫu là 123
-            if(pwd === "123" || pwd !== "") { 
+            if(pwd === "123") {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('admin-dashboard').style.display = 'block';
             } else {
-                alert("Sếp chưa nhập mật khẩu kìa!");
+                alert("❌ Sếp nhập sai mật khẩu rồi!");
             }
-        }
+        };
 
-        function logout() {
+        window.logout = () => {
             document.getElementById('admin-pwd').value = "";
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('admin-dashboard').style.display = 'none';
-        }
+        };
 
-        // Bấm Enter để đăng nhập
-        document.getElementById("admin-pwd").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                login();
-            }
-        });
+        // Đếm ngược Mắt Thần
+        setInterval(() => {
+            const nowSec = Date.now() / 1000;
+            document.querySelectorAll('.live-cd').forEach(el => {
+                const end = parseFloat(el.getAttribute('data-endtime'));
+                if (end && end > nowSec) {
+                    el.textContent = (end - nowSec).toFixed(1);
+                } else {
+                    el.textContent = '0.0';
+                }
+            });
+        }, 100);
+
+        setInterval(() => { renderManageTable(); }, 30000);
     </script>
 </body>
 </html>
