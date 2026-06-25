@@ -96,24 +96,10 @@
             text-transform: uppercase; display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow-soft); height: 100%;
         }
         .logout-btn:hover { background: var(--surface-hover); border-color: #475569; }
-        
-        /* BOX TIẾN ĐỘ ARGO */
-        .argo-widget {
-            background: rgba(15,23,42,0.8); border: 1px solid var(--border); border-radius: var(--radius-btn); 
-            padding: 8px 12px; display: flex; flex-direction: column; width: 220px; 
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.15); height: 100%;
-        }
-        .argo-widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .argo-widget-title { font-size: 0.75rem; font-weight: 800; color: #3b82f6; text-transform: uppercase; }
-        .btn-argo-toggle { background: #10b981; color: white; border: none; border-radius: 4px; font-size: 0.65rem; font-weight: bold; padding: 3px 8px; cursor: pointer; transition: 0.2s; }
-        .btn-argo-toggle:hover { filter: brightness(1.1); }
-        .argo-progress-bg { width: 100%; background: rgba(0,0,0,0.4); border-radius: 4px; height: 6px; overflow: hidden; position: relative; }
-        .argo-progress-fill { width: 0%; background: #10b981; height: 100%; transition: width 0.4s ease, background 0.4s ease; box-shadow: 0 0 5px #10b981; }
-        .argo-text-row { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 700; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
 
         .tabs { 
             display: flex; gap: 8px; margin-bottom: 25px; padding: 6px; background: rgba(30, 41, 59, 0.5); 
-            border-radius: 12px; width: fit-content; border: 1px solid var(--border);
+            border-radius: 12px; width: fit-content; border: 1px solid var(--border); flex-wrap: wrap;
         }
         .tab-btn { 
             padding: 12px 24px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; 
@@ -226,7 +212,6 @@
             .table-responsive { width: 100%; padding-bottom: 10px;}
             .ctrl-group { justify-content: flex-start; }
             
-            .argo-widget { width: 100%; }
             .logout-btn { flex: 1; justify-content: center; }
         }
     </style>
@@ -254,20 +239,6 @@
         <div class="header">
             <h1><span style="font-size: 1.4em; vertical-align: bottom;">📡</span> ANALYTICS DASHBOARD</h1>
             <div class="header-actions">
-                <div class="argo-widget">
-                    <div class="argo-widget-header">
-                        <span class="argo-widget-title">🚀 Mạng Argo</span>
-                        <button id="btn-toggle-argo" class="btn-argo-toggle" onclick="toggleArgoMode()">ĐANG BẬT</button>
-                    </div>
-                    <div class="argo-progress-bg">
-                        <div id="argo-progress-bar" class="argo-progress-fill"></div>
-                    </div>
-                    <div class="argo-text-row">
-                        <span id="argo-usage-text">0.0MB</span>
-                        <span>1000MB</span>
-                    </div>
-                </div>
-                
                 <button id="btn-free-mode" class="logout-btn" onclick="toggleFreeMode()">⏳ CHECK...</button>
                 <span class="logout-btn mono" id="online-stats" style="background: rgba(15,23,42,0.8); border-style: solid; border-color: var(--border); cursor: default; min-width: 140px; justify-content: center; letter-spacing: 1.5px; font-size: 0.9rem;">ON: 0/0</span>
                 <button class="logout-btn" style="color: var(--danger); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1);" onclick="logout()">THOÁT</button>
@@ -278,6 +249,7 @@
             <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Quản Lý Khách <span class="tab-badge" id="count-manage">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">💻 Terminal Bù Giờ <span class="tab-badge" id="count-monitor">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Thống Kê & Top Mở <span class="tab-badge" id="count-stats">0</span></button>
+            <button class="tab-btn" onclick="switchTab('tab-argo')" id="btn-argo" style="color: #10b981;">🚀 Mạng Argo</button>
         </div>
 
         <div id="tab-manage" class="tab-content active">
@@ -378,6 +350,30 @@
                         <tbody id="stats-list-body">
                             </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-argo" class="tab-content">
+            <div class="panel">
+                <div class="panel-title panel-title-border" style="color: #10b981;">🚀 ĐIỀU KHIỂN & GIÁM SÁT BĂNG THÔNG ARGO</div>
+                <div style="display: flex; flex-direction: column; gap: 30px; align-items: center; padding: 30px 0;">
+                    
+                    <button id="btn-toggle-argo" class="btn" style="max-width: 350px; font-size: 1.2rem; padding: 18px; border-radius: 12px; font-weight: 800;" onclick="toggleArgoMode()">🚀 ĐANG BẬT MẠNG ARGO</button>
+                    
+                    <div style="width: 100%; max-width: 800px; background: rgba(0,0,0,0.5); border-radius: 16px; height: 36px; overflow: hidden; position: relative; border: 1px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);">
+                        <div id="argo-progress-bar" style="width: 0%; background: #10b981; height: 100%; transition: width 0.4s ease, background 0.4s ease; box-shadow: 0 0 20px #10b981;"></div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; width: 100%; max-width: 800px; font-size: 1.3rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; align-items: center;">
+                        <span id="argo-usage-text">Đã dùng: <span style="color:var(--text-muted)">0.000 MB (0.00 KB)</span></span>
+                        <span style="color: var(--text-muted); font-size: 1rem;">Tối đa: 1000 MB</span>
+                    </div>
+
+                    <div style="background: rgba(59, 130, 246, 0.1); border: 1px dashed rgba(59, 130, 246, 0.4); padding: 20px; border-radius: 12px; color: #94a3b8; font-size: 1rem; text-align: center; max-width: 700px; line-height: 1.6;">
+                        <strong style="color: #60a5fa;">💡 Thông tin hệ thống:</strong><br>
+                        Tool tự động làm mới dữ liệu từ Cloudflare mỗi 5 phút. Nếu băng thông chạm ngưỡng an toàn do Admin cài đặt trên Python, Tool sẽ <b>tự động kích hoạt Cầu Dao sập mạng Argo về trạng thái Free</b> để bảo vệ thẻ tín dụng.
+                    </div>
                 </div>
             </div>
         </div>
@@ -518,17 +514,17 @@
             const bar = document.getElementById('argo-progress-bar');
             
             if(isArgoOn) {
-                btn.innerHTML = 'ĐANG BẬT';
+                btn.innerHTML = '🚀 ĐANG BẬT MẠNG ARGO';
                 btn.style.background = '#10b981';
                 bar.style.background = '#10b981';
-                bar.style.boxShadow = '0 0 5px #10b981';
+                bar.style.boxShadow = '0 0 20px #10b981';
             } else {
-                btn.innerHTML = 'ĐÃ TẮT (FREE)';
+                btn.innerHTML = '🛑 ĐÃ TẮT (MẠNG FREE)';
                 btn.style.background = '#64748b';
                 bar.style.background = '#64748b';
                 bar.style.boxShadow = 'none';
                 bar.style.width = '0%';
-                document.getElementById('argo-usage-text').textContent = '0.0MB';
+                document.getElementById('argo-usage-text').innerHTML = `Đã dùng: <span style="color:var(--text-muted)">0.000 MB (0.00 KB)</span>`;
             }
         });
 
@@ -539,24 +535,27 @@
             }
         };
 
-        // Lắng nghe dung lượng Argo từ Python bắn lên (Giả lập cấu trúc hứng data)
+        // Lắng nghe dung lượng Argo từ Python bắn lên (CẬP NHẬT: HIỂN THỊ CẢ KB VÀ MB)
         onValue(ref(db, 'global_settings/argo_usage'), (snapshot) => {
             if(!isArgoOn) return; 
             const usageMB = parseFloat(snapshot.val()) || 0.0;
+            const usageKB = usageMB * 1024; // Tính quy đổi ra Kilobyte
             const maxMB = 1000;
             const percent = Math.min((usageMB / maxMB) * 100, 100);
             
             const bar = document.getElementById('argo-progress-bar');
             bar.style.width = `${percent}%`;
-            document.getElementById('argo-usage-text').textContent = `${usageMB.toFixed(1)}MB`;
+            
+            // Format cực đẹp: 0.015 MB (15.36 KB)
+            document.getElementById('argo-usage-text').innerHTML = `Đã dùng: <span style="color:var(--primary)">${usageMB.toFixed(3)} MB</span> <span style="color:var(--warning); font-size:1.1rem;">(${usageKB.toFixed(2)} KB)</span>`;
             
             // Cảnh báo nếu vượt 900MB
             if (usageMB > 900) {
                 bar.style.background = '#ef4444';
-                bar.style.boxShadow = '0 0 5px #ef4444';
+                bar.style.boxShadow = '0 0 20px #ef4444';
             } else {
                 bar.style.background = '#10b981';
-                bar.style.boxShadow = '0 0 5px #10b981';
+                bar.style.boxShadow = '0 0 20px #10b981';
             }
         });
 
@@ -871,6 +870,7 @@
             if (Object.keys(updates).length > 0) update(ref(db), updates);
         };
 
+        // CẬP NHẬT: Thêm logic cho Tab Mạng Argo mới
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -879,6 +879,7 @@
             if (tabId === 'tab-manage') document.getElementById('btn-manage').classList.add('active');
             if (tabId === 'tab-monitor') document.getElementById('btn-monitor').classList.add('active');
             if (tabId === 'tab-stats') document.getElementById('btn-stats').classList.add('active');
+            if (tabId === 'tab-argo') document.getElementById('btn-argo').classList.add('active');
         };
 
         setInterval(() => {
