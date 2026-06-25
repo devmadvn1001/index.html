@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trạm Chỉ Huy Pro Analytics - Tool VIP</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
@@ -132,7 +132,6 @@
             border: 1px solid var(--border); box-shadow: var(--shadow-soft); position: relative; 
         }
         
-        /* CẬP NHẬT: Chia class cho các hàng chứa tiêu đề panel để dễ style trên mobile */
         .panel-header-row {
             display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 25px;
         }
@@ -144,7 +143,6 @@
             border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 24px;
         }
         
-        /* CẬP NHẬT: Class riêng cho hộp Thao tác hàng loạt */
         .bulk-action-box {
             display: flex; align-items: center; gap: 15px; background: rgba(15,23,42,0.8); 
             padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border); 
@@ -153,9 +151,9 @@
         
         .table-responsive { 
             overflow-x: auto; background: var(--bg-page); border-radius: 12px; border: 1px solid var(--border);
-            -webkit-overflow-scrolling: touch; /* Giúp lướt mượt trên iPhone */
+            -webkit-overflow-scrolling: touch; 
         }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; } /* Giữ min-width để ko bị bóp */
+        table { width: 100%; border-collapse: collapse; min-width: 900px; } 
         th { 
             text-align: left; padding: 18px 20px; background: rgba(30, 41, 59, 0.8); color: var(--text-muted); 
             font-size: 0.8rem; font-weight: 800; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 1px;
@@ -230,28 +228,22 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.8); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
         .modal-box { background: var(--surface); border-radius: var(--radius-card); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid var(--border); animation: fadeIn 0.3s ease; }
         
-        /* ========================================= */
-        /* TINH CHỈNH RESPONSIVE CHO ĐIỆN THOẠI      */
-        /* ========================================= */
         @media (max-width: 900px) { 
             .dashboard-grid { grid-template-columns: 1fr; } 
             .header { justify-content: center; text-align: center; } 
             .header-actions { justify-content: center; } 
             
-            /* Tối ưu Tabs bọc dòng trên mobile */
             .tabs { flex-wrap: wrap; justify-content: center; width: 100%; }
             .tab-btn { flex: 1 1 calc(50% - 10px); text-align: center; min-width: 140px; padding: 10px;}
             
-            /* Tối ưu hộp Thao tác hàng loạt xếp dọc */
             .panel-header-row { flex-direction: column; align-items: stretch; gap: 10px; }
             .panel-header-row .panel-title { justify-content: center; border-bottom: none; margin-bottom: 0; padding-bottom: 5px;}
             .bulk-action-box { flex-direction: column; align-items: center; width: 100%; padding: 15px;}
             .bulk-action-box > span { margin-bottom: 8px; }
             .bulk-action-box .ctrl-group { justify-content: center; width: 100%; }
             
-            /* Đảm bảo bảng không bị bóp, cho phép trượt mượt */
             .table-responsive { width: 100%; padding-bottom: 10px;}
-            .ctrl-group { justify-content: flex-start; } /* Đẩy các nút sang trái để dễ bấm khi cuộn ngang */
+            .ctrl-group { justify-content: flex-start; }
         }
     </style>
 </head>
@@ -262,11 +254,16 @@
             <div style="font-size: 3.5rem; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(59,130,246,0.5));">🛡️</div>
             <h2>TRẠM CHỈ HUY VIP</h2>
             <p>Hệ Thống Quản Trị Dữ Liệu BigData</p>
-            <div class="input-group">
-                <label>Passcode Hệ Thống</label>
-                <input type="password" id="admin-pwd" placeholder="••••••••">
-            </div>
-            <button class="btn btn-primary" onclick="login()" id="btnLogin">ĐĂNG NHẬP HỆ THỐNG</button>
+            
+            <form id="login-form">
+                <input type="text" id="admin-user" value="admin_commander" style="display:none" autocomplete="username">
+                
+                <div class="input-group">
+                    <label>Passcode Hệ Thống</label>
+                    <input type="password" id="admin-pwd" placeholder="••••••••" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="btnLogin">ĐĂNG NHẬP HỆ THỐNG</button>
+            </form>
         </div>
     </div>
 
@@ -283,7 +280,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Quản Lý Khách <span class="tab-badge" id="count-manage">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">💻 Terminal Bù Giờ <span class="tab-badge" id="count-monitor">0</span></button>
-            <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats">📊 Thống Kê & Top Mở <span class="tab-badge" id="count-stats">0</span></button>
+            <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Thống Kê & Top Mở <span class="tab-badge" id="count-stats">0</span></button>
         </div>
 
         <div id="tab-manage" class="tab-content active">
@@ -427,7 +424,45 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        window.login = async () => {
+        // QUẢN LÝ PHIÊN ĐĂNG NHẬP ADMIN BẰNG LOCALSTORAGE
+        let myAdminSession = localStorage.getItem('my_admin_session');
+
+        // KIỂM TRA ĐĂNG NHẬP KHI TẢI TRANG
+        async function checkAutoLogin() {
+            if (myAdminSession) {
+                try {
+                    const snapshot = await get(child(ref(db), 'admin_session/current_id'));
+                    if (snapshot.val() === myAdminSession) {
+                        showDashboard();
+                    } else {
+                        localStorage.removeItem('my_admin_session');
+                    }
+                } catch(e) {}
+            }
+        }
+        checkAutoLogin();
+
+        function showDashboard() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-dashboard').style.display = 'block';
+            listenToKick(); // Bắt đầu lắng nghe xem có ai giành quyền không
+        }
+
+        // ĐÁ VĂNG NẾU CÓ THIẾT BỊ KHÁC ĐĂNG NHẬP
+        function listenToKick() {
+            onValue(ref(db, 'admin_session/current_id'), (snapshot) => {
+                const currentActiveId = snapshot.val();
+                if (currentActiveId && myAdminSession && currentActiveId !== myAdminSession) {
+                    alert("⚠️ LƯU Ý: Tài khoản Admin đã được đăng nhập từ một thiết bị khác! Bạn đã bị đăng xuất khỏi phiên làm việc này.");
+                    window.logout();
+                }
+            });
+        }
+
+        // SỬ DỤNG FORM ĐỂ TRÌNH DUYỆT HIỂU VÀ ĐỀ XUẤT LƯU MẬT KHẨU
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Chặn tải lại trang
+            
             const pwdInput = document.getElementById('admin-pwd').value.trim();
             if (!pwdInput) return alert("⚠️ Sếp chưa nhập mật khẩu kìa!");
             const btn = document.getElementById('btnLogin');
@@ -436,24 +471,28 @@
             try {
                 const snapshot = await get(child(ref(db), 'admin_pwd'));
                 if (snapshot.exists() && pwdInput === snapshot.val()) {
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('admin-dashboard').style.display = 'block';
+                    
+                    // Tạo ID phiên làm việc mới
+                    myAdminSession = 'admin_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('my_admin_session', myAdminSession);
+                    
+                    // Cập nhật Firebase để đá các máy cũ ra
+                    await set(ref(db, 'admin_session/current_id'), myAdminSession);
+                    
+                    showDashboard();
                 } else {
                     alert("❌ Mật khẩu không chính xác!");
                 }
             } catch (error) { alert("❌ Lỗi kết nối Firebase!"); }
             btn.textContent = "ĐĂNG NHẬP HỆ THỐNG"; btn.disabled = false;
-        };
+        });
 
         window.logout = () => {
+            localStorage.removeItem('my_admin_session');
             document.getElementById('admin-pwd').value = "";
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('admin-dashboard').style.display = 'none';
         };
-
-        document.getElementById("admin-pwd").addEventListener("keypress", function(e) {
-            if (e.key === "Enter") { e.preventDefault(); window.login(); }
-        });
 
         let isFreeMode = false;
         onValue(ref(db, 'global_settings/free_mode'), (snapshot) => {
