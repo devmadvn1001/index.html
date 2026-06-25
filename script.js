@@ -195,7 +195,6 @@ if (lastAccessState === 'granted' && lockScreen) {
 function pushHeartbeat() {
     if (document.hidden) return; 
     
-    // CẬP NHẬT: THÊM client_offset ĐỂ BẮN THÔNG SỐ KHÁCH BẤM LÊN TERMINAL ADMIN
     update(deviceRef, {
         last_active: Date.now(),
         opened_today: openedToday, 
@@ -289,7 +288,7 @@ document.addEventListener("visibilitychange", function() {
 
 
 // ============================================================== //
-// CÁC HÀM CỐT LÕI (GIỮ NGUYÊN GỐC KHÔNG THAY ĐỔI)
+// CÁC HÀM CỐT LÕI VÀ LÔ GIC RƯƠNG CHUỖI
 // ============================================================== //
 if (btnSwitchUI) {
     btnSwitchUI.addEventListener('click', () => {
@@ -431,6 +430,7 @@ function connectWebSocket() {
 
 if (liveRoomId) { connectWebSocket(); }
 
+// LOGIC CẬP NHẬT GIAO DIỆN NÚT CHUỖI
 function updateNavigationUI() {
     if (!btnPrevBox || !btnNextBox) return;
     
@@ -445,16 +445,46 @@ function updateNavigationUI() {
 
     const hasPrev = currentIndex > 0;
     const hasNext = currentIndex < allBoxes.length - 1;
+    const nowSec = Math.floor(getCurrentTimeMs() / 1000);
 
     if (hasPrev || hasNext) {
         if(nextBoxWrapper) nextBoxWrapper.style.display = 'flex';
-        if (hasPrev) { btnPrevBox.style.display = 'flex'; if (prevBoxCount) prevBoxCount.textContent = currentIndex; } else { btnPrevBox.style.display = 'none'; }
-        if (hasNext) { btnNextBox.style.display = 'flex'; if (nextBoxCount) nextBoxCount.textContent = (allBoxes.length - 1 - currentIndex); } else { btnNextBox.style.display = 'none'; }
+        
+        // XỬ LÝ NÚT LÙI (PREV)
+        if (hasPrev) { 
+            btnPrevBox.style.display = 'flex'; 
+            if (prevBoxCount) prevBoxCount.textContent = currentIndex; 
+            
+            // Check nếu rương trước đó (A) VẪN CÒN THỜI GIAN
+            if (allBoxes[currentIndex - 1].end_time > nowSec) {
+                btnPrevBox.classList.add('btn-prev-active-red');
+            } else {
+                // Rương trước đó đã hết giờ -> Hết nháy đỏ
+                btnPrevBox.classList.remove('btn-prev-active-red');
+            }
+        } else { 
+            btnPrevBox.style.display = 'none'; 
+            btnPrevBox.classList.remove('btn-prev-active-red');
+        }
+        
+        // XỬ LÝ NÚT TIẾN (NEXT)
+        if (hasNext) { 
+            btnNextBox.style.display = 'flex'; 
+            if (nextBoxCount) nextBoxCount.textContent = (allBoxes.length - 1 - currentIndex); 
+        } else { 
+            btnNextBox.style.display = 'none'; 
+        }
     } else {
         if(nextBoxWrapper) nextBoxWrapper.style.display = 'none';
         btnPrevBox.style.display = 'none'; btnNextBox.style.display = 'none';
+        btnPrevBox.classList.remove('btn-prev-active-red');
     }
 }
+
+// Cập nhật lại màu sắc của nút lùi tự động theo thời gian thực mỗi 1 giây
+setInterval(() => {
+    if (allBoxes.length > 0) updateNavigationUI();
+}, 1000);
 
 function loadBox(targetBox) {
     if (!targetBox) return;
