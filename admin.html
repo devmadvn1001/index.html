@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trạm Chỉ Huy Pro Analytics - Tool VIP</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
@@ -97,7 +97,6 @@
         }
         .logout-btn:hover { background: var(--surface-hover); border-color: #475569; }
         
-        /* CẬP NHẬT CSS CHO TAB & BADGES ĐỎ TO HƠN */
         .tabs { 
             display: flex; gap: 8px; margin-bottom: 25px; padding: 6px; background: rgba(30, 41, 59, 0.5); 
             border-radius: 12px; width: fit-content; border: 1px solid var(--border);
@@ -105,31 +104,24 @@
         .tab-btn { 
             padding: 12px 24px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; 
             cursor: pointer; background: transparent; color: var(--text-muted); transition: 0.3s ease; 
-            display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;
         }
         .tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
         .tab-btn.active { background: var(--primary); color: #ffffff; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
         
-        /* BADGE ĐỎ & TĂNG KÍCH THƯỚC 20% */
         .tab-badge {
-            background: rgba(239, 68, 68, 0.15); /* Nền đỏ nhạt */
-            color: var(--danger); /* Chữ màu đỏ */
+            background: rgba(239, 68, 68, 0.15); 
+            color: var(--danger); 
             padding: 2px 10px;
             border-radius: 12px;
-            font-size: 0.9rem; /* Tăng từ 0.75 lên 0.9 */
+            font-size: 0.9rem; 
             font-weight: 800;
             margin-left: 4px;
             font-family: 'JetBrains Mono', monospace;
             transition: 0.3s;
         }
-        .tab-btn:hover .tab-badge { 
-            background: rgba(239, 68, 68, 0.25); 
-        }
-        .tab-btn.active .tab-badge { 
-            background: var(--danger); /* Nền đỏ rực khi đang ở Tab đó */
-            color: #ffffff; /* Chữ trắng */
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-        }
+        .tab-btn:hover .tab-badge { background: rgba(239, 68, 68, 0.25); }
+        .tab-btn.active .tab-badge { background: var(--danger); color: #ffffff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); }
 
         .tab-content { display: none; } .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -139,27 +131,45 @@
             background: var(--surface); border-radius: var(--radius-card); padding: 28px; 
             border: 1px solid var(--border); box-shadow: var(--shadow-soft); position: relative; 
         }
+        
+        /* CẬP NHẬT: Chia class cho các hàng chứa tiêu đề panel để dễ style trên mobile */
+        .panel-header-row {
+            display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 25px;
+        }
         .panel-title { 
-            font-weight: 800; font-size: 1.1rem; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; 
+            font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; 
             text-transform: uppercase; color: var(--text-main); letter-spacing: 0.5px;
-            padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .panel-title-border {
+            border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 24px;
         }
         
-        .table-responsive { overflow-x: auto; background: var(--bg-page); border-radius: 12px; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        /* CẬP NHẬT: Class riêng cho hộp Thao tác hàng loạt */
+        .bulk-action-box {
+            display: flex; align-items: center; gap: 15px; background: rgba(15,23,42,0.8); 
+            padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border); 
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.15);
+        }
+        
+        .table-responsive { 
+            overflow-x: auto; background: var(--bg-page); border-radius: 12px; border: 1px solid var(--border);
+            -webkit-overflow-scrolling: touch; /* Giúp lướt mượt trên iPhone */
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; } /* Giữ min-width để ko bị bóp */
         th { 
             text-align: left; padding: 18px 20px; background: rgba(30, 41, 59, 0.8); color: var(--text-muted); 
             font-size: 0.8rem; font-weight: 800; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 1px;
+            white-space: nowrap;
         }
         td { padding: 18px 20px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 0.95rem; font-weight: 500; transition: background 0.2s;}
         tr:last-child td { border-bottom: none; }
         tr:hover td { background-color: rgba(255,255,255,0.02); } 
         
-        .user-name { font-weight: 800; color: var(--text-main); font-size: 1.05rem; display: block; margin-bottom: 6px;}
-        .device-id { font-family: 'JetBrains Mono', monospace; color: #60a5fa; font-size: 0.8rem; font-weight: 700; background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 6px; }
-        .live-cd { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; color: var(--danger); background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 8px; display: inline-block; }
+        .user-name { font-weight: 800; color: var(--text-main); font-size: 1.05rem; display: block; margin-bottom: 6px; white-space: nowrap;}
+        .device-id { font-family: 'JetBrains Mono', monospace; color: #60a5fa; font-size: 0.8rem; font-weight: 700; background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 6px; white-space: nowrap;}
+        .live-cd { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; color: var(--danger); background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 8px; display: inline-block; white-space: nowrap;}
         
-        .badge { padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge { padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;}
         .badge-active { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); } 
         .badge-locked { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); } 
         .badge-offline { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); border: 1px solid rgba(148, 163, 184, 0.2); }
@@ -180,7 +190,7 @@
         .action-btn { background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); font-size: 1.1rem; cursor: pointer; padding: 8px 12px; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; justify-content: center;}
         .action-btn:hover { background: var(--primary); color: white !important; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-color: var(--primary);}
         
-        .ctrl-group { display: flex; align-items: center; gap: 10px; justify-content: flex-end; margin-top: 10px; }
+        .ctrl-group { display: flex; align-items: center; gap: 10px; justify-content: flex-end; margin-top: 10px; flex-wrap: wrap;}
         .ctrl-box { display: flex; align-items: center; background: rgba(15, 23, 42, 0.5); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
         
         .ctrl-btn { width: 40px; height: 40px; border: none; font-weight: 800; font-size: 1.4rem; cursor: pointer; color: white; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
@@ -203,21 +213,16 @@
             height: 40px; 
             display: flex; 
             align-items: center; 
+            justify-content: center;
             transition: all 0.2s; 
             text-transform: uppercase; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             letter-spacing: 0.5px;
         }
-        .btn-reset:hover { 
-            background: #475569; 
-            color: #ffffff; 
-            border-color: #64748b; 
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
+        .btn-reset:hover { background: #475569; color: #ffffff; border-color: #64748b; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
         .btn-reset:active { transform: translateY(1px); box-shadow: none; }
         
-        .offset-badge { font-size: 0.8rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace;}
+        .offset-badge { font-size: 0.8rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; white-space: nowrap;}
         .offset-zero { background: rgba(15, 23, 42, 0.5); color: var(--text-muted); border: 1px dashed var(--border); } 
         .offset-pos { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); } 
         .offset-neg { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
@@ -225,7 +230,29 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.8); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
         .modal-box { background: var(--surface); border-radius: var(--radius-card); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid var(--border); animation: fadeIn 0.3s ease; }
         
-        @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } .header { justify-content: center; text-align: center; } .header-actions { justify-content: center; } }
+        /* ========================================= */
+        /* TINH CHỈNH RESPONSIVE CHO ĐIỆN THOẠI      */
+        /* ========================================= */
+        @media (max-width: 900px) { 
+            .dashboard-grid { grid-template-columns: 1fr; } 
+            .header { justify-content: center; text-align: center; } 
+            .header-actions { justify-content: center; } 
+            
+            /* Tối ưu Tabs bọc dòng trên mobile */
+            .tabs { flex-wrap: wrap; justify-content: center; width: 100%; }
+            .tab-btn { flex: 1 1 calc(50% - 10px); text-align: center; min-width: 140px; padding: 10px;}
+            
+            /* Tối ưu hộp Thao tác hàng loạt xếp dọc */
+            .panel-header-row { flex-direction: column; align-items: stretch; gap: 10px; }
+            .panel-header-row .panel-title { justify-content: center; border-bottom: none; margin-bottom: 0; padding-bottom: 5px;}
+            .bulk-action-box { flex-direction: column; align-items: center; width: 100%; padding: 15px;}
+            .bulk-action-box > span { margin-bottom: 8px; }
+            .bulk-action-box .ctrl-group { justify-content: center; width: 100%; }
+            
+            /* Đảm bảo bảng không bị bóp, cho phép trượt mượt */
+            .table-responsive { width: 100%; padding-bottom: 10px;}
+            .ctrl-group { justify-content: flex-start; } /* Đẩy các nút sang trái để dễ bấm khi cuộn ngang */
+        }
     </style>
 </head>
 <body>
@@ -262,7 +289,7 @@
         <div id="tab-manage" class="tab-content active">
             <div class="dashboard-grid">
                 <div class="panel">
-                    <div class="panel-title">⚡ CẤP QUYỀN TRUY CẬP</div>
+                    <div class="panel-title panel-title-border">⚡ CẤP QUYỀN TRUY CẬP</div>
                     <div class="input-group">
                         <label>Mã thiết bị (Device ID)</label>
                         <input type="text" id="new-device-id" placeholder="VIP-XXXX-YYYY">
@@ -283,7 +310,7 @@
                 </div>
 
                 <div class="panel">
-                    <div class="panel-title">🗄️ CƠ SỞ DỮ LIỆU KHÁCH HÀNG</div>
+                    <div class="panel-title panel-title-border">🗄️ CƠ SỞ DỮ LIỆU KHÁCH HÀNG</div>
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -303,12 +330,12 @@
 
         <div id="tab-monitor" class="tab-content">
             <div class="panel">
-                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 25px;">
-                    <div class="panel-title" style="margin-bottom: 0; border-bottom: none;">🎛️ BẢNG ĐIỀU KHIỂN THỜI GIAN THỰC</div>
+                <div class="panel-header-row">
+                    <div class="panel-title">🎛️ BẢNG ĐIỀU KHIỂN THỜI GIAN THỰC</div>
                     
-                    <div style="display: flex; align-items: center; gap: 15px; background: rgba(15,23,42,0.8); padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.15);">
+                    <div class="bulk-action-box">
                         <span style="font-weight: 800; font-size: 0.9rem; color: var(--primary); text-transform: uppercase;">Thao tác hàng loạt:</span>
-                        <div class="ctrl-group" style="margin-top: 0;">
+                        <div class="ctrl-group">
                             <div class="ctrl-box">
                                 <button class="ctrl-btn btn-sub" onclick="adjustAllOffset(-1)">-</button>
                                 <input type="number" id="step-all-minus" class="ctrl-input" value="0.1" step="0.01" oninput="syncAllSteps('minus', this.value)">
@@ -340,7 +367,7 @@
 
         <div id="tab-stats" class="tab-content">
             <div class="panel">
-                <div class="panel-title" style="color: #fbbf24;">🏆 BẢNG XẾP HẠNG TOP MỞ TRONG NGÀY</div>
+                <div class="panel-title panel-title-border" style="color: #fbbf24;">🏆 BẢNG XẾP HẠNG TOP MỞ TRONG NGÀY</div>
                 <div style="margin-bottom: 20px; color: var(--text-muted); font-size: 0.9rem;">
                     Hệ thống tự động thống kê số lượng mở thành công của từng thiết bị và cập nhật theo thời gian thực (Real-time).
                 </div>
