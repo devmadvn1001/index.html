@@ -207,10 +207,9 @@ body {
     font-size: clamp(0.9rem, 3vw, 1.1rem);
     color: var(--text-muted);
     font-weight: 600;
-    font-variant-numeric: tabular-nums; /* FIX GIẬT THỜI GIAN */
+    font-variant-numeric: tabular-nums; 
 }
 
-/* Đóng khung cố định cho chữ trên T1 khỏi văng */
 #endTimeDisplay {
     display: inline-block;
     min-width: 65px;
@@ -409,16 +408,29 @@ body {
 .mbc, .modal-btn-cancel { background: var(--panel-bg); color: var(--text-main); border: 1px solid var(--border-color); }
 .mbs, .modal-btn-ok { background: var(--btn-dark); color: white; }
 
-.next-box-wrapper { position: absolute; right: 0; bottom: -5px; display: flex; gap: 12px; }
+.next-box-wrapper { position: absolute; right: 0; bottom: -5px; display: flex; align-items: center; gap: 12px; }
 .btn-next-box, .btn-prev-box { color: white; border: none; border-radius: 14px; padding: 10px 20px; font-size: 1.15rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.1s;}
 .btn-next-box { background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4); animation: pulseNext 1.5s infinite;}
 .btn-prev-box { background: linear-gradient(135deg, #64748b, #475569); box-shadow: 0 4px 10px rgba(100, 116, 139, 0.4);}
 .btn-next-box:active, .btn-prev-box:active { transform: scale(0.9); }
 
+/* ============ NÚT RƯƠNG VIP ĐỎ KHẨN CẤP ============ */
+.btn-emergency {
+    color: white; border: none; border-radius: 14px; padding: 10px 20px; font-size: 1.15rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.1s;
+    background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+}
+.btn-emergency:active { transform: scale(0.9); }
+
 @keyframes pulseNext {
     0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
     70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
     100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+@keyframes pulseRed {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+    70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
 @media screen and (max-width: 480px) {
@@ -451,7 +463,6 @@ body {
     min-height: 100vh;
 }
 
-/* Nút chuyển đổi góc phải (Giống giao diện tab) */
 .t3-top-bar {
     width: 100%;
     max-width: 500px;
@@ -485,12 +496,10 @@ body {
     text-align: center;
 }
 
-/* Header Info */
 .t3-header { text-align: center; margin-bottom: 6px; opacity: 0.9; line-height: 1.7; }
 .t3-username { font-size: 1.6rem; font-weight: 800; margin-bottom: 5px; }
 .t3-stats { font-size: 1.1rem; font-weight: 600; }
 
-/* Đồng hồ đếm ngược có viền bóng y chang gốc */
 .t3-countdown-area {
     display: flex;
     justify-content: center;
@@ -508,7 +517,6 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
-/* Time & Ping */
 .t3-time-info { 
     text-align: center; 
     margin-bottom: 18px; 
@@ -520,7 +528,6 @@ body {
 .t3-ping { font-size: 1.1rem; font-weight: 500; }
 #serverTimeDisplay, #endTimeDisplay { display: inline-block; min-width: 70px; text-align: center; }
 
-/* Control Offset - Fix co giãn nút */
 .t3-controls-row {
     display: flex;
     align-items: center;
@@ -555,7 +562,6 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
-/* Copy & Plus Buttons - Y hệt bản gốc */
 .t3-actions-row {
     display: flex;
     justify-content: center;
@@ -597,7 +603,6 @@ body {
     padding-bottom: 2px;
 }
 
-/* Hộp Firebase hiển thị người xem */
 .t3-firebase-box {
     width: 100%;
     background: rgba(255, 255, 255, 0.5);
@@ -627,8 +632,7 @@ body {
     margin-top: 25px; 
 }
 
-
-/* ================= OVERLAY MÀN HÌNH KHÓA VIP ================= */
+/* OVERLAY */
 .vip-lock-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(15, 23, 42, 0.95);
@@ -651,7 +655,6 @@ body {
 }
 .btn-copy-id:active { transform: scale(0.95); }
 
-/* Khóa ô nhập tên */
 input:disabled {
     background-color: #e2e8f0 !important;
     color: #64748b !important;
