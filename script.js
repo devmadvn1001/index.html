@@ -86,11 +86,11 @@ let timeBase = Date.now() - performance.now();
 function getAccurateTime() { return performance.now() + timeBase; }
 const isT3 = window.location.pathname.includes('t3.html');
 
-// ---- BỘ ĐẾM SỐ LƯỢNG MỞ RƯƠNG (TỰ ĐỘNG RESET 3H SÁNG VIỆT NAM) ----
+let openedToday = parseInt(safeGetItem('opened_today', 0)) || 0;
+
 function checkAndReset3AM() {
     const now = new Date();
     const vnTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
-    
     const resetLimit = new Date(vnTime);
     resetLimit.setHours(3, 0, 0, 0);
     
@@ -108,9 +108,8 @@ function checkAndReset3AM() {
     }
     return parseInt(safeGetItem('opened_today', 0)) || 0;
 }
-let openedToday = checkAndReset3AM();
+openedToday = checkAndReset3AM();
 
-// ---- CƠ CHẾ ĐẾM THÔNG MINH CHỐNG F5 ----
 function recordBoxOpen(currentEndTime) {
     if (!currentEndTime || currentEndTime <= 0) return;
     const lastCounted = safeGetItem('last_counted_endtime');
@@ -123,7 +122,6 @@ function recordBoxOpen(currentEndTime) {
 }
 recordBoxOpen(endTime);
 
-// HIỂN THỊ THÔNG SỐ LÊN UI LẦN ĐẦU
 if (usernameDisplayEl) usernameDisplayEl.textContent = paramM;
 if (viewCountEl) viewCountEl.textContent = coins;
 if (peopleCountEl) peopleCountEl.textContent = canOpen;
@@ -183,10 +181,10 @@ let deviceStatus = 'unknown';
 let adminOffset = 0; 
 let isFreeModeLoaded = false;
 let isDeviceLoaded = false;
+let currentPingMs = 0; // Biến lưu Ping hiện tại
 
 const deviceRef = ref(db, `devices/${deviceId}`);
 
-// KIỂM TRA LỊCH SỬ CỤC BỘ TRƯỚC (CHỐNG CHỚP LÚC MỚI MỞ WEB)
 const lastAccessState = safeGetItem('last_access_state');
 if (lastAccessState === 'granted' && lockScreen) {
     lockScreen.style.display = 'none';
@@ -194,9 +192,8 @@ if (lastAccessState === 'granted' && lockScreen) {
     lockScreen.style.display = 'flex';
 }
 
-// BÁO CÁO LÊN FIREBASE (LƯU Ý CÓ KHÓA MÕM KHI ẨN TAB)
 function pushHeartbeat() {
-    if (document.hidden) return; // Tab ẩn thì KHÔNG ĐƯỢC GỬI để tránh tranh giành quyền với Tab mới
+    if (document.hidden) return; 
     
     update(deviceRef, {
         last_active: Date.now(),
@@ -205,12 +202,13 @@ function pushHeartbeat() {
             rate: paramM || 'Đang chờ...',
             coins: coins || 0,
             can_open: canOpen || 0, 
-            end_time: endTime || 0
+            end_time: endTime || 0,
+            ping: currentPingMs, // Bắn Ping lên Admin
+            flag: hotBoxStr // Bắn thẳng Cờ Rương lên Admin
         }
     }).catch(()=>{});
 }
 
-// HÀM QUYẾT ĐỊNH QUYỀN TRUY CẬP CHÍNH THỨC
 function checkAccess() {
     if (!isFreeModeLoaded || !isDeviceLoaded) return;
     
@@ -230,14 +228,12 @@ function checkAccess() {
     }
 }
 
-// Lắng nghe công tắc Free Mode
 onValue(ref(db, 'global_settings/free_mode'), (snapshot) => {
     isFreeMode = !!snapshot.val();
     isFreeModeLoaded = true; 
     checkAccess();
 });
 
-// Lắng nghe dữ liệu khách VIP
 onValue(deviceRef, (snapshot) => {
     isDeviceLoaded = true; 
     const data = snapshot.val();
@@ -268,7 +264,6 @@ onValue(deviceRef, (snapshot) => {
     checkAccess();
 });
 
-// ---- XÓA ĐỒNG HỒ TRÊN ADMIN KHI MẤT KẾT NỐI ----
 setInterval(pushHeartbeat, 30000);
 onDisconnect(deviceRef).update({ 
     last_active: Date.now(),
@@ -276,11 +271,9 @@ onDisconnect(deviceRef).update({
     'current_task/end_time': 0 
 });
 
-// ---- CẢM BIẾN ẨN TAB TRÌNH DUYỆT ----
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) { 
         if (myViewerRef) remove(myViewerRef); 
-        // Báo cho Admin biết khách đang Ẩn Tab, xóa đếm ngược
         update(deviceRef, {
             'current_task/rate': 'Đang ẩn Tab...',
             'current_task/end_time': 0
@@ -288,7 +281,6 @@ document.addEventListener("visibilitychange", function() {
     } 
     else {
         if (nameInputEl && nameInputEl.value.trim() !== '') { pushNameToFirebase(nameInputEl.value); }
-        // Khách quay lại Tab -> Khôi phục đếm ngược
         pushHeartbeat(); 
     }
 });
@@ -385,6 +377,7 @@ function connectWebSocket() {
                 const now = getAccurateTime();
                 const rtt = now - data.client_time;
                 const pingMs = rtt / 2;
+                currentPingMs = pingMs; // CẬP NHẬT PING
                 const pingS = (pingMs / 1000).toFixed(3);
                 
                 if (data.server_time) { networkTimeOffset = (data.server_time + pingMs) - now; } 
