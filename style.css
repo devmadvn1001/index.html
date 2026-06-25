@@ -207,7 +207,7 @@ body {
     font-size: clamp(0.9rem, 3vw, 1.1rem);
     color: var(--text-muted);
     font-weight: 600;
-    font-variant-numeric: tabular-nums; 
+    font-variant-numeric: tabular-nums;
 }
 
 #endTimeDisplay {
@@ -408,29 +408,16 @@ body {
 .mbc, .modal-btn-cancel { background: var(--panel-bg); color: var(--text-main); border: 1px solid var(--border-color); }
 .mbs, .modal-btn-ok { background: var(--btn-dark); color: white; }
 
-.next-box-wrapper { position: absolute; right: 0; bottom: -5px; display: flex; align-items: center; gap: 12px; }
+.next-box-wrapper { position: absolute; right: 0; bottom: -5px; display: flex; gap: 12px; }
 .btn-next-box, .btn-prev-box { color: white; border: none; border-radius: 14px; padding: 10px 20px; font-size: 1.15rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.1s;}
 .btn-next-box { background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4); animation: pulseNext 1.5s infinite;}
 .btn-prev-box { background: linear-gradient(135deg, #64748b, #475569); box-shadow: 0 4px 10px rgba(100, 116, 139, 0.4);}
 .btn-next-box:active, .btn-prev-box:active { transform: scale(0.9); }
 
-/* ============ NÚT RƯƠNG VIP ĐỎ KHẨN CẤP ============ */
-.btn-emergency {
-    color: white; border: none; border-radius: 14px; padding: 10px 20px; font-size: 1.15rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.1s;
-    background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
-}
-.btn-emergency:active { transform: scale(0.9); }
-
 @keyframes pulseNext {
     0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
     70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
     100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
-}
-
-@keyframes pulseRed {
-    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
-    70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
 @media screen and (max-width: 480px) {
@@ -632,7 +619,8 @@ body {
     margin-top: 25px; 
 }
 
-/* OVERLAY */
+
+/* ================= OVERLAY MÀN HÌNH KHÓA VIP ================= */
 .vip-lock-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(15, 23, 42, 0.95);
@@ -661,4 +649,16 @@ input:disabled {
     border-color: #cbd5e1 !important;
     cursor: not-allowed;
     opacity: 0.8;
+}
+
+/* ================= NÚT LÙI (PREV) ĐỎ KHI RƯƠNG TRƯỚC CÒN THỜI GIAN ================= */
+.btn-prev-active-red {
+    background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4) !important;
+    animation: pulseRed 1.5s infinite !important;
+}
+@keyframes pulseRed {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+    70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
