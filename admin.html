@@ -539,17 +539,16 @@
             renderManageTable();
         });
 
-        window.toggleFreeMode = () => {
+       window.toggleFreeMode = () => {
             const actionText = isFreeMode ? "TẮT chế độ Free?\n\nTất cả khách chưa được cấp quyền VIP sẽ văng ra Màn hình Khóa ngay lập tức!" : "BẬT chế độ Free?\n\nTất cả mọi người sẽ được truy cập Tool tự do không cần mã!";
             if(confirm(`Sếp có chắc chắn muốn ${actionText}`)) {
                 set(ref(db, 'global_settings/free_mode'), !isFreeMode);
             }
         };
 
+
         window.toggleArgoMode = () => {
-            const actionText = isArgoOn 
-                ? "TẮT mạng Argo?\n\nHệ thống sẽ chuyển về mạng Free (An toàn nhưng chậm hơn)." 
-                : "BẬT mạng Argo?\n\nHệ thống sẽ chạy tốc độ cao. Hãy chú ý thanh dung lượng nhé!";
+            const actionText = isArgoOn ? "TẮT mạng Argo?\n\nHệ thống sẽ chuyển về mạng Free (An toàn nhưng chậm hơn)." : "BẬT mạng Argo?\n\nHệ thống sẽ chạy tốc độ cao. Hãy chú ý thanh dung lượng nhé!";
             if(confirm(`Sếp có chắc chắn muốn ${actionText}`)) {
                 set(ref(db, 'global_settings/argo_mode'), !isArgoOn);
             }
