@@ -362,7 +362,7 @@ function startWsPing() {
     if (wsPingInterval) clearInterval(wsPingInterval);
     wsPingInterval = setInterval(() => {
         if (ws && ws.readyState === 1 && (isT3 || isSyncOn)) { ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() })); }
-    }, 1500);
+    }, 1000);
 }
 
 function connectWebSocket() {
