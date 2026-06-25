@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trạm Chỉ Huy Pro Analytics - Tool VIP</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
@@ -163,7 +163,7 @@
         tr:last-child td { border-bottom: none; }
         tr:hover td { background-color: rgba(255,255,255,0.02); } 
         
-        .user-name { font-weight: 800; color: var(--text-main); font-size: 1.05rem; display: block; margin-bottom: 6px; white-space: nowrap;}
+        .user-name { font-weight: 800; color: var(--text-main); font-size: 1.05rem; display: block; white-space: nowrap;}
         .device-id { font-family: 'JetBrains Mono', monospace; color: #60a5fa; font-size: 0.8rem; font-weight: 700; background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 6px; white-space: nowrap;}
         .live-cd { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; color: var(--danger); background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.3); padding: 4px 12px; border-radius: 8px; display: inline-block; white-space: nowrap;}
         
@@ -257,7 +257,6 @@
             
             <form id="login-form">
                 <input type="text" id="admin-user" value="admin_commander" style="display:none" autocomplete="username">
-                
                 <div class="input-group">
                     <label>Passcode Hệ Thống</label>
                     <input type="password" id="admin-pwd" placeholder="••••••••" autocomplete="current-password" required>
@@ -427,7 +426,6 @@
         // QUẢN LÝ PHIÊN ĐĂNG NHẬP ADMIN BẰNG LOCALSTORAGE
         let myAdminSession = localStorage.getItem('my_admin_session');
 
-        // KIỂM TRA ĐĂNG NHẬP KHI TẢI TRANG
         async function checkAutoLogin() {
             if (myAdminSession) {
                 try {
@@ -445,10 +443,9 @@
         function showDashboard() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('admin-dashboard').style.display = 'block';
-            listenToKick(); // Bắt đầu lắng nghe xem có ai giành quyền không
+            listenToKick(); 
         }
 
-        // ĐÁ VĂNG NẾU CÓ THIẾT BỊ KHÁC ĐĂNG NHẬP
         function listenToKick() {
             onValue(ref(db, 'admin_session/current_id'), (snapshot) => {
                 const currentActiveId = snapshot.val();
@@ -459,9 +456,8 @@
             });
         }
 
-        // SỬ DỤNG FORM ĐỂ TRÌNH DUYỆT HIỂU VÀ ĐỀ XUẤT LƯU MẬT KHẨU
         document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Chặn tải lại trang
+            e.preventDefault(); 
             
             const pwdInput = document.getElementById('admin-pwd').value.trim();
             if (!pwdInput) return alert("⚠️ Sếp chưa nhập mật khẩu kìa!");
@@ -471,14 +467,9 @@
             try {
                 const snapshot = await get(child(ref(db), 'admin_pwd'));
                 if (snapshot.exists() && pwdInput === snapshot.val()) {
-                    
-                    // Tạo ID phiên làm việc mới
                     myAdminSession = 'admin_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                     localStorage.setItem('my_admin_session', myAdminSession);
-                    
-                    // Cập nhật Firebase để đá các máy cũ ra
                     await set(ref(db, 'admin_session/current_id'), myAdminSession);
-                    
                     showDashboard();
                 } else {
                     alert("❌ Mật khẩu không chính xác!");
@@ -628,10 +619,19 @@
                 const task = data.current_task || {};
                 const endTime = task.end_time || 0; 
                 const adminOffset = data.admin_offset || 0; 
+                const clientPing = task.ping || 0; 
+                const boxFlag = task.flag || ''; 
                 
                 let offsetClass = 'offset-zero'; let offsetText = 'Đang bù: 0.00s';
                 if (adminOffset > 0) { offsetClass = 'offset-pos'; offsetText = `Đang bù: +${adminOffset.toFixed(2)}s`; }
                 if (adminOffset < 0) { offsetClass = 'offset-neg'; offsetText = `Đang bù: ${adminOffset.toFixed(2)}s`; }
+
+                let pingColor = 'var(--success)';
+                if (clientPing >= 150 && clientPing < 300) pingColor = 'var(--warning)';
+                if (clientPing >= 300 || clientPing === 0) pingColor = 'var(--danger)';
+                const pingHtml = clientPing > 0 
+                    ? `<span style="font-size: 0.75rem; font-weight: 700; color: ${pingColor}; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">${Math.round(clientPing)}ms</span>` 
+                    : `<span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">-- ms</span>`;
                 
                 const stepMinusVal = savedStepValues[`step-minus-${id}`] || globalMinus;
                 const stepPlusVal = savedStepValues[`step-plus-${id}`] || globalPlus;
@@ -639,13 +639,14 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
-                        <div class="user-info">
-                            <span class="user-name">${data.note || 'Khách Vô Danh'}</span>
-                            <span class="device-id">${id}</span>
+                        <div class="user-info" style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
+                            <span class="user-name" style="margin-bottom: 0;">${data.note || 'Khách Vô Danh'}</span>
+                            ${pingHtml}
                         </div>
+                        <span class="device-id">${id}</span>
                     </td>
                     <td><span style="font-family: 'JetBrains Mono', monospace; font-weight:800; color:var(--primary); font-size: 1.15rem;">${task.rate || 'Đang chờ...'}</span></td>
-                    <td><b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span></td>
+                    <td><b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span> <span style="font-size: 1.2rem; margin-left: 5px;">${boxFlag}</span></td>
                     <td style="text-align: right;">
                         <div><span class="live-cd" data-endtime="${endTime}">0.0</span></div>
                         <div class="ctrl-group">
