@@ -546,6 +546,16 @@
             }
         };
 
+        window.toggleArgoMode = () => {
+            const actionText = isArgoOn 
+                ? "TẮT mạng Argo?\n\nHệ thống sẽ chuyển về mạng Free (An toàn nhưng chậm hơn)." 
+                : "BẬT mạng Argo?\n\nHệ thống sẽ chạy tốc độ cao. Hãy chú ý thanh dung lượng nhé!";
+            if(confirm(`Sếp có chắc chắn muốn ${actionText}`)) {
+                set(ref(db, 'global_settings/argo_mode'), !isArgoOn);
+            }
+        };
+        
+
         // LẮNG NGHE ARGO MODE & DUNG LƯỢNG ARGO
         let isArgoOn = true;
         onValue(ref(db, 'global_settings/argo_mode'), (snapshot) => {
