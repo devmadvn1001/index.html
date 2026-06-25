@@ -181,7 +181,7 @@ let deviceStatus = 'unknown';
 let adminOffset = 0; 
 let isFreeModeLoaded = false;
 let isDeviceLoaded = false;
-let currentPingMs = 0; // Biến lưu Ping hiện tại
+let currentPingMs = 0; 
 
 const deviceRef = ref(db, `devices/${deviceId}`);
 
@@ -195,6 +195,7 @@ if (lastAccessState === 'granted' && lockScreen) {
 function pushHeartbeat() {
     if (document.hidden) return; 
     
+    // CẬP NHẬT: THÊM client_offset ĐỂ BẮN THÔNG SỐ KHÁCH BẤM LÊN TERMINAL ADMIN
     update(deviceRef, {
         last_active: Date.now(),
         opened_today: openedToday, 
@@ -203,8 +204,9 @@ function pushHeartbeat() {
             coins: coins || 0,
             can_open: canOpen || 0, 
             end_time: endTime || 0,
-            ping: currentPingMs, // Bắn Ping lên Admin
-            flag: hotBoxStr // Bắn thẳng Cờ Rương lên Admin
+            ping: currentPingMs,
+            flag: hotBoxStr,
+            client_offset: timeOffset 
         }
     }).catch(()=>{});
 }
@@ -377,7 +379,7 @@ function connectWebSocket() {
                 const now = getAccurateTime();
                 const rtt = now - data.client_time;
                 const pingMs = rtt / 2;
-                currentPingMs = pingMs; // CẬP NHẬT PING
+                currentPingMs = pingMs; 
                 const pingS = (pingMs / 1000).toFixed(3);
                 
                 if (data.server_time) { networkTimeOffset = (data.server_time + pingMs) - now; } 
@@ -636,6 +638,9 @@ function adjustTime(seconds) {
     timeOffset += seconds; timeOffset = Math.round(timeOffset * 100) / 100;
     safeSetItem('timeOffset', String(timeOffset));
     updateDTOffset(); forceUpdateClock();
+    
+    // GỬI OFFSET CỦA CLIENT LÊN SERVER NGAY KHI KHÁCH BẤM NÚT
+    pushHeartbeat();
 }
 
 if (dec005) dec005.addEventListener('click', function () { adjustTime(-0.05); });
