@@ -348,8 +348,9 @@
                         <thead>
                             <tr>
                                 <th>Nhân Sự / Thiết Bị</th>
-                                <th>Trạng Thái</th>
-                                <th style="text-align: right;">Bù Giờ Admin</th>
+                                <th>Đang Mở / Rate</th>
+                                <th>Thông Số Rương</th>
+                                <th style="text-align: right; min-width: 320px;">Terminal Cá Nhân</th>
                             </tr>
                         </thead>
                         <tbody id="staff-list-body"></tbody>
@@ -727,7 +728,7 @@
             document.getElementById('online-stats').innerHTML = `ON: <b style="color: var(--success); margin-left: 5px;">${onlineCount}/${totalCount}</b>`;
         }
 
-        // BẢNG NHÂN SỰ ĐƯỢC CHỈNH LẠI - CHỈ HIỆN STAFF ĐANG ONLINE
+        // BẢNG NHÂN SỰ ĐƯỢC CHỈNH LẠI - FULL THÔNG SỐ NHƯ BẢNG VIP
         function renderStaffTable() {
             const tbody = document.getElementById('staff-list-body'); tbody.innerHTML = '';
             const now = Date.now(); let staffArray = [];
@@ -743,25 +744,39 @@
             }
 
             document.getElementById('count-staff').textContent = staffArray.length;
+            
+            // Sắp xếp rương nào nổ trước lên đầu
+            staffArray.sort((a, b) => (b.data.current_task?.end_time || 0) - (a.data.current_task?.end_time || 0));
 
             staffArray.forEach(item => {
-                const {id, data} = item;
-                const ping = data.current_task?.ping || 0;
+                const {id, data} = item; const task = data.current_task || {};
+                const adminOffset = data.admin_offset || 0; const clientOffset = task.client_offset || 0; 
                 
-                let statusHtml = `<span class="badge badge-staff" style="margin-bottom:4px;"><div class="dot dot-purple"></div> ĐANG CÀY THUÊ</span><br>`;
-                statusHtml += `<span style="font-size:0.8rem; color:var(--text-muted); font-weight:700;">Ping: <b style="color:${ping > 300 ? 'var(--danger)' : 'var(--success)'}">${Math.round(ping)}ms</b></span>`;
-
-                const adminOffset = data.admin_offset || 0;
                 let aOffsetClass = 'offset-zero'; let aOffsetText = '0.00s';
                 if (adminOffset > 0) { aOffsetClass = 'offset-pos'; aOffsetText = `+${adminOffset.toFixed(2)}s`; }
                 if (adminOffset < 0) { aOffsetClass = 'offset-neg'; aOffsetText = `${adminOffset.toFixed(2)}s`; }
 
+                let cOffsetClass = 'offset-zero'; let cOffsetText = '0.00s';
+                if (clientOffset > 0) { cOffsetClass = 'offset-pos'; cOffsetText = `+${clientOffset.toFixed(2)}s`; }
+                if (clientOffset < 0) { cOffsetClass = 'offset-neg'; cOffsetText = `${clientOffset.toFixed(2)}s`; }
+
+                let pingColor = 'var(--success)';
+                if (task.ping >= 150 && task.ping < 300) pingColor = 'var(--warning)';
+                if (task.ping >= 300 || task.ping === 0) pingColor = 'var(--danger)';
+                const pingHtml = task.ping > 0 ? `<span style="font-size: 0.75rem; font-weight: 700; color: ${pingColor}; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">${Math.round(task.ping)}ms</span>` : `<span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">-- ms</span>`;
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><div class="user-info"><span class="user-name">${data.note || 'Chưa Ghi Chú'}</span> <span class="device-id">${id}</span></div></td>
-                    <td>${statusHtml}</td>
+                    <td>
+                        <div class="user-info" style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
+                            <span class="user-name" style="margin-bottom: 0; color: var(--staff);">${data.note || 'Chưa Ghi Chú'} 👷</span> ${pingHtml}
+                        </div>
+                        <span class="device-id">${id}</span>
+                    </td>
+                    <td><span style="font-family: 'JetBrains Mono', monospace; font-weight:800; color:var(--primary); font-size: 1.15rem;">${task.rate || 'Đang chờ...'}</span></td>
+                    <td><b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span> <span style="font-size: 1.2rem; margin-left: 5px;">${task.flag || ''}</span></td>
                     <td style="text-align: right;">
-                        <span class="offset-badge ${aOffsetClass}" style="margin-bottom: 8px;">⚙️ Admin: ${aOffsetText}</span><br>
+                        <div><span class="live-cd" data-endtime="${task.end_time || 0}">0.0</span></div>
                         <div class="ctrl-group">
                             <div class="ctrl-box">
                                 <button class="ctrl-btn btn-sub" onclick="adjustOffset('${id}', -1)">-</button>
@@ -771,6 +786,11 @@
                                 <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)">+</button>
                                 <input type="number" id="step-plus-staff-${id}" class="ctrl-input step-plus" value="0.1" step="0.01">
                             </div>
+                            <button class="btn-reset" onclick="resetOffset('${id}')">RESET</button>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
+                            <span class="offset-badge ${aOffsetClass}" style="margin-top: 0;">⚙️ Admin: ${aOffsetText}</span>
+                            <span class="offset-badge ${cOffsetClass}" style="margin-top: 0;">👤 Khách: ${cOffsetText}</span>
                         </div>
                     </td>
                 `;
