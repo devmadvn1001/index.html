@@ -126,6 +126,12 @@
         .panel-title { font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; text-transform: uppercase; color: var(--text-main); letter-spacing: 0.5px; }
         .panel-title-border { border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 24px; }
         
+        /* CSS TAB CON CHO KHÁCH HÀNG & NHÂN SỰ */
+        .sub-tabs { display: flex; gap: 8px; background: rgba(15, 23, 42, 0.6); padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
+        .sub-tab-btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; background: transparent; color: var(--text-muted); transition: 0.2s; text-transform: uppercase; letter-spacing: 0.5px;}
+        .sub-tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .sub-tab-btn.active { background: var(--primary); color: #fff !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); }
+
         .bulk-action-box { display: flex; align-items: center; gap: 15px; background: rgba(15,23,42,0.8); padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.15); }
         
         .table-responsive { overflow-x: auto; background: var(--bg-page); border-radius: 12px; border: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
@@ -291,7 +297,13 @@
                 </div>
 
                 <div class="panel">
-                    <div class="panel-title panel-title-border">🗄️ CƠ SỞ DỮ LIỆU KHÁCH HÀNG</div>
+                    <div class="panel-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 24px;">
+                        <div class="panel-title" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">🗄️ CƠ SỞ DỮ LIỆU KHÁCH HÀNG</div>
+                        <div class="sub-tabs">
+                            <button class="sub-tab-btn active" onclick="filterDatabase('vip')" id="sub-tab-vip">💎 Khách VIP</button>
+                            <button class="sub-tab-btn" onclick="filterDatabase('staff')" id="sub-tab-staff" style="color: var(--staff);">👷 Nhân Sự</button>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -658,6 +670,15 @@
             }, 3000); 
         }
 
+        // ================= LỌC CƠ SỞ DỮ LIỆU KHÁCH HÀNG =================
+        let currentDbFilter = 'vip'; // Mặc định mở lên là tab Khách VIP
+        window.filterDatabase = (type) => {
+            currentDbFilter = type;
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`sub-tab-${type}`).classList.add('active');
+            renderManageTable();
+        };
+
         // ================= XỬ LÝ DATA DEVICES =================
         let devicesData = {};
         onValue(ref(db, 'devices'), (snapshot) => {
@@ -681,15 +702,29 @@
             const tbody = document.getElementById('device-list-body');
             tbody.innerHTML = ''; let onlineCount = 0; let totalCount = 0; const now = Date.now();
 
+            let manageArray = [];
+            
             for (const [id, data] of Object.entries(devicesData)) {
                 totalCount++;
                 const isOnline = data.last_active && (now - data.last_active < 60000);
                 if (isOnline) onlineCount++;
+                manageArray.push({ id, data, isOnline });
+            }
+
+            // Sắp xếp ưu tiên người online gần nhất lên đầu (dựa vào last_active)
+            manageArray.sort((a, b) => (b.data.last_active || 0) - (a.data.last_active || 0));
+
+            manageArray.forEach(item => {
+                const { id, data, isOnline } = item;
+                const role = data.role || 'vip';
+
+                // Lọc hiển thị theo tab con (VIP hoặc Staff)
+                if (currentDbFilter === 'vip' && role === 'staff') return;
+                if (currentDbFilter === 'staff' && role !== 'staff') return;
 
                 let statusHtml = ''; let typeHtml = '';
                 let expiryText = data.expiry_days === 'forever' ? 'Vĩnh viễn' : (data.expiry_days ? data.expiry_days + ' ngày' : 'Không rõ');
 
-                const role = data.role || 'vip';
                 let roleLabel = role === 'staff' ? `<b style="color:var(--staff)">👷 Nhân Sự</b>` : `<b style="color:var(--primary)">💎 Khách VIP</b>`;
 
                 if (data.status === 'active') {
@@ -723,7 +758,9 @@
                     <td style="text-align: right;">${actionBtn}</td>
                 `;
                 tbody.appendChild(tr);
-            }
+            });
+            
+            // Cập nhật bộ đếm cho tab tổng (hiển thị số tổng toàn bộ thiết bị)
             document.getElementById('count-manage').textContent = totalCount;
             document.getElementById('online-stats').innerHTML = `ON: <b style="color: var(--success); margin-left: 5px;">${onlineCount}/${totalCount}</b>`;
         }
