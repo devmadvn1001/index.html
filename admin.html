@@ -362,7 +362,7 @@
                 <div class="panel-header-row">
                     <div class="panel-title">🎛️ BẢNG ĐIỀU KHIỂN THỜI GIAN THỰC</div>
                     <div class="bulk-action-box">
-                        <span style="font-weight: 800; font-size: 0.9rem; color: var(--primary); text-transform: uppercase;">Thao tác hàng loạt:</span>
+                        <span style="font-weight: 800; font-size: 0.9rem; color: var(--primary); text-transform: uppercase;">Thao tác hàng loạt (Chỉ VIP):</span>
                         <div class="ctrl-group" style="margin-top: 0;">
                             <div class="ctrl-box">
                                 <button class="ctrl-btn btn-sub" onclick="adjustAllOffset(-1)">-</button>
@@ -688,7 +688,6 @@
                 let statusHtml = ''; let typeHtml = '';
                 let expiryText = data.expiry_days === 'forever' ? 'Vĩnh viễn' : (data.expiry_days ? data.expiry_days + ' ngày' : 'Không rõ');
 
-                // XỬ LÝ ROLE NHÂN SỰ HOẶC VIP
                 const role = data.role || 'vip';
                 let roleLabel = role === 'staff' ? `<b style="color:var(--staff)">👷 Nhân Sự</b>` : `<b style="color:var(--primary)">💎 Khách VIP</b>`;
 
@@ -728,25 +727,29 @@
             document.getElementById('online-stats').innerHTML = `ON: <b style="color: var(--success); margin-left: 5px;">${onlineCount}/${totalCount}</b>`;
         }
 
-        // BẢNG NHÂN SỰ
+        // BẢNG NHÂN SỰ ĐƯỢC CHỈNH LẠI - CHỈ HIỆN STAFF ĐANG ONLINE
         function renderStaffTable() {
             const tbody = document.getElementById('staff-list-body'); tbody.innerHTML = '';
-            const now = Date.now(); let staffCount = 0;
+            const now = Date.now(); let staffArray = [];
 
             for (const [id, data] of Object.entries(devicesData)) {
                 if (data.role !== 'staff') continue;
-                staffCount++;
                 
+                // KIỂM TRA ONLINE ĐỂ ĐƯA VÀO BẢNG
                 const isOnline = data.last_active && (now - data.last_active < 60000);
-                const ping = data.current_task?.ping || 0;
-                let statusHtml = '';
+                if (!isOnline) continue; // NẾU OFFLINE QUÁ LÂU SẼ TỰ ĐỘNG BỊ LOẠI KHỎI BẢNG
                 
-                if (isOnline) {
-                    statusHtml = `<span class="badge badge-staff" style="margin-bottom:4px;"><div class="dot dot-purple"></div> ĐANG CÀY THUÊ</span><br>`;
-                    statusHtml += `<span style="font-size:0.8rem; color:var(--text-muted); font-weight:700;">Ping: <b style="color:${ping > 300 ? 'var(--danger)' : 'var(--success)'}">${Math.round(ping)}ms</b></span>`;
-                } else {
-                    statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
-                }
+                staffArray.push({ id, data });
+            }
+
+            document.getElementById('count-staff').textContent = staffArray.length;
+
+            staffArray.forEach(item => {
+                const {id, data} = item;
+                const ping = data.current_task?.ping || 0;
+                
+                let statusHtml = `<span class="badge badge-staff" style="margin-bottom:4px;"><div class="dot dot-purple"></div> ĐANG CÀY THUÊ</span><br>`;
+                statusHtml += `<span style="font-size:0.8rem; color:var(--text-muted); font-weight:700;">Ping: <b style="color:${ping > 300 ? 'var(--danger)' : 'var(--success)'}">${Math.round(ping)}ms</b></span>`;
 
                 const adminOffset = data.admin_offset || 0;
                 let aOffsetClass = 'offset-zero'; let aOffsetText = '0.00s';
@@ -772,8 +775,7 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
-            }
-            document.getElementById('count-staff').textContent = staffCount;
+            });
         }
 
         window.syncAllSteps = (type, val) => {
@@ -781,6 +783,7 @@
             document.querySelectorAll(className).forEach(input => { input.value = val; savedStepValues[input.id] = val; });
         };
 
+        // BẢNG MONITOR (TERMINAL) ĐƯỢC CHỈNH LẠI - LOẠI BỎ KHÁCH NHÂN SỰ
         let savedStepValues = {};
         function renderMonitorTable() {
             document.querySelectorAll('.ctrl-input').forEach(input => { if(!input.id.includes('step-all')) savedStepValues[input.id] = input.value; });
@@ -791,7 +794,10 @@
             let monitorArray = [];
             for (const [id, data] of Object.entries(devicesData)) {
                 const isOnline = data.last_active && (now - data.last_active < 60000);
-                if (isOnline && data.status !== 'locked') monitorArray.push({ id, data });
+                // BỘ LỌC CẤM CỬA STAFF (CHỈ HIỆN VIP)
+                if (isOnline && data.status !== 'locked' && data.role !== 'staff') {
+                    monitorArray.push({ id, data });
+                }
             }
 
             document.getElementById('count-monitor').textContent = monitorArray.length;
@@ -818,7 +824,7 @@
                 tr.innerHTML = `
                     <td>
                         <div class="user-info" style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
-                            <span class="user-name" style="margin-bottom: 0; color: ${data.role==='staff'?'var(--staff)':'var(--text-main)'}">${data.note || 'Khách Vô Danh'} ${data.role==='staff'?'👷':''}</span> ${pingHtml}
+                            <span class="user-name" style="margin-bottom: 0;">${data.note || 'Khách Vô Danh'}</span> ${pingHtml}
                         </div>
                         <span class="device-id">${id}</span>
                     </td>
@@ -927,15 +933,28 @@
         };
         window.resetOffset = (id) => update(ref(db, 'devices/' + id), { admin_offset: 0 });
 
+        // NÚT THAO TÁC HÀNG LOẠT BÂY GIỜ CHỈ ÁP DỤNG CHO KHÁCH VIP
         window.adjustAllOffset = (direction) => {
             const stepVal = parseFloat(document.getElementById(direction === 1 ? 'step-all-plus' : 'step-all-minus').value) || 0.1;
             const now = Date.now(); let updates = {};
-            for (const [id, data] of Object.entries(devicesData)) if (data.last_active && (now - data.last_active < 60000) && data.status !== 'locked') updates[`devices/${id}/admin_offset`] = Math.round(((data.admin_offset || 0) + (stepVal * direction)) * 100) / 100;
-            if (Object.keys(updates).length > 0) update(ref(db), updates); else alert("Không có khách nào đang online!");
+            for (const [id, data] of Object.entries(devicesData)) {
+                // CHỈ CHỌN NHỮNG THIẾT BỊ ONLINE, KHÔNG BỊ KHÓA VÀ KHÔNG PHẢI NHÂN SỰ
+                if (data.last_active && (now - data.last_active < 60000) && data.status !== 'locked' && data.role !== 'staff') {
+                    updates[`devices/${id}/admin_offset`] = Math.round(((data.admin_offset || 0) + (stepVal * direction)) * 100) / 100;
+                }
+            }
+            if (Object.keys(updates).length > 0) update(ref(db), updates); 
+            else alert("Không có khách VIP nào đang online!");
         };
+
         window.resetAllOffset = () => {
             const now = Date.now(); let updates = {};
-            for (const [id, data] of Object.entries(devicesData)) if (data.last_active && (now - data.last_active < 60000)) updates[`devices/${id}/admin_offset`] = 0;
+            for (const [id, data] of Object.entries(devicesData)) {
+                // CHỈ RESET CHO KHÁCH VIP
+                if (data.last_active && (now - data.last_active < 60000) && data.role !== 'staff') {
+                    updates[`devices/${id}/admin_offset`] = 0;
+                }
+            }
             if (Object.keys(updates).length > 0) update(ref(db), updates);
         };
 
