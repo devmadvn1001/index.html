@@ -206,7 +206,13 @@ onValue(deviceRef, (snapshot) => {
     if (data) {
         deviceStatus = data.status || 'unknown';
         adminOffset = parseFloat(data.admin_offset) || 0;
-        myRole = data.role || 'vip'; 
+        
+        const newRole = data.role || 'vip'; 
+        // NẾU ADMIN VỪA ĐỔI QUYỀN (TỪ VIP <-> STAFF) THÌ XẾP LẠI PHÒNG NGAY LẬP TỨC
+        if (newRole !== myRole) {
+            myRole = newRole;
+            setupRoomViewers(endTime); 
+        }
         
         applyNetworkSettings(); 
 
@@ -240,14 +246,20 @@ if (!mySessionId) { mySessionId = 'sess_' + Date.now() + '_' + Math.floor(Math.r
 
 let currentRoomIdStr = ''; let myViewerRef = null; let roomViewersRef = null; let unsubscribeViewers = null;
 
+// ================= CƠ CHẾ CHIA PHÒNG THEO QUYỀN HẠN (ROLE) =================
 function setupRoomViewers(newEndTime) {
     if (myViewerRef) { remove(myViewerRef); myViewerRef = null; }
     if (unsubscribeViewers) { unsubscribeViewers(); unsubscribeViewers = null; }
-    currentRoomIdStr = newEndTime ? `room_${newEndTime}` : 'room_default';
+    
+    // GẮN MÁC ROLE VÀO ĐUÔI TÊN PHÒNG ĐỂ TÁCH BIỆT VIP VÀ STAFF
+    currentRoomIdStr = newEndTime ? `room_${newEndTime}_${myRole}` : `room_default_${myRole}`;
+    
     myViewerRef = ref(db, `rooms/${currentRoomIdStr}/viewers/${mySessionId}`);
     onDisconnect(myViewerRef).remove();
+    
     const savedName = nameInputEl && nameInputEl.value.trim() !== '' ? nameInputEl.value : safeGetItem('myName');
     if (savedName) pushNameToFirebase(savedName);
+    
     roomViewersRef = ref(db, `rooms/${currentRoomIdStr}/viewers`);
     unsubscribeViewers = onValue(roomViewersRef, (snapshot) => {
         const data = snapshot.val();
