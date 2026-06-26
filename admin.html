@@ -127,7 +127,7 @@
         .panel-title-border { border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 24px; }
         
         /* CSS TAB CON CHO KHÁCH HÀNG & NHÂN SỰ */
-        .sub-tabs { display: flex; gap: 8px; background: rgba(15, 23, 42, 0.6); padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
+        .sub-tabs { display: flex; gap: 8px; background: rgba(15, 23, 42, 0.6); padding: 4px; border-radius: 8px; border: 1px solid var(--border); flex-wrap: wrap;}
         .sub-tab-btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; background: transparent; color: var(--text-muted); transition: 0.2s; text-transform: uppercase; letter-spacing: 0.5px;}
         .sub-tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
         .sub-tab-btn.active { background: var(--primary); color: #fff !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); }
@@ -222,6 +222,7 @@
             .table-responsive { width: 100%; padding-bottom: 10px;}
             .ctrl-group { justify-content: flex-start; }
             .logout-btn { flex: 1; justify-content: center; }
+            .sub-tabs { justify-content: center; }
         }
     </style>
 </head>
@@ -302,6 +303,7 @@
                         <div class="sub-tabs">
                             <button class="sub-tab-btn active" onclick="filterDatabase('vip')" id="sub-tab-vip">💎 Khách VIP</button>
                             <button class="sub-tab-btn" onclick="filterDatabase('staff')" id="sub-tab-staff" style="color: var(--staff);">👷 Nhân Sự</button>
+                            <button class="sub-tab-btn" onclick="filterDatabase('free')" id="sub-tab-free" style="color: #cbd5e1;">🆓 Free / Vô Danh</button>
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -440,7 +442,7 @@
                         <span style="color: var(--text-muted); font-size: 1rem;">Tối đa: 1000 MB</span>
                     </div>
                     <div style="background: rgba(59, 130, 246, 0.1); border: 1px dashed rgba(59, 130, 246, 0.4); padding: 20px; border-radius: 12px; color: #94a3b8; font-size: 1rem; text-align: center; max-width: 700px; line-height: 1.6;">
-                        <strong style="color: #60a5fa;">💡 Thông tin hệ thống:</strong><br>
+                        <strong style="color: #60a5fa;">💡 Thông系统:</strong><br>
                         Tool tự động làm mới dữ liệu từ Cloudflare mỗi 5 phút. Nếu băng thông chạm ngưỡng an toàn, Tool sẽ <b>tự động kích hoạt Cầu Dao sập mạng Argo về trạng thái Free</b>.
                     </div>
                 </div>
@@ -718,9 +720,14 @@
                 const { id, data, isOnline } = item;
                 const role = data.role || 'vip';
 
-                // Lọc hiển thị theo tab con (VIP hoặc Staff)
-                if (currentDbFilter === 'vip' && role === 'staff') return;
-                if (currentDbFilter === 'staff' && role !== 'staff') return;
+                // Tách biệt Logic kiểm tra phân loại tab 
+                let tabCategory = 'free'; // Mặc định nếu không Active/Locked thì là Vô Danh / Free
+                if (data.status === 'active' || data.status === 'locked') {
+                    tabCategory = (role === 'staff') ? 'staff' : 'vip';
+                }
+
+                // Lọc hiển thị theo tab con (VIP, Staff, Free)
+                if (currentDbFilter !== tabCategory) return;
 
                 let statusHtml = ''; let typeHtml = '';
                 let expiryText = data.expiry_days === 'forever' ? 'Vĩnh viễn' : (data.expiry_days ? data.expiry_days + ' ngày' : 'Không rõ');
