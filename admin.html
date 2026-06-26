@@ -18,6 +18,7 @@
             --success: #10b981; 
             --warning: #f59e0b;
             --danger: #ef4444;
+            --staff: #a855f7;
             --radius-card: 16px;
             --radius-btn: 8px;
             --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
@@ -63,15 +64,11 @@
         }
         .input-group input:focus, .input-group select:focus { border-color: var(--primary); background: var(--bg-page); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         
-        select#new-device-expiry {
-            appearance: none;
-            -webkit-appearance: none;
+        select#new-device-expiry, select#new-device-role, select#edit-role {
+            appearance: none; -webkit-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 18px center; 
-            background-size: 16px;
-            padding-right: 45px;
-            cursor: pointer;
+            background-repeat: no-repeat; background-position: right 18px center; background-size: 16px;
+            padding-right: 45px; cursor: pointer;
         }
         
         .btn { 
@@ -110,15 +107,8 @@
         .tab-btn.active { background: var(--primary); color: #ffffff !important; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
         
         .tab-badge {
-            background: rgba(239, 68, 68, 0.15); 
-            color: var(--danger); 
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.9rem; 
-            font-weight: 800;
-            margin-left: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            transition: 0.3s;
+            background: rgba(239, 68, 68, 0.15); color: var(--danger); padding: 2px 10px; border-radius: 12px;
+            font-size: 0.9rem; font-weight: 800; margin-left: 4px; font-family: 'JetBrains Mono', monospace; transition: 0.3s;
         }
         .tab-btn:hover .tab-badge { background: rgba(239, 68, 68, 0.25); }
         .tab-btn.active .tab-badge { background: var(--danger); color: #ffffff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); }
@@ -153,8 +143,10 @@
         .badge-active { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); } 
         .badge-locked { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); } 
         .badge-offline { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); border: 1px solid rgba(148, 163, 184, 0.2); }
+        .badge-staff { background: rgba(168, 85, 247, 0.1); color: var(--staff); border: 1px solid rgba(168, 85, 247, 0.2); }
         .dot { width: 8px; height: 8px; border-radius: 50%; } 
         .dot-green { background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 1.5s infinite; }
+        .dot-purple { background: var(--staff); box-shadow: 0 0 8px var(--staff); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
         
         .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; font-weight: 800; font-size: 1rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); }
@@ -195,59 +187,34 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.8); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
         .modal-box { background: var(--surface); border-radius: var(--radius-card); padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid var(--border); animation: fadeIn 0.3s ease; }
         
-        /* ================= CSS THÔNG BÁO ONLINE TỪ TRÊN XUỐNG ================= */
+        /* ================= CSS THÔNG BÁO ONLINE ================= */
         #toast-container {
-            position: fixed;
-            top: 25px;
-            left: 50%;
-            transform: translate(-50%, -100%);
-            background: rgba(16, 185, 129, 0.9); 
-            color: #ffffff;
-            padding: 12px 24px;
-            border-radius: 12px; 
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.95rem;
-            opacity: 0;
-            pointer-events: none;
-            transition: transform 0.5s ease-out, opacity 0.5s ease-out; 
+            position: fixed; top: 25px; left: 50%; transform: translate(-50%, -100%);
+            background: rgba(16, 185, 129, 0.9); color: #ffffff; padding: 12px 24px;
+            border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); z-index: 10000;
+            display: flex; align-items: center; gap: 12px; font-size: 0.95rem; opacity: 0;
+            pointer-events: none; transition: transform 0.5s ease-out, opacity 0.5s ease-out; 
             backdrop-filter: blur(4px);
         }
-        #toast-container.show {
-            transform: translate(-50%, 0);
-            opacity: 1;
-        }
+        #toast-container.show { transform: translate(-50%, 0); opacity: 1; }
         .toast-icon { font-size: 1.2rem; }
-        .toast-id { 
-            font-family: 'JetBrains Mono', monospace; 
-            background: rgba(0, 0, 0, 0.2); 
-            padding: 3px 8px; 
-            border-radius: 6px; 
-            font-size: 0.85rem;
-            font-weight: 700;
-        }
-        /* ==================================================================== */
+        .toast-id { font-family: 'JetBrains Mono', monospace; background: rgba(0, 0, 0, 0.2); padding: 3px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; }
+        
+        /* CỘT NHÂN SỰ CHỨC NĂNG */
+        .staff-control-panel { background: rgba(15,23,42,0.8); padding: 20px; border-radius: 16px; border: 1px dashed var(--staff); margin-bottom: 25px;}
+        .staff-control-title { color: var(--staff); font-weight: 800; font-size: 1.1rem; margin-bottom: 15px; text-transform: uppercase;}
 
         @media (max-width: 900px) { 
             .dashboard-grid { grid-template-columns: 1fr; } 
             .header { justify-content: center; text-align: center; } 
             .header-actions { justify-content: center; width: 100%; } 
-            
             .tabs { flex-wrap: wrap; justify-content: center; width: 100%; }
             .tab-btn { flex: 1 1 calc(50% - 10px); text-align: center; min-width: 140px; padding: 10px;}
-            
             .panel-header-row { flex-direction: column; align-items: stretch; gap: 10px; }
             .panel-header-row .panel-title { justify-content: center; border-bottom: none; margin-bottom: 0; padding-bottom: 5px;}
             .bulk-action-box { flex-direction: column; align-items: center; width: 100%; padding: 15px;}
-            .bulk-action-box > span { margin-bottom: 8px; }
-            .bulk-action-box .ctrl-group { justify-content: center; width: 100%; }
-            
             .table-responsive { width: 100%; padding-bottom: 10px;}
             .ctrl-group { justify-content: flex-start; }
-            
             .logout-btn { flex: 1; justify-content: center; }
         }
     </style>
@@ -264,7 +231,6 @@
             <div style="font-size: 3.5rem; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(59,130,246,0.5));">🛡️</div>
             <h2>TRẠM CHỈ HUY VIP</h2>
             <p>Hệ Thống Quản Trị Dữ Liệu BigData</p>
-            
             <form id="login-form">
                 <input type="text" id="admin-user" value="admin_commander" style="display:none" autocomplete="username">
                 <div class="input-group">
@@ -290,6 +256,7 @@
             <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Quản Lý Khách <span class="tab-badge" id="count-manage">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">💻 Terminal Bù Giờ <span class="tab-badge" id="count-monitor">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Thống Kê & Top Mở <span class="tab-badge" id="count-stats">0</span></button>
+            <button class="tab-btn" onclick="switchTab('tab-staff')" id="btn-staff" style="color: var(--staff);">👷 Nhân Sự <span class="tab-badge" id="count-staff" style="background: rgba(168, 85, 247, 0.2); color: #fff;">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-argo')" id="btn-argo" style="color: #10b981;">🚀 Mạng Argo</button>
         </div>
 
@@ -297,6 +264,13 @@
             <div class="dashboard-grid">
                 <div class="panel">
                     <div class="panel-title panel-title-border">⚡ CẤP QUYỀN TRUY CẬP</div>
+                    <div class="input-group">
+                        <label>Phân loại tài khoản</label>
+                        <select id="new-device-role">
+                            <option value="vip">Khách VIP (Mạng Argo + Ping 1s)</option>
+                            <option value="staff">Nhân Sự (Mạng Free + Ping giãn)</option>
+                        </select>
+                    </div>
                     <div class="input-group">
                         <label>Mã thiết bị (Device ID)</label>
                         <input type="text" id="new-device-id" placeholder="VIP-XXXX-YYYY">
@@ -335,11 +309,58 @@
             </div>
         </div>
 
+        <div id="tab-staff" class="tab-content">
+            <div class="panel">
+                <div class="panel-title panel-title-border" style="color: var(--staff);">👷 QUẢN LÝ ĐỘI NGŨ NHÂN SỰ CÀY THUÊ</div>
+                
+                <div class="staff-control-panel">
+                    <div class="staff-control-title">🎛️ BẢNG ĐIỀU KHIỂN TỔNG (MASTER CONTROL)</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        
+                        <div>
+                            <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">1. Nhịp Ping Mạng (Giãn cách):</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="number" id="staff-ping-input" value="3000" step="500" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; font-size:1.1rem; outline:none;">
+                                <button class="btn" style="background:#8b5cf6; width:auto; padding:0 20px;" onclick="saveStaffPing()">LƯU PING (ms)</button>
+                            </div>
+                            <small style="color:#64748b; margin-top:5px; display:block;">Mặc định: 3000 ms (3 giây). VIP là 1000 ms.</small>
+                        </div>
+
+                        <div>
+                            <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">2. Link WSS Dự Phòng (Mạng Free):</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" id="staff-link-input" placeholder="wss://free-tunnel.com" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; font-size:1.1rem; outline:none;">
+                                <button class="btn" style="background:#8b5cf6; width:auto; padding:0 20px;" onclick="saveStaffLink()">LƯU LINK</button>
+                            </div>
+                            <small style="color:#64748b; margin-top:5px; display:block;">Link ngầm định hướng cho toàn bộ nhân sự.</small>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; justify-content:flex-end;">
+                            <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">3. Cầu Dao ÉP Mạng Nhân Sự:</label>
+                            <button id="btn-staff-network" class="btn" style="background:#ef4444; font-size:1.1rem;" onclick="toggleStaffNetwork()">🛑 ĐANG ÉP DÙNG MẠNG FREE</button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nhân Sự / Thiết Bị</th>
+                                <th>Trạng Thái</th>
+                                <th style="text-align: right;">Bù Giờ Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staff-list-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         <div id="tab-monitor" class="tab-content">
             <div class="panel">
                 <div class="panel-header-row">
                     <div class="panel-title">🎛️ BẢNG ĐIỀU KHIỂN THỜI GIAN THỰC</div>
-                    
                     <div class="bulk-action-box">
                         <span style="font-weight: 800; font-size: 0.9rem; color: var(--primary); text-transform: uppercase;">Thao tác hàng loạt:</span>
                         <div class="ctrl-group" style="margin-top: 0;">
@@ -355,7 +376,6 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -388,8 +408,7 @@
                                 <th style="text-align: right;">Số Lượng Đã Mở (Hôm nay)</th>
                             </tr>
                         </thead>
-                        <tbody id="stats-list-body">
-                            </tbody>
+                        <tbody id="stats-list-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -399,21 +418,17 @@
             <div class="panel">
                 <div class="panel-title panel-title-border" style="color: #10b981;">🚀 ĐIỀU KHIỂN & GIÁM SÁT BĂNG THÔNG ARGO</div>
                 <div style="display: flex; flex-direction: column; gap: 30px; align-items: center; padding: 30px 0;">
-                    
                     <button id="btn-toggle-argo" class="btn" style="max-width: 350px; font-size: 1.2rem; padding: 18px; border-radius: 12px; font-weight: 800;" onclick="toggleArgoMode()">🚀 ĐANG BẬT MẠNG ARGO</button>
-                    
                     <div style="width: 100%; max-width: 800px; background: rgba(0,0,0,0.5); border-radius: 16px; height: 36px; overflow: hidden; position: relative; border: 1px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);">
                         <div id="argo-progress-bar" style="width: 0%; background: #10b981; height: 100%; transition: width 0.4s ease, background 0.4s ease; box-shadow: 0 0 20px #10b981;"></div>
                     </div>
-                    
                     <div style="display: flex; justify-content: space-between; width: 100%; max-width: 800px; font-size: 1.3rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; align-items: center;">
                         <span id="argo-usage-text">Đã dùng: <span style="color:var(--text-muted)">0.000 MB (0.00 KB)</span></span>
                         <span style="color: var(--text-muted); font-size: 1rem;">Tối đa: 1000 MB</span>
                     </div>
-
                     <div style="background: rgba(59, 130, 246, 0.1); border: 1px dashed rgba(59, 130, 246, 0.4); padding: 20px; border-radius: 12px; color: #94a3b8; font-size: 1rem; text-align: center; max-width: 700px; line-height: 1.6;">
                         <strong style="color: #60a5fa;">💡 Thông tin hệ thống:</strong><br>
-                        Tool tự động làm mới dữ liệu từ Cloudflare mỗi 5 phút. Nếu băng thông chạm ngưỡng an toàn do Admin cài đặt trên Python, Tool sẽ <b>tự động kích hoạt Cầu Dao sập mạng Argo về trạng thái Free</b> để bảo vệ thẻ tín dụng.
+                        Tool tự động làm mới dữ liệu từ Cloudflare mỗi 5 phút. Nếu băng thông chạm ngưỡng an toàn, Tool sẽ <b>tự động kích hoạt Cầu Dao sập mạng Argo về trạng thái Free</b>.
                     </div>
                 </div>
             </div>
@@ -425,7 +440,13 @@
         <div class="modal-box">
             <h2 style="font-weight: 800; font-size: 1.4rem; margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 8px;">✏️ Cập Nhật Dữ Liệu</h2>
             <input type="hidden" id="edit-old-id">
-            
+            <div class="input-group">
+                <label>Phân loại tài khoản</label>
+                <select id="edit-role">
+                    <option value="vip">Khách VIP (Mạng Argo + Ping 1s)</option>
+                    <option value="staff">Nhân Sự (Mạng Free + Ping giãn)</option>
+                </select>
+            </div>
             <div class="input-group">
                 <label>Mã thiết bị ID</label>
                 <input type="text" id="edit-id">
@@ -434,7 +455,6 @@
                 <label>Tên Khách / Ghi chú</label>
                 <input type="text" id="edit-note" style="font-family: 'Inter', sans-serif;">
             </div>
-            
             <div style="display: flex; gap: 12px; margin-top: 30px;">
                 <button class="btn" style="background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border);" onclick="closeEditModal()">HỦY BỎ</button>
                 <button class="btn btn-primary" onclick="saveEditDevice()">CẬP NHẬT LƯU TRỮ</button>
@@ -458,18 +478,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // QUẢN LÝ PHIÊN ĐĂNG NHẬP ADMIN BẰNG LOCALSTORAGE
         let myAdminSession = localStorage.getItem('my_admin_session');
 
         async function checkAutoLogin() {
             if (myAdminSession) {
                 try {
                     const snapshot = await get(child(ref(db), 'admin_session/current_id'));
-                    if (snapshot.val() === myAdminSession) {
-                        showDashboard();
-                    } else {
-                        localStorage.removeItem('my_admin_session');
-                    }
+                    if (snapshot.val() === myAdminSession) showDashboard();
+                    else localStorage.removeItem('my_admin_session');
                 } catch(e) {}
             }
         }
@@ -493,7 +509,6 @@
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault(); 
-            
             const pwdInput = document.getElementById('admin-pwd').value.trim();
             if (!pwdInput) return alert("⚠️ Sếp chưa nhập mật khẩu kìa!");
             const btn = document.getElementById('btnLogin');
@@ -506,9 +521,7 @@
                     localStorage.setItem('my_admin_session', myAdminSession);
                     await set(ref(db, 'admin_session/current_id'), myAdminSession);
                     showDashboard();
-                } else {
-                    alert("❌ Mật khẩu không chính xác!");
-                }
+                } else alert("❌ Mật khẩu không chính xác!");
             } catch (error) { alert("❌ Lỗi kết nối Firebase!"); }
             btn.textContent = "ĐĂNG NHẬP HỆ THỐNG"; btn.disabled = false;
         });
@@ -520,42 +533,27 @@
             document.getElementById('admin-dashboard').style.display = 'none';
         };
 
-        // LẮNG NGHE MODE FREE
+        // LẮNG NGHE MODE FREE TỔNG
         let isFreeMode = false;
         onValue(ref(db, 'global_settings/free_mode'), (snapshot) => {
             isFreeMode = !!snapshot.val();
             const btn = document.getElementById('btn-free-mode');
             if(isFreeMode) {
-                btn.innerHTML = '🟢 FREE MODE: ON';
-                btn.style.color = 'var(--success)';
-                btn.style.borderColor = 'rgba(16,185,129,0.3)';
-                btn.style.background = 'rgba(16,185,129,0.1)';
+                btn.innerHTML = '🟢 FREE MODE: ON'; btn.style.color = 'var(--success)';
+                btn.style.borderColor = 'rgba(16,185,129,0.3)'; btn.style.background = 'rgba(16,185,129,0.1)';
             } else {
-                btn.innerHTML = '🔴 FREE MODE: OFF';
-                btn.style.color = 'var(--danger)';
-                btn.style.borderColor = 'rgba(239,68,68,0.3)';
-                btn.style.background = 'rgba(239,68,68,0.1)';
+                btn.innerHTML = '🔴 FREE MODE: OFF'; btn.style.color = 'var(--danger)';
+                btn.style.borderColor = 'rgba(239,68,68,0.3)'; btn.style.background = 'rgba(239,68,68,0.1)';
             }
             renderManageTable();
         });
 
-       window.toggleFreeMode = () => {
-            const actionText = isFreeMode ? "TẮT chế độ Free?\n\nTất cả khách chưa được cấp quyền VIP sẽ văng ra Màn hình Khóa ngay lập tức!" : "BẬT chế độ Free?\n\nTất cả mọi người sẽ được truy cập Tool tự do không cần mã!";
-            if(confirm(`Sếp có chắc chắn muốn ${actionText}`)) {
-                set(ref(db, 'global_settings/free_mode'), !isFreeMode);
-            }
+        window.toggleFreeMode = () => {
+            const actionText = isFreeMode ? "TẮT chế độ Free?\n\nTất cả khách chưa VIP sẽ văng ra Màn hình Khóa!" : "BẬT chế độ Free?\n\nMọi người sẽ truy cập tự do không cần mã!";
+            if(confirm(`Sếp có chắc chắn muốn ${actionText}`)) set(ref(db, 'global_settings/free_mode'), !isFreeMode);
         };
 
-
-        window.toggleArgoMode = () => {
-            const actionText = isArgoOn ? "TẮT mạng Argo?\n\nHệ thống sẽ chuyển về mạng Free (An toàn nhưng chậm hơn)." : "BẬT mạng Argo?\n\nHệ thống sẽ chạy tốc độ cao. Hãy chú ý thanh dung lượng nhé!";
-            if(confirm(`Sếp có chắc chắn muốn ${actionText}`)) {
-                set(ref(db, 'global_settings/argo_mode'), !isArgoOn);
-            }
-        };
-        
-
-        // LẮNG NGHE ARGO MODE & DUNG LƯỢNG ARGO
+        // LẮNG NGHE MẠNG ARGO
         let isArgoOn = true;
         onValue(ref(db, 'global_settings/argo_mode'), (snapshot) => {
             const val = snapshot.val();
@@ -564,44 +562,69 @@
             const bar = document.getElementById('argo-progress-bar');
             
             if(isArgoOn) {
-                btn.innerHTML = '🚀 ĐANG BẬT MẠNG ARGO';
-                btn.style.background = '#10b981';
-                bar.style.background = '#10b981';
-                bar.style.boxShadow = '0 0 20px #10b981';
+                btn.innerHTML = '🚀 ĐANG BẬT MẠNG ARGO'; btn.style.background = '#10b981';
+                bar.style.background = '#10b981'; bar.style.boxShadow = '0 0 20px #10b981';
             } else {
-                btn.innerHTML = '🛑 ĐÃ TẮT (MẠNG FREE)';
-                btn.style.background = '#64748b';
-                bar.style.background = '#64748b';
-                bar.style.boxShadow = 'none';
-                bar.style.width = '0%';
+                btn.innerHTML = '🛑 ĐÃ TẮT (MẠNG FREE)'; btn.style.background = '#64748b';
+                bar.style.background = '#64748b'; bar.style.boxShadow = 'none'; bar.style.width = '0%';
                 document.getElementById('argo-usage-text').innerHTML = `Đã dùng: <span style="color:var(--text-muted)">0.000 MB (0.00 KB)</span>`;
             }
         });
+
+        window.toggleArgoMode = () => {
+            const actionText = isArgoOn ? "TẮT mạng Argo?\n\nHệ thống chuyển về mạng Free (Chậm hơn)." : "BẬT mạng Argo?\n\nHệ thống chạy tốc độ cao. Hãy chú ý dung lượng!";
+            if(confirm(`Sếp có chắc chắn muốn ${actionText}`)) set(ref(db, 'global_settings/argo_mode'), !isArgoOn);
+        };
 
         onValue(ref(db, 'global_settings/argo_usage'), (snapshot) => {
             if(!isArgoOn) return; 
             const usageMB = parseFloat(snapshot.val()) || 0.0;
             const usageKB = usageMB * 1024;
-            const maxMB = 1000;
-            const percent = Math.min((usageMB / maxMB) * 100, 100);
+            const percent = Math.min((usageMB / 1000) * 100, 100);
             
             const bar = document.getElementById('argo-progress-bar');
             bar.style.width = `${percent}%`;
-            
             document.getElementById('argo-usage-text').innerHTML = `Đã dùng: <span style="color:var(--primary)">${usageMB.toFixed(3)} MB</span> <span style="color:var(--warning); font-size:1.1rem;">(${usageKB.toFixed(2)} KB)</span>`;
             
-            if (usageMB > 900) {
-                bar.style.background = '#ef4444';
-                bar.style.boxShadow = '0 0 20px #ef4444';
-            } else {
-                bar.style.background = '#10b981';
-                bar.style.boxShadow = '0 0 20px #10b981';
+            if (usageMB > 900) { bar.style.background = '#ef4444'; bar.style.boxShadow = '0 0 20px #ef4444'; } 
+            else { bar.style.background = '#10b981'; bar.style.boxShadow = '0 0 20px #10b981'; }
+        });
+
+        // ================= CẤU HÌNH NHÂN SỰ =================
+        let staffSettings = { ping_interval: 3000, network_mode: 'free', link_free: '' };
+        onValue(ref(db, 'global_settings/staff_settings'), (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                staffSettings = { ...staffSettings, ...data };
+                document.getElementById('staff-ping-input').value = staffSettings.ping_interval;
+                document.getElementById('staff-link-input').value = staffSettings.link_free || '';
+                
+                const btnNet = document.getElementById('btn-staff-network');
+                if (staffSettings.network_mode === 'free') {
+                    btnNet.innerHTML = '🛑 ĐANG ÉP DÙNG MẠNG FREE';
+                    btnNet.style.background = '#ef4444';
+                } else {
+                    btnNet.innerHTML = '🚀 CHO PHÉP DÙNG MẠNG ARGO VIP';
+                    btnNet.style.background = '#10b981';
+                }
             }
         });
 
-        // =========================================================================
-        // HỆ THỐNG QUEUE ĐẨY THÔNG BÁO ONLINE (TRÁNH CHỒNG ĐÈ, CHỜ NHAU MƯỢT MÀ)
-        // =========================================================================
+        window.saveStaffPing = () => {
+            const val = parseInt(document.getElementById('staff-ping-input').value);
+            if(val < 1000) return alert("Ping tối thiểu là 1000ms!");
+            update(ref(db, 'global_settings/staff_settings'), { ping_interval: val });
+        };
+        window.saveStaffLink = () => {
+            const val = document.getElementById('staff-link-input').value.trim();
+            update(ref(db, 'global_settings/staff_settings'), { link_free: val });
+        };
+        window.toggleStaffNetwork = () => {
+            const newMode = staffSettings.network_mode === 'free' ? 'argo' : 'free';
+            update(ref(db, 'global_settings/staff_settings'), { network_mode: newMode });
+        };
+
+        // ================= HỆ THỐNG TOAST ONLINE =================
         let previousDevicesState = {};
         let isFirstLoad = true;
         let notificationQueue = [];
@@ -611,74 +634,37 @@
             const now = Date.now();
             for (const [id, data] of Object.entries(newData)) {
                 const isCurrentlyOnline = data.last_active && (now - data.last_active < 60000);
-                
-                // Nếu khách đang online VÀ đã từng có dữ liệu trong biến tạm
                 if (isCurrentlyOnline && previousDevicesState[id]) {
                     const prevLastActive = previousDevicesState[id].last_active || 0;
-                    
-                    // So sánh: Nếu lần cuối kích hoạt cách thời điểm hiện tại hơn 5 phút (300,000 ms) 
-                    // nghĩa là khách vừa chuyển từ Offline -> Online
-                    if (now - prevLastActive > 300000) {
-                        queueNotification(data.note || 'Khách Vô Danh', id);
-                    }
+                    if (now - prevLastActive > 300000) queueNotification(data.note || 'Khách Vô Danh', id);
                 }
-                // Cập nhật lại bản ghi để đo cho chu kỳ sau
                 previousDevicesState[id] = { ...data };
             }
         }
 
-        function queueNotification(name, id) {
-            notificationQueue.push({ name, id });
-            showNextNotification(); // Gọi hàm chạy cờ
-        }
+        function queueNotification(name, id) { notificationQueue.push({ name, id }); showNextNotification(); }
 
         function showNextNotification() {
-            // Đang có thông báo chạy hoặc hết hàng đợi thì đứng im
             if (isNotifying || notificationQueue.length === 0) return;
-            
             isNotifying = true;
             const toast = document.getElementById('toast-container');
-            const msgEl = document.getElementById('toast-msg');
-            
-            // Bốc thằng đầu tiên trong hàng đợi ra
             const currentNotif = notificationQueue.shift();
-            
-            msgEl.innerHTML = `<b style="font-size: 1.05rem;">${currentNotif.name}</b> <span style="opacity: 0.8; margin: 0 4px;">/</span> <span class="toast-id">${currentNotif.id}</span> vừa online!`;
-            
-            // Rơi xuống
+            document.getElementById('toast-msg').innerHTML = `<b style="font-size: 1.05rem;">${currentNotif.name}</b> <span style="opacity: 0.8; margin: 0 4px;">/</span> <span class="toast-id">${currentNotif.id}</span> vừa online!`;
             toast.classList.add('show');
-            
-            // Chờ 3 giây rồi rút lên
             setTimeout(() => {
                 toast.classList.remove('show');
-                
-                // Chờ đúng 0.5s để hiệu ứng CSS kéo lên chạy xong mới nhả cờ cho thằng tiếp theo
-                setTimeout(() => {
-                    isNotifying = false;
-                    showNextNotification(); 
-                }, 500);
-                
-            }, 5000); 
+                setTimeout(() => { isNotifying = false; showNextNotification(); }, 500);
+            }, 3000); 
         }
 
-        // =========================================================================
-
+        // ================= XỬ LÝ DATA DEVICES =================
         let devicesData = {};
         onValue(ref(db, 'devices'), (snapshot) => {
             const newData = snapshot.val() || {};
-            
-            // Lần tải đầu tiên (vừa mở Admin) thì lưu bộ nhớ tạm nhưng không bắn thông báo
-            if (isFirstLoad) {
-                previousDevicesState = JSON.parse(JSON.stringify(newData));
-                isFirstLoad = false;
-            } else {
-                processNotifications(newData);
-            }
-            
+            if (isFirstLoad) { previousDevicesState = JSON.parse(JSON.stringify(newData)); isFirstLoad = false; } 
+            else processNotifications(newData);
             devicesData = newData;
-            renderManageTable();
-            renderMonitorTable();
-            renderStatsTable();
+            renderManageTable(); renderMonitorTable(); renderStatsTable(); renderStaffTable();
         });
 
         function formatTimeAgo(ms) {
@@ -692,8 +678,7 @@
 
         function renderManageTable() {
             const tbody = document.getElementById('device-list-body');
-            tbody.innerHTML = '';
-            let onlineCount = 0; let totalCount = 0; const now = Date.now();
+            tbody.innerHTML = ''; let onlineCount = 0; let totalCount = 0; const now = Date.now();
 
             for (const [id, data] of Object.entries(devicesData)) {
                 totalCount++;
@@ -701,17 +686,21 @@
                 if (isOnline) onlineCount++;
 
                 let statusHtml = ''; let typeHtml = '';
-                
-                let expiryText = 'Không rõ';
-                if (data.expiry_days === 'forever') expiryText = 'Vĩnh viễn';
-                else if (data.expiry_days) expiryText = data.expiry_days + ' ngày';
+                let expiryText = data.expiry_days === 'forever' ? 'Vĩnh viễn' : (data.expiry_days ? data.expiry_days + ' ngày' : 'Không rõ');
+
+                // XỬ LÝ ROLE NHÂN SỰ HOẶC VIP
+                const role = data.role || 'vip';
+                let roleLabel = role === 'staff' ? `<b style="color:var(--staff)">👷 Nhân Sự</b>` : `<b style="color:var(--primary)">💎 Khách VIP</b>`;
 
                 if (data.status === 'active') {
-                    typeHtml = `<b style="color:var(--primary)">Khách VIP</b><br><small style="color:var(--text-muted)">${expiryText}</small>`;
-                    if (isOnline) statusHtml = `<span class="badge badge-active"><div class="dot dot-green"></div> ONLINE</span>`;
+                    typeHtml = `${roleLabel}<br><small style="color:var(--text-muted)">${expiryText}</small>`;
+                    if (isOnline) {
+                        if(role === 'staff') statusHtml = `<span class="badge badge-staff"><div class="dot dot-purple"></div> ONLINE</span>`;
+                        else statusHtml = `<span class="badge badge-active"><div class="dot dot-green"></div> ONLINE</span>`;
+                    }
                     else statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
                 } else if (data.status === 'locked') {
-                    typeHtml = `<b style="color:var(--danger)">VIP Bị Khóa</b>`;
+                    typeHtml = `<b style="color:var(--danger)">Tài Khoản Bị Khóa</b>`;
                     statusHtml = `<span class="badge badge-locked">🔒 LOCKED</span>`;
                 } else {
                     typeHtml = `<b style="color:#cbd5e1">Khách Free</b>`;
@@ -724,8 +713,7 @@
                         <button class="action-btn" style="color: var(--primary);" title="Edit" onclick="openEditModal('${id}')">✏️</button>
                         <button class="action-btn" style="color: var(--warning)" title="${data.status === 'locked' ? 'Mở khóa' : 'Khóa'}" onclick="toggleLock('${id}', '${data.status || 'free'}')">${data.status === 'locked' ? '🔓' : '🔒'}</button>
                         <button class="action-btn" style="color: var(--danger);" title="Delete" onclick="deleteDevice('${id}')">🗑️</button>
-                    </div>
-                `;
+                    </div>`;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -736,57 +724,82 @@
                 `;
                 tbody.appendChild(tr);
             }
-            
-            const countManageEl = document.getElementById('count-manage');
-            if(countManageEl) countManageEl.textContent = totalCount;
-            
+            document.getElementById('count-manage').textContent = totalCount;
             document.getElementById('online-stats').innerHTML = `ON: <b style="color: var(--success); margin-left: 5px;">${onlineCount}/${totalCount}</b>`;
+        }
+
+        // BẢNG NHÂN SỰ
+        function renderStaffTable() {
+            const tbody = document.getElementById('staff-list-body'); tbody.innerHTML = '';
+            const now = Date.now(); let staffCount = 0;
+
+            for (const [id, data] of Object.entries(devicesData)) {
+                if (data.role !== 'staff') continue;
+                staffCount++;
+                
+                const isOnline = data.last_active && (now - data.last_active < 60000);
+                const ping = data.current_task?.ping || 0;
+                let statusHtml = '';
+                
+                if (isOnline) {
+                    statusHtml = `<span class="badge badge-staff" style="margin-bottom:4px;"><div class="dot dot-purple"></div> ĐANG CÀY THUÊ</span><br>`;
+                    statusHtml += `<span style="font-size:0.8rem; color:var(--text-muted); font-weight:700;">Ping: <b style="color:${ping > 300 ? 'var(--danger)' : 'var(--success)'}">${Math.round(ping)}ms</b></span>`;
+                } else {
+                    statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
+                }
+
+                const adminOffset = data.admin_offset || 0;
+                let aOffsetClass = 'offset-zero'; let aOffsetText = '0.00s';
+                if (adminOffset > 0) { aOffsetClass = 'offset-pos'; aOffsetText = `+${adminOffset.toFixed(2)}s`; }
+                if (adminOffset < 0) { aOffsetClass = 'offset-neg'; aOffsetText = `${adminOffset.toFixed(2)}s`; }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><div class="user-info"><span class="user-name">${data.note || 'Chưa Ghi Chú'}</span> <span class="device-id">${id}</span></div></td>
+                    <td>${statusHtml}</td>
+                    <td style="text-align: right;">
+                        <span class="offset-badge ${aOffsetClass}" style="margin-bottom: 8px;">⚙️ Admin: ${aOffsetText}</span><br>
+                        <div class="ctrl-group">
+                            <div class="ctrl-box">
+                                <button class="ctrl-btn btn-sub" onclick="adjustOffset('${id}', -1)">-</button>
+                                <input type="number" id="step-minus-staff-${id}" class="ctrl-input step-minus" value="0.1" step="0.01">
+                            </div>
+                            <div class="ctrl-box">
+                                <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)">+</button>
+                                <input type="number" id="step-plus-staff-${id}" class="ctrl-input step-plus" value="0.1" step="0.01">
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+            document.getElementById('count-staff').textContent = staffCount;
         }
 
         window.syncAllSteps = (type, val) => {
             const className = type === 'plus' ? '.step-plus' : '.step-minus';
-            document.querySelectorAll(className).forEach(input => {
-                input.value = val;
-                savedStepValues[input.id] = val; 
-            });
+            document.querySelectorAll(className).forEach(input => { input.value = val; savedStepValues[input.id] = val; });
         };
 
         let savedStepValues = {};
         function renderMonitorTable() {
             document.querySelectorAll('.ctrl-input').forEach(input => { if(!input.id.includes('step-all')) savedStepValues[input.id] = input.value; });
             const tbody = document.getElementById('monitor-list-body'); tbody.innerHTML = ''; const now = Date.now();
-            
             const globalMinus = document.getElementById('step-all-minus').value || "0.1";
             const globalPlus = document.getElementById('step-all-plus').value || "0.1";
 
             let monitorArray = [];
             for (const [id, data] of Object.entries(devicesData)) {
                 const isOnline = data.last_active && (now - data.last_active < 60000);
-                if (isOnline && data.status !== 'locked') {
-                    monitorArray.push({ id, data });
-                }
+                if (isOnline && data.status !== 'locked') monitorArray.push({ id, data });
             }
 
-            const countMonitorEl = document.getElementById('count-monitor');
-            if(countMonitorEl) countMonitorEl.textContent = monitorArray.length;
-
-            monitorArray.sort((a, b) => {
-                const endTimeA = a.data.current_task?.end_time || 0;
-                const endTimeB = b.data.current_task?.end_time || 0;
-                return endTimeB - endTimeA;
-            });
+            document.getElementById('count-monitor').textContent = monitorArray.length;
+            monitorArray.sort((a, b) => (b.data.current_task?.end_time || 0) - (a.data.current_task?.end_time || 0));
 
             monitorArray.forEach(item => {
-                const id = item.id;
-                const data = item.data;
-                const task = data.current_task || {};
-                const endTime = task.end_time || 0; 
-                
-                const adminOffset = data.admin_offset || 0; 
-                const clientOffset = task.client_offset || 0; 
-                
-                const clientPing = task.ping || 0; 
-                const boxFlag = task.flag || ''; 
+                const {id, data} = item; const task = data.current_task || {};
+                const adminOffset = data.admin_offset || 0; const clientOffset = task.client_offset || 0; 
                 
                 let aOffsetClass = 'offset-zero'; let aOffsetText = '0.00s';
                 if (adminOffset > 0) { aOffsetClass = 'offset-pos'; aOffsetText = `+${adminOffset.toFixed(2)}s`; }
@@ -797,36 +810,30 @@
                 if (clientOffset < 0) { cOffsetClass = 'offset-neg'; cOffsetText = `${clientOffset.toFixed(2)}s`; }
 
                 let pingColor = 'var(--success)';
-                if (clientPing >= 150 && clientPing < 300) pingColor = 'var(--warning)';
-                if (clientPing >= 300 || clientPing === 0) pingColor = 'var(--danger)';
-                const pingHtml = clientPing > 0 
-                    ? `<span style="font-size: 0.75rem; font-weight: 700; color: ${pingColor}; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">${Math.round(clientPing)}ms</span>` 
-                    : `<span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">-- ms</span>`;
+                if (task.ping >= 150 && task.ping < 300) pingColor = 'var(--warning)';
+                if (task.ping >= 300 || task.ping === 0) pingColor = 'var(--danger)';
+                const pingHtml = task.ping > 0 ? `<span style="font-size: 0.75rem; font-weight: 700; color: ${pingColor}; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">${Math.round(task.ping)}ms</span>` : `<span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">-- ms</span>`;
                 
-                const stepMinusVal = savedStepValues[`step-minus-${id}`] || globalMinus;
-                const stepPlusVal = savedStepValues[`step-plus-${id}`] || globalPlus;
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
                         <div class="user-info" style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
-                            <span class="user-name" style="margin-bottom: 0;">${data.note || 'Khách Vô Danh'}</span>
-                            ${pingHtml}
+                            <span class="user-name" style="margin-bottom: 0; color: ${data.role==='staff'?'var(--staff)':'var(--text-main)'}">${data.note || 'Khách Vô Danh'} ${data.role==='staff'?'👷':''}</span> ${pingHtml}
                         </div>
                         <span class="device-id">${id}</span>
                     </td>
                     <td><span style="font-family: 'JetBrains Mono', monospace; font-weight:800; color:var(--primary); font-size: 1.15rem;">${task.rate || 'Đang chờ...'}</span></td>
-                    <td><b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span> <span style="font-size: 1.2rem; margin-left: 5px;">${boxFlag}</span></td>
+                    <td><b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span> <span style="font-size: 1.2rem; margin-left: 5px;">${task.flag || ''}</span></td>
                     <td style="text-align: right;">
-                        <div><span class="live-cd" data-endtime="${endTime}">0.0</span></div>
+                        <div><span class="live-cd" data-endtime="${task.end_time || 0}">0.0</span></div>
                         <div class="ctrl-group">
                             <div class="ctrl-box">
                                 <button class="ctrl-btn btn-sub" onclick="adjustOffset('${id}', -1)">-</button>
-                                <input type="number" id="step-minus-${id}" class="ctrl-input step-minus" value="${stepMinusVal}" step="0.01">
+                                <input type="number" id="step-minus-${id}" class="ctrl-input step-minus" value="${savedStepValues[`step-minus-${id}`] || globalMinus}" step="0.01">
                             </div>
                             <div class="ctrl-box">
                                 <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)">+</button>
-                                <input type="number" id="step-plus-${id}" class="ctrl-input step-plus" value="${stepPlusVal}" step="0.01">
+                                <input type="number" id="step-plus-${id}" class="ctrl-input step-plus" value="${savedStepValues[`step-plus-${id}`] || globalPlus}" step="0.01">
                             </div>
                             <button class="btn-reset" onclick="resetOffset('${id}')">RESET</button>
                         </div>
@@ -841,152 +848,104 @@
         }
 
         function renderStatsTable() {
-            const tbody = document.getElementById('stats-list-body');
-            tbody.innerHTML = '';
-            const now = Date.now();
-            let statsArray = [];
-
-            for (const [id, data] of Object.entries(devicesData)) {
-                let openedCount = parseInt(data.opened_today) || 0;
-                statsArray.push({
-                    id: id,
-                    name: data.note || 'Khách Vô Danh',
-                    last_active: data.last_active,
-                    status: data.status,
-                    opened: openedCount
-                });
-            }
-
+            const tbody = document.getElementById('stats-list-body'); tbody.innerHTML = '';
+            const now = Date.now(); let statsArray = [];
+            for (const [id, data] of Object.entries(devicesData)) statsArray.push({ id, name: data.note || 'Khách', last_active: data.last_active, status: data.status, opened: parseInt(data.opened_today) || 0 });
             statsArray.sort((a, b) => b.opened - a.opened);
-            
             const rankedUsers = statsArray.filter(item => item.opened > 0);
-            
-            const countStatsEl = document.getElementById('count-stats');
-            if(countStatsEl) countStatsEl.textContent = rankedUsers.length;
+            document.getElementById('count-stats').textContent = rankedUsers.length;
 
             rankedUsers.forEach((item, index) => {
                 const rank = index + 1;
                 let rankHtml = `<span class="rank-badge">${rank}</span>`;
-                
                 if (rank === 1) rankHtml = `<span class="rank-badge top-1">🥇 1</span>`;
                 if (rank === 2) rankHtml = `<span class="rank-badge top-2">🥈 2</span>`;
                 if (rank === 3) rankHtml = `<span class="rank-badge top-3">🥉 3</span>`;
 
                 const isOnline = item.last_active && (now - item.last_active < 60000);
-                let statusHtml = '';
-                if (item.status === 'locked') {
-                    statusHtml = `<span style="color: var(--danger); font-size: 0.85rem; font-weight: 700;">🔒 Đang Khóa</span>`;
-                } else if (isOnline) {
-                    statusHtml = `<span style="color: var(--success); font-size: 0.85rem; font-weight: 700;"><span style="display:inline-block; width:6px; height:6px; background:var(--success); border-radius:50%; margin-right:4px; box-shadow: 0 0 5px var(--success); animation: pulse 1s infinite;"></span>Đang Chạy Auto</span>`;
-                } else {
-                    statusHtml = `<span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">🕒 ${formatTimeAgo(item.last_active)}</span>`;
-                }
+                let statusHtml = item.status === 'locked' ? `<span style="color: var(--danger); font-size: 0.85rem; font-weight: 700;">🔒 Đang Khóa</span>` : (isOnline ? `<span style="color: var(--success); font-size: 0.85rem; font-weight: 700;"><span style="display:inline-block; width:6px; height:6px; background:var(--success); border-radius:50%; margin-right:4px; box-shadow: 0 0 5px var(--success); animation: pulse 1s infinite;"></span>Đang Chạy Auto</span>` : `<span style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">🕒 ${formatTimeAgo(item.last_active)}</span>`);
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="text-align: center; vertical-align: middle;">${rankHtml}</td>
-                    <td>
-                        <div class="user-info">
-                            <span class="user-name" style="margin-bottom: 2px;">${item.name}</span>
-                            <span class="device-id" style="background: transparent; padding: 0; color: #64748b;">${item.id}</span>
-                        </div>
-                    </td>
+                    <td><div class="user-info"><span class="user-name" style="margin-bottom: 2px;">${item.name}</span><span class="device-id" style="background: transparent; padding: 0; color: #64748b;">${item.id}</span></div></td>
                     <td>${statusHtml}</td>
-                    <td style="text-align: right;">
-                        <span class="stat-number">${item.opened.toLocaleString()}</span> <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Links</span>
-                    </td>
+                    <td style="text-align: right;"><span class="stat-number">${item.opened.toLocaleString()}</span> <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Links</span></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        window.deleteDevice = (id) => {
-            const note = devicesData[id]?.note || id;
-            if(confirm(`⚠️ Sếp có CHẮC CHẮN muốn XÓA VĨNH VIỄN khách hàng [ ${note} ] không?\nThao tác này không thể hoàn tác!`)) {
-                remove(ref(db, 'devices/' + id));
-            }
-        };
-
+        window.deleteDevice = (id) => { if(confirm(`⚠️ Sếp có CHẮC CHẮN muốn XÓA VĨNH VIỄN khách hàng [ ${devicesData[id]?.note || id} ] không?`)) remove(ref(db, 'devices/' + id)); };
+        
         window.openEditModal = (id) => {
-            const data = devicesData[id];
-            if(!data) return;
+            const data = devicesData[id]; if(!data) return;
             document.getElementById('edit-old-id').value = id;
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-note').value = data.note || '';
+            document.getElementById('edit-role').value = data.role || 'vip';
             document.getElementById('editModal').style.display = 'flex';
         };
-
-        window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
-
+        window.closeEditModal = () => document.getElementById('editModal').style.display = 'none';
+        
         window.saveEditDevice = () => {
             const oldId = document.getElementById('edit-old-id').value;
             const newId = document.getElementById('edit-id').value.trim().toUpperCase();
             const newNote = document.getElementById('edit-note').value.trim();
+            const newRole = document.getElementById('edit-role').value;
             if(!newId || !newNote) return alert("Sếp không được để trống thông tin nhé!");
 
-            const dataToSave = { ...devicesData[oldId], note: newNote };
+            const dataToSave = { ...devicesData[oldId], note: newNote, role: newRole };
             if(newId !== oldId) {
-                if(devicesData[newId]) { if(!confirm("⚠️ Mã thiết bị mới này ĐÃ TỒN TẠI.\nSếp có muốn GHI ĐÈ lên nó không?")) return; }
-                set(ref(db, 'devices/' + newId), dataToSave).then(() => {
-                    remove(ref(db, 'devices/' + oldId)); closeEditModal();
-                });
-            } else { update(ref(db, 'devices/' + oldId), { note: newNote }).then(() => { closeEditModal(); }); }
+                if(devicesData[newId] && !confirm("⚠️ Mã thiết bị mới này ĐÃ TỒN TẠI.\nGHI ĐÈ?")) return;
+                set(ref(db, 'devices/' + newId), dataToSave).then(() => { remove(ref(db, 'devices/' + oldId)); closeEditModal(); });
+            } else { update(ref(db, 'devices/' + oldId), { note: newNote, role: newRole }).then(() => closeEditModal()); }
         };
 
         window.addDevice = () => {
             const id = document.getElementById('new-device-id').value.trim().toUpperCase();
             const note = document.getElementById('new-device-note').value.trim();
-            if (!id || !note) return alert("Sếp phải nhập đầy đủ Mã thiết bị và Tên Khách!");
-            set(ref(db, 'devices/' + id), { status: 'active', note: note, created_at: Date.now(), expiry_days: document.getElementById('new-device-expiry').value, last_active: 0, admin_offset: 0, opened_today: 0, current_task: {} }).then(() => {
-                alert("✅ Đã cấp quyền VIP thành công!");
+            const role = document.getElementById('new-device-role').value;
+            if (!id || !note) return alert("Sếp phải nhập đầy đủ thông tin!");
+            set(ref(db, 'devices/' + id), { role: role, status: 'active', note: note, created_at: Date.now(), expiry_days: document.getElementById('new-device-expiry').value, last_active: 0, admin_offset: 0, opened_today: 0, current_task: {} }).then(() => {
+                alert("✅ Đã cấp quyền thành công!");
                 document.getElementById('new-device-id').value = ''; document.getElementById('new-device-note').value = '';
             });
         };
 
         window.toggleLock = (id, currentStatus) => {
-            const actionText = currentStatus === 'locked' ? 'MỞ KHÓA cho thiết bị này?' : 'KHÓA thiết bị này?\n(Khách sẽ văng ra màn hình đen ngay lập tức dù đang có Free Mode)';
-            if(confirm(`Sếp có chắc chắn muốn ${actionText}`)) {
-                const newStatus = currentStatus === 'locked' ? 'active' : 'locked';
-                update(ref(db, 'devices/' + id), { status: newStatus });
-            }
+            if(confirm(currentStatus === 'locked' ? 'MỞ KHÓA cho thiết bị này?' : 'KHÓA thiết bị này?')) update(ref(db, 'devices/' + id), { status: currentStatus === 'locked' ? 'active' : 'locked' });
         };
 
         window.adjustOffset = (id, direction) => {
-            const inputId = direction === 1 ? `step-plus-${id}` : `step-minus-${id}`;
+            let inputId = `step-plus-${id}`;
+            if(direction === -1) inputId = document.getElementById(`step-minus-staff-${id}`) ? `step-minus-staff-${id}` : `step-minus-${id}`;
+            else inputId = document.getElementById(`step-plus-staff-${id}`) ? `step-plus-staff-${id}` : `step-plus-${id}`;
+            
             const stepVal = parseFloat(document.getElementById(inputId).value) || 0.1;
-            const currentOffset = devicesData[id]?.admin_offset || 0;
-            update(ref(db, 'devices/' + id), { admin_offset: Math.round((currentOffset + (stepVal * direction)) * 100) / 100 });
+            update(ref(db, 'devices/' + id), { admin_offset: Math.round(((devicesData[id]?.admin_offset || 0) + (stepVal * direction)) * 100) / 100 });
         };
         window.resetOffset = (id) => update(ref(db, 'devices/' + id), { admin_offset: 0 });
 
         window.adjustAllOffset = (direction) => {
-            const inputId = direction === 1 ? 'step-all-plus' : 'step-all-minus';
-            const stepVal = parseFloat(document.getElementById(inputId).value) || 0.1;
+            const stepVal = parseFloat(document.getElementById(direction === 1 ? 'step-all-plus' : 'step-all-minus').value) || 0.1;
             const now = Date.now(); let updates = {};
-            for (const [id, data] of Object.entries(devicesData)) {
-                if (data.last_active && (now - data.last_active < 60000) && data.status !== 'locked') {
-                    updates[`devices/${id}/admin_offset`] = Math.round(((data.admin_offset || 0) + (stepVal * direction)) * 100) / 100;
-                }
-            }
-            if (Object.keys(updates).length > 0) update(ref(db), updates);
-            else alert("Không có khách nào đang online!");
+            for (const [id, data] of Object.entries(devicesData)) if (data.last_active && (now - data.last_active < 60000) && data.status !== 'locked') updates[`devices/${id}/admin_offset`] = Math.round(((data.admin_offset || 0) + (stepVal * direction)) * 100) / 100;
+            if (Object.keys(updates).length > 0) update(ref(db), updates); else alert("Không có khách nào đang online!");
         };
         window.resetAllOffset = () => {
             const now = Date.now(); let updates = {};
-            for (const [id, data] of Object.entries(devicesData)) {
-                if (data.last_active && (now - data.last_active < 60000)) updates[`devices/${id}/admin_offset`] = 0;
-            }
+            for (const [id, data] of Object.entries(devicesData)) if (data.last_active && (now - data.last_active < 60000)) updates[`devices/${id}/admin_offset`] = 0;
             if (Object.keys(updates).length > 0) update(ref(db), updates);
         };
 
         window.switchTab = (tabId) => {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
             if (tabId === 'tab-manage') document.getElementById('btn-manage').classList.add('active');
             if (tabId === 'tab-monitor') document.getElementById('btn-monitor').classList.add('active');
             if (tabId === 'tab-stats') document.getElementById('btn-stats').classList.add('active');
+            if (tabId === 'tab-staff') document.getElementById('btn-staff').classList.add('active');
             if (tabId === 'tab-argo') document.getElementById('btn-argo').classList.add('active');
         };
 
@@ -997,7 +956,7 @@
                 el.textContent = (end && end > nowSec) ? (end - nowSec).toFixed(1) : '0.0';
             });
         }, 100);
-        setInterval(() => { renderManageTable(); renderStatsTable(); }, 30000);
+        setInterval(() => { renderManageTable(); renderStatsTable(); renderStaffTable(); }, 30000);
     </script>
 </body>
 </html>
