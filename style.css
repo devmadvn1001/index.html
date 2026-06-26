@@ -651,14 +651,13 @@ input:disabled {
     opacity: 0.8;
 }
 
-/* ================= NÚT LÙI (PREV) ĐỎ KHI RƯƠNG TRƯỚC CÒN THỜI GIAN ================= */
+/* ================= NÚT LÙI (PREV) NHỊP TIM ĐỎ KHI CÒN GIỜ ================= */
 .btn-prev-active-red {
-    background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
-    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4) !important;
+    /* Đã gỡ lệnh ghi đè background, giữ nguyên màu xám xanh gốc */
     animation: pulseRed 1.5s infinite !important;
 }
 @keyframes pulseRed {
-    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
     70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
     100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
