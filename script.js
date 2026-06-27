@@ -166,7 +166,8 @@ function checkAccess() {
 
 // BỘ ĐIỀU PHỐI MẠNG THEO ROLE (CORE ROUTING LOGIC)
 function applyNetworkSettings() {
-    let targetInterval = 1000; 
+    // 🌟 SỬA TẠI ĐÂY: Cho nó đọc Ping VIP từ bảng Admin (nếu chưa có thì mặc định 1000)
+    let targetInterval = staffSettings.vip_ping_interval || 1000; 
     let targetUrl = customWsUrl; 
 
     // NẾU LÀ NHÂN SỰ CÀY THUÊ -> BÓP PING & CHUYỂN MẠNG THEO CẦU DAO
