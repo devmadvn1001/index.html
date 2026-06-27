@@ -329,9 +329,9 @@
                 
                 <div class="staff-control-panel">
                     <div class="staff-control-title">🎛️ BẢNG ĐIỀU KHIỂN TỔNG (MASTER CONTROL)</div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
                         
-                        <div>
+                        <div style="flex: 1 1 300px;">
                             <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">1. Nhịp Ping Mạng Nhân Sự:</label>
                             <div style="display:flex; gap:10px;">
                                 <input type="number" id="staff-ping-input" value="3000" step="500" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; font-size:1.1rem; outline:none;">
@@ -340,7 +340,7 @@
                             <small style="color:#64748b; margin-top:5px; display:block;">Mặc định: 3000 ms (3 giây).</small>
                         </div>
 
-                        <div>
+                        <div style="flex: 1 1 300px;">
                             <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">2. Link WSS Dự Phòng (Mạng Free):</label>
                             <div style="display:flex; gap:10px;">
                                 <input type="text" id="staff-link-input" placeholder="wss://free-tunnel.com" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; font-size:1.1rem; outline:none;">
@@ -349,12 +349,12 @@
                             <small style="color:#64748b; margin-top:5px; display:block;">Link ngầm định hướng cho toàn bộ nhân sự.</small>
                         </div>
 
-                        <div style="display:flex; flex-direction:column; justify-content:flex-end;">
+                        <div style="flex: 1 1 300px; display:flex; flex-direction:column; justify-content:flex-end;">
                             <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">3. Cầu Dao ÉP Mạng Nhân Sự:</label>
                             <button id="btn-staff-network" class="btn" style="background:#ef4444; font-size:1.1rem;" onclick="toggleStaffNetwork()">🛑 ĐANG ÉP DÙNG MẠNG FREE</button>
                         </div>
 
-                        <div style="grid-column: 1 / -1; display:flex; align-items:center; gap: 15px; margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+                        <div style="flex: 1 1 100%; display:flex; align-items:center; gap: 15px; margin-top: 5px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px; flex-wrap: wrap;">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--text-main); font-weight:700;">
                                 <input type="checkbox" id="staff-stop-sync-cb" style="width:20px; height:20px;"> 
                                 Dừng Sync (Ping) lúc đếm ngược còn:
@@ -389,8 +389,8 @@
                 
                 <div class="staff-control-panel" style="margin-bottom: 25px; border-color: var(--primary); background: rgba(15,23,42,0.4);">
                     <div class="staff-control-title" style="color: var(--primary);">🎛️ ĐIỀU KHIỂN PING MẠNG KHÁCH VIP</div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                        <div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                        <div style="flex: 1 1 300px;">
                             <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">Nhịp Ping Khách VIP (Giãn cách):</label>
                             <div style="display:flex; gap:10px;">
                                 <input type="number" id="vip-ping-input" value="1000" step="100" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; font-size:1.1rem; outline:none;">
@@ -399,7 +399,7 @@
                             <small style="color:#64748b; margin-top:5px; display:block;">Mặc định: 1000 ms (1 giây). Quyết định độ trễ lấy data của VIP.</small>
                         </div>
                         
-                        <div style="display:flex; align-items:center; gap: 15px; border-left: 1px dashed rgba(255,255,255,0.1); padding-left: 20px;">
+                        <div style="flex: 1 1 300px; display:flex; flex-direction:column; justify-content:flex-end;">
                             <div style="display:flex; flex-direction:column; gap:8px;">
                                 <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--text-main); font-weight:700;">
                                     <input type="checkbox" id="vip-stop-sync-cb" style="width:20px; height:20px;"> 
@@ -412,7 +412,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
@@ -791,8 +790,13 @@
                 manageArray.push({ id, data, isOnline });
             }
 
-            // Sắp xếp ưu tiên người online gần nhất lên đầu (dựa vào last_active)
-            manageArray.sort((a, b) => (b.data.last_active || 0) - (a.data.last_active || 0));
+            // MỚI: Ưu tiên người Online lên đầu, ai nổ rương trước xếp trước
+            manageArray.sort((a, b) => {
+                if(a.isOnline && b.isOnline) {
+                    return (b.data.current_task?.end_time || 0) - (a.data.current_task?.end_time || 0);
+                }
+                return (b.data.last_active || 0) - (a.data.last_active || 0);
+            });
 
             manageArray.forEach(item => {
                 const { id, data, isOnline } = item;
