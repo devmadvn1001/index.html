@@ -285,8 +285,29 @@ let ws = null; let wsPingInterval = null; let isSyncOn = isT3 ? true : false; le
 function startWsPing() {
     if (wsPingInterval) clearInterval(wsPingInterval);
     wsPingInterval = setInterval(() => {
-        if (ws && ws.readyState === 1 && (isT3 || isSyncOn)) ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() }));
-    }, currentPingInterval); // <-- PING LINH HOẠT TÙY ĐỐI TƯỢNG (1000ms HOẶC 3000ms)
+        let shouldPing = true;
+        
+        // KIỂM TRA TÍNH NĂNG DỪNG SYNC
+        if (endTime > 0) {
+            let stopActive = myRole === 'staff' ? staffSettings.stop_sync_staff_active : staffSettings.stop_sync_vip_active;
+            let stopSec = myRole === 'staff' ? (staffSettings.stop_sync_staff_sec || 2) : (staffSettings.stop_sync_vip_sec || 2);
+            
+            if (stopActive) {
+                const now = getCurrentTimeMs();
+                const diffSeconds = ((endTime * 1000) + (timeOffset * 1000) + (adminOffset * 1000) - now) / 1000;
+                
+                // NẾU GIỜ CHỈ CÒN NHỎ HƠN MỐC SẾP CÀI -> NGẮT PING ĐỂ BẢO TOÀN SỐ GIÂY
+                if (diffSeconds <= stopSec && diffSeconds > -10) { 
+                    shouldPing = false;
+                }
+            }
+        }
+
+        // CHỈ GỬI PING KHI ĐƯỢC PHÉP
+        if (shouldPing && ws && ws.readyState === 1 && (isT3 || isSyncOn)) {
+            ws.send(JSON.stringify({ action: 'ping', client_time: getAccurateTime() }));
+        }
+    }, currentPingInterval);
 }
 
 function connectWebSocket() {
