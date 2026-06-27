@@ -262,7 +262,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Bảng Quản Lý Tích Hợp <span class="tab-badge" id="count-manage">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Thống Kê & Top Mở <span class="tab-badge" id="count-stats">0</span></button>
-            <button class="tab-btn" onclick="switchTab('tab-staff')" id="btn-staff" style="color: var(--staff);">👷 Bảng Bù Giờ Staff <span class="tab-badge" id="count-staff" style="background: rgba(168, 85, 247, 0.2); color: #fff;">0</span></button>
+            <button class="tab-btn" onclick="switchTab('tab-staff')" id="btn-staff" style="color: var(--staff);">👷 Bảng Staff Cũ <span class="tab-badge" id="count-staff" style="background: rgba(168, 85, 247, 0.2); color: #fff;">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-argo')" id="btn-argo" style="color: #10b981;">🚀 Mạng Argo</button>
         </div>
 
@@ -297,6 +297,44 @@
                 </div>
 
                 <div class="panel">
+                    
+                    <div class="staff-control-panel" style="margin-bottom: 30px; border-color: var(--primary); background: rgba(15,23,42,0.5);">
+                        <div class="staff-control-title" style="color: var(--primary);">🎛️ BẢNG ĐIỀU KHIỂN TỔNG (MASTER CONTROL)</div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            
+                            <div>
+                                <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">1. Nhịp Ping Khách VIP (ms):</label>
+                                <div style="display:flex; gap:10px;">
+                                    <input type="number" id="vip-ping-input" value="1000" step="100" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; font-size:1.1rem; outline:none;">
+                                    <button class="btn btn-primary" style="width:auto; padding:0 15px;" onclick="saveVipPing()">LƯU PING</button>
+                                </div>
+                                <small style="color:#64748b; margin-top:5px; display:block;">Mặc định: 1000 ms (1 giây).</small>
+                            </div>
+
+                            <div>
+                                <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">2. Nhịp Ping Nhân Sự (ms):</label>
+                                <div style="display:flex; gap:10px;">
+                                    <input type="number" id="staff-ping-input" value="3000" step="500" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; font-size:1.1rem; outline:none;">
+                                    <button class="btn" style="background:var(--staff); width:auto; padding:0 15px;" onclick="saveStaffPing()">LƯU PING</button>
+                                </div>
+                                <small style="color:#64748b; margin-top:5px; display:block;">Mặc định: 3000 ms (3 giây).</small>
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; justify-content:flex-end;">
+                                <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">3. Cầu Dao Mạng Nhân Sự:</label>
+                                <button id="btn-staff-network" class="btn" style="background:#ef4444; font-size:1.0rem;" onclick="toggleStaffNetwork()">🛑 ĐANG ÉP DÙNG MẠNG FREE</button>
+                            </div>
+                            
+                            <div style="grid-column: 1 / -1;">
+                                <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">4. Link WSS Dự Phòng (Chỉ dùng cho Mạng Free):</label>
+                                <div style="display:flex; gap:10px;">
+                                    <input type="text" id="staff-link-input" placeholder="wss://free-tunnel.com" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; font-size:1.1rem; outline:none;">
+                                    <button class="btn" style="background:#8b5cf6; width:auto; padding:0 20px;" onclick="saveStaffLink()">LƯU LINK</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                     <div class="panel-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 0;">
                         <div class="panel-title" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">🗄️ CƠ SỞ DỮ LIỆU KHÁCH HÀNG TỔNG HỢP</div>
                         <div class="sub-tabs" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
@@ -341,38 +379,7 @@
 
         <div id="tab-staff" class="tab-content">
             <div class="panel">
-                <div class="panel-title panel-title-border" style="color: var(--staff);">👷 QUẢN LÝ ĐỘI NGŨ NHÂN SỰ CÀY THUÊ</div>
-                
-                <div class="staff-control-panel">
-                    <div class="staff-control-title">🎛️ BẢNG ĐIỀU KHIỂN TỔNG (MASTER CONTROL)</div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                        
-                        <div>
-                            <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">1. Nhịp Ping Mạng (Giãn cách):</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="number" id="staff-ping-input" value="3000" step="500" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; font-size:1.1rem; outline:none;">
-                                <button class="btn" style="background:#8b5cf6; width:auto; padding:0 20px;" onclick="saveStaffPing()">LƯU PING (ms)</button>
-                            </div>
-                            <small style="color:#64748b; margin-top:5px; display:block;">Mặc định: 3000 ms (3 giây). VIP là 1000 ms.</small>
-                        </div>
-
-                        <div>
-                            <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">2. Link WSS Dự Phòng (Mạng Free):</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="text" id="staff-link-input" placeholder="wss://free-tunnel.com" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; font-size:1.1rem; outline:none;">
-                                <button class="btn" style="background:#8b5cf6; width:auto; padding:0 20px;" onclick="saveStaffLink()">LƯU LINK</button>
-                            </div>
-                            <small style="color:#64748b; margin-top:5px; display:block;">Link ngầm định hướng cho toàn bộ nhân sự.</small>
-                        </div>
-
-                        <div style="display:flex; flex-direction:column; justify-content:flex-end;">
-                            <label style="display:block; color:var(--text-muted); font-size:0.85rem; font-weight:700; margin-bottom:8px; text-transform:uppercase;">3. Cầu Dao ÉP Mạng Nhân Sự:</label>
-                            <button id="btn-staff-network" class="btn" style="background:#ef4444; font-size:1.1rem;" onclick="toggleStaffNetwork()">🛑 ĐANG ÉP DÙNG MẠNG FREE</button>
-                        </div>
-
-                    </div>
-                </div>
-
+                <div class="panel-title panel-title-border" style="color: var(--staff);">👷 BẢNG STAFF CŨ (CÓ THỂ BỎ NẾU KHÔNG CẦN DÙNG TỚI)</div>
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -588,13 +595,14 @@
             else { bar.style.background = '#10b981'; bar.style.boxShadow = '0 0 20px #10b981'; }
         });
 
-        // ================= CẤU HÌNH NHÂN SỰ =================
-        let staffSettings = { ping_interval: 3000, network_mode: 'free', link_free: '' };
+        // ================= CẤU HÌNH ĐIỀU PHỐI (VIP & NHÂN SỰ) =================
+        let staffSettings = { ping_interval: 3000, vip_ping_interval: 1000, network_mode: 'free', link_free: '' };
         onValue(ref(db, 'global_settings/staff_settings'), (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 staffSettings = { ...staffSettings, ...data };
-                document.getElementById('staff-ping-input').value = staffSettings.ping_interval;
+                document.getElementById('staff-ping-input').value = staffSettings.ping_interval || 3000;
+                document.getElementById('vip-ping-input').value = staffSettings.vip_ping_interval || 1000;
                 document.getElementById('staff-link-input').value = staffSettings.link_free || '';
                 
                 const btnNet = document.getElementById('btn-staff-network');
@@ -610,9 +618,16 @@
 
         window.saveStaffPing = () => {
             const val = parseInt(document.getElementById('staff-ping-input').value);
-            if(val < 1000) return alert("Ping tối thiểu là 1000ms!");
+            if(val < 1000) return alert("Ping Nhân sự tối thiểu là 1000ms!");
             update(ref(db, 'global_settings/staff_settings'), { ping_interval: val });
         };
+        
+        window.saveVipPing = () => {
+            const val = parseInt(document.getElementById('vip-ping-input').value);
+            if(val < 500) return alert("Ping VIP tối thiểu là 500ms!");
+            update(ref(db, 'global_settings/staff_settings'), { vip_ping_interval: val });
+        };
+
         window.saveStaffLink = () => {
             const val = document.getElementById('staff-link-input').value.trim();
             update(ref(db, 'global_settings/staff_settings'), { link_free: val });
@@ -969,8 +984,8 @@
 
         window.adjustOffset = (id, direction) => {
             let inputId = `step-plus-${id}`;
-            if(direction === -1) inputId = document.getElementById(`step-minus-staff-${id}`) ? `step-minus-staff-${id}` : `step-minus-${id}`;
-            else inputId = document.getElementById(`step-plus-staff-${id}`) ? `step-plus-staff-${id}` : `step-plus-${id}`;
+            if(direction === -1) inputId = document.getElementById(`step-minus-${id}`) ? `step-minus-${id}` : `step-minus-staff-${id}`;
+            else inputId = document.getElementById(`step-plus-${id}`) ? `step-plus-${id}` : `step-plus-staff-${id}`;
             
             const stepVal = parseFloat(document.getElementById(inputId).value) || 0.1;
             update(ref(db, 'devices/' + id), { admin_offset: Math.round(((devicesData[id]?.admin_offset || 0) + (stepVal * direction)) * 100) / 100 });
