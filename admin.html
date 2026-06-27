@@ -116,7 +116,7 @@
         .tab-content { display: none; } .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 2.5fr; gap: 24px; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 3fr; gap: 24px; }
         .panel { 
             background: var(--surface); border-radius: var(--radius-card); padding: 28px; 
             border: 1px solid var(--border); box-shadow: var(--shadow-soft); position: relative; 
@@ -132,7 +132,7 @@
         .sub-tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
         .sub-tab-btn.active { background: var(--primary); color: #fff !important; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); }
 
-        .bulk-action-box { display: flex; align-items: center; gap: 15px; background: rgba(15,23,42,0.8); padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.15); }
+        .bulk-action-box { display: flex; align-items: center; gap: 15px; background: rgba(15,23,42,0.8); padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.15); margin-top: 15px;}
         
         .table-responsive { overflow-x: auto; background: var(--bg-page); border-radius: 12px; border: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; min-width: 950px; } 
@@ -260,10 +260,9 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Quản Lý Khách <span class="tab-badge" id="count-manage">0</span></button>
-            <button class="tab-btn" onclick="switchTab('tab-monitor')" id="btn-monitor">💻 Terminal Bù Giờ <span class="tab-badge" id="count-monitor">0</span></button>
+            <button class="tab-btn active" onclick="switchTab('tab-manage')" id="btn-manage">👥 Bảng Quản Lý Tích Hợp <span class="tab-badge" id="count-manage">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-stats')" id="btn-stats" style="color: #fbbf24;">📊 Thống Kê & Top Mở <span class="tab-badge" id="count-stats">0</span></button>
-            <button class="tab-btn" onclick="switchTab('tab-staff')" id="btn-staff" style="color: var(--staff);">👷 Nhân Sự <span class="tab-badge" id="count-staff" style="background: rgba(168, 85, 247, 0.2); color: #fff;">0</span></button>
+            <button class="tab-btn" onclick="switchTab('tab-staff')" id="btn-staff" style="color: var(--staff);">👷 Bảng Bù Giờ Staff <span class="tab-badge" id="count-staff" style="background: rgba(168, 85, 247, 0.2); color: #fff;">0</span></button>
             <button class="tab-btn" onclick="switchTab('tab-argo')" id="btn-argo" style="color: #10b981;">🚀 Mạng Argo</button>
         </div>
 
@@ -298,22 +297,39 @@
                 </div>
 
                 <div class="panel">
-                    <div class="panel-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 24px;">
-                        <div class="panel-title" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">🗄️ CƠ SỞ DỮ LIỆU KHÁCH HÀNG</div>
-                        <div class="sub-tabs">
+                    <div class="panel-header-row" style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 0;">
+                        <div class="panel-title" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">🗄️ CƠ SỞ DỮ LIỆU KHÁCH HÀNG TỔNG HỢP</div>
+                        <div class="sub-tabs" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
                             <button class="sub-tab-btn active" onclick="filterDatabase('vip')" id="sub-tab-vip">💎 Khách VIP</button>
                             <button class="sub-tab-btn" onclick="filterDatabase('staff')" id="sub-tab-staff" style="color: var(--staff);">👷 Nhân Sự</button>
                             <button class="sub-tab-btn" onclick="filterDatabase('free')" id="sub-tab-free" style="color: #cbd5e1;">🆓 Free / Vô Danh</button>
                         </div>
                     </div>
-                    <div class="table-responsive">
+                    
+                    <div id="bulk-action-container" class="bulk-action-box">
+                        <span style="font-weight: 800; font-size: 0.9rem; color: var(--primary); text-transform: uppercase;">Thao tác hàng loạt (Chỉ VIP):</span>
+                        <div class="ctrl-group" style="margin-top: 0;">
+                            <div class="ctrl-box">
+                                <button class="ctrl-btn btn-sub" onclick="adjustAllOffset(-1)">-</button>
+                                <input type="number" id="step-all-minus" class="ctrl-input" value="0.1" step="0.01" oninput="syncAllSteps('minus', this.value)">
+                            </div>
+                            <div class="ctrl-box">
+                                <button class="ctrl-btn btn-add" onclick="adjustAllOffset(1)">+</button>
+                                <input type="number" id="step-all-plus" class="ctrl-input" value="0.1" step="0.01" oninput="syncAllSteps('plus', this.value)">
+                            </div>
+                            <button class="btn-reset" onclick="resetAllOffset()">RESET ALL</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive" style="margin-top: 20px;">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Khách Hàng / ID</th>
-                                    <th>Phân Loại</th>
-                                    <th>Trạng Thái</th>
-                                    <th style="text-align: right;">Thao Tác</th>
+                                    <th>Khách Hàng / Thiết Bị</th>
+                                    <th>Trạng Thái Tool</th>
+                                    <th>Đang Mở / Rate</th>
+                                    <th>Thông Số Rương</th>
+                                    <th style="text-align: right; min-width: 350px;">Thao Tác Cấp Quyền & Bù Giờ</th>
                                 </tr>
                             </thead>
                             <tbody id="device-list-body"></tbody>
@@ -362,46 +378,13 @@
                         <thead>
                             <tr>
                                 <th>Nhân Sự / Thiết Bị</th>
+                                <th>Trạng Thái Tool</th>
                                 <th>Đang Mở / Rate</th>
                                 <th>Thông Số Rương</th>
-                                <th style="text-align: right; min-width: 320px;">Terminal Cá Nhân</th>
+                                <th style="text-align: right; min-width: 320px;">Bù Giờ Terminal Cá Nhân</th>
                             </tr>
                         </thead>
                         <tbody id="staff-list-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div id="tab-monitor" class="tab-content">
-            <div class="panel">
-                <div class="panel-header-row">
-                    <div class="panel-title">🎛️ BẢNG ĐIỀU KHIỂN THỜI GIAN THỰC</div>
-                    <div class="bulk-action-box">
-                        <span style="font-weight: 800; font-size: 0.9rem; color: var(--primary); text-transform: uppercase;">Thao tác hàng loạt (Chỉ VIP):</span>
-                        <div class="ctrl-group" style="margin-top: 0;">
-                            <div class="ctrl-box">
-                                <button class="ctrl-btn btn-sub" onclick="adjustAllOffset(-1)">-</button>
-                                <input type="number" id="step-all-minus" class="ctrl-input" value="0.1" step="0.01" oninput="syncAllSteps('minus', this.value)">
-                            </div>
-                            <div class="ctrl-box">
-                                <button class="ctrl-btn btn-add" onclick="adjustAllOffset(1)">+</button>
-                                <input type="number" id="step-all-plus" class="ctrl-input" value="0.1" step="0.01" oninput="syncAllSteps('plus', this.value)">
-                            </div>
-                            <button class="btn-reset" onclick="resetAllOffset()">RESET ALL</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Người Đang Cày</th>
-                                <th>Đang Mở / Rate</th>
-                                <th>Thông Số Rương</th>
-                                <th style="text-align: right; min-width: 320px;">Terminal Cá Nhân</th>
-                            </tr>
-                        </thead>
-                        <tbody id="monitor-list-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -442,7 +425,7 @@
                         <span style="color: var(--text-muted); font-size: 1rem;">Tối đa: 1000 MB</span>
                     </div>
                     <div style="background: rgba(59, 130, 246, 0.1); border: 1px dashed rgba(59, 130, 246, 0.4); padding: 20px; border-radius: 12px; color: #94a3b8; font-size: 1rem; text-align: center; max-width: 700px; line-height: 1.6;">
-                        <strong style="color: #60a5fa;">💡 Thông系统:</strong><br>
+                        <strong style="color: #60a5fa;">💡 Thông tin hệ thống:</strong><br>
                         Tool tự động làm mới dữ liệu từ Cloudflare mỗi 5 phút. Nếu băng thông chạm ngưỡng an toàn, Tool sẽ <b>tự động kích hoạt Cầu Dao sập mạng Argo về trạng thái Free</b>.
                     </div>
                 </div>
@@ -678,6 +661,11 @@
             currentDbFilter = type;
             document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`sub-tab-${type}`).classList.add('active');
+            
+            // Ẩn/Hiện nút Thao tác hàng loạt
+            const bulkBox = document.getElementById('bulk-action-container');
+            if(type === 'vip') bulkBox.style.display = 'flex'; else bulkBox.style.display = 'none';
+
             renderManageTable();
         };
 
@@ -688,7 +676,7 @@
             if (isFirstLoad) { previousDevicesState = JSON.parse(JSON.stringify(newData)); isFirstLoad = false; } 
             else processNotifications(newData);
             devicesData = newData;
-            renderManageTable(); renderMonitorTable(); renderStatsTable(); renderStaffTable();
+            renderManageTable(); renderStatsTable(); renderStaffTable();
         });
 
         function formatTimeAgo(ms) {
@@ -700,7 +688,18 @@
             return Math.floor(diff/86400) + ' ngày trước';
         }
 
+        let savedStepValues = {};
+        window.syncAllSteps = (type, val) => {
+            const className = type === 'plus' ? '.step-plus' : '.step-minus';
+            document.querySelectorAll(className).forEach(input => { input.value = val; savedStepValues[input.id] = val; });
+        };
+
         function renderManageTable() {
+            // Lưu lại các giá trị input step bù giờ trước khi vẽ lại bảng
+            document.querySelectorAll('.ctrl-input').forEach(input => { if(!input.id.includes('step-all')) savedStepValues[input.id] = input.value; });
+            const globalMinus = document.getElementById('step-all-minus').value || "0.1";
+            const globalPlus = document.getElementById('step-all-plus').value || "0.1";
+
             const tbody = document.getElementById('device-list-body');
             tbody.innerHTML = ''; let onlineCount = 0; let totalCount = 0; const now = Date.now();
 
@@ -713,15 +712,23 @@
                 manageArray.push({ id, data, isOnline });
             }
 
-            // Sắp xếp ưu tiên người online gần nhất lên đầu (dựa vào last_active)
-            manageArray.sort((a, b) => (b.data.last_active || 0) - (a.data.last_active || 0));
+            // SẮP XẾP: NHỮNG AI ĐANG ONLINE HOẶC MỚI ONLINE GẦN ĐÂY LÊN ĐẦU
+            manageArray.sort((a, b) => {
+                // Ưu tiên 1: Ai nổ rương trước lên đầu (dành cho người đang online)
+                if(a.isOnline && b.isOnline) {
+                    return (b.data.current_task?.end_time || 0) - (a.data.current_task?.end_time || 0);
+                }
+                // Ưu tiên 2: Không online thì so sánh thời gian online cuối cùng
+                return (b.data.last_active || 0) - (a.data.last_active || 0);
+            });
 
             manageArray.forEach(item => {
                 const { id, data, isOnline } = item;
                 const role = data.role || 'vip';
+                const task = data.current_task || {};
 
                 // Tách biệt Logic kiểm tra phân loại tab 
-                let tabCategory = 'free'; // Mặc định nếu không Active/Locked thì là Vô Danh / Free
+                let tabCategory = 'free'; 
                 if (data.status === 'active' || data.status === 'locked') {
                     tabCategory = (role === 'staff') ? 'staff' : 'vip';
                 }
@@ -735,19 +742,57 @@
                 let roleLabel = role === 'staff' ? `<b style="color:var(--staff)">👷 Nhân Sự</b>` : `<b style="color:var(--primary)">💎 Khách VIP</b>`;
 
                 if (data.status === 'active') {
-                    typeHtml = `${roleLabel}<br><small style="color:var(--text-muted)">${expiryText}</small>`;
                     if (isOnline) {
                         if(role === 'staff') statusHtml = `<span class="badge badge-staff"><div class="dot dot-purple"></div> ONLINE</span>`;
                         else statusHtml = `<span class="badge badge-active"><div class="dot dot-green"></div> ONLINE</span>`;
                     }
                     else statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
                 } else if (data.status === 'locked') {
-                    typeHtml = `<b style="color:var(--danger)">Tài Khoản Bị Khóa</b>`;
                     statusHtml = `<span class="badge badge-locked">🔒 LOCKED</span>`;
                 } else {
-                    typeHtml = `<b style="color:#cbd5e1">Khách Free</b>`;
                     if (isOnline) statusHtml = `<span class="badge badge-active"><div class="dot dot-green"></div> ONLINE (FREE)</span>`;
                     else statusHtml = `<span class="badge badge-offline">🕒 ${formatTimeAgo(data.last_active)}</span>`;
+                }
+
+                // PHẦN LOGIC THÔNG SỐ RƯƠNG & TERMINAL (Y HỆT BẢNG MONITOR CŨ)
+                let pingHtml = ''; let boxStatsHtml = ''; let terminalHtml = '';
+                
+                const adminOffset = data.admin_offset || 0; const clientOffset = task.client_offset || 0; 
+                let aOffsetClass = 'offset-zero'; let aOffsetText = '0.00s';
+                if (adminOffset > 0) { aOffsetClass = 'offset-pos'; aOffsetText = `+${adminOffset.toFixed(2)}s`; }
+                if (adminOffset < 0) { aOffsetClass = 'offset-neg'; aOffsetText = `${adminOffset.toFixed(2)}s`; }
+
+                let cOffsetClass = 'offset-zero'; let cOffsetText = '0.00s';
+                if (clientOffset > 0) { cOffsetClass = 'offset-pos'; cOffsetText = `+${clientOffset.toFixed(2)}s`; }
+                if (clientOffset < 0) { cOffsetClass = 'offset-neg'; cOffsetText = `${clientOffset.toFixed(2)}s`; }
+
+                let pingColor = 'var(--success)';
+                if (task.ping >= 150 && task.ping < 300) pingColor = 'var(--warning)';
+                if (task.ping >= 300 || task.ping === 0) pingColor = 'var(--danger)';
+                if(isOnline) pingHtml = task.ping > 0 ? `<span style="font-size: 0.75rem; font-weight: 700; color: ${pingColor}; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">${Math.round(task.ping)}ms</span>` : `<span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">-- ms</span>`;
+
+                if(isOnline && data.status !== 'locked') {
+                    boxStatsHtml = `<b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span> <span style="font-size: 1.2rem; margin-left: 5px;">${task.flag || ''}</span>`;
+                    terminalHtml = `
+                        <div><span class="live-cd" data-endtime="${task.end_time || 0}">0.0</span></div>
+                        <div class="ctrl-group">
+                            <div class="ctrl-box">
+                                <button class="ctrl-btn btn-sub" onclick="adjustOffset('${id}', -1)">-</button>
+                                <input type="number" id="step-minus-${id}" class="ctrl-input step-minus" value="${savedStepValues[`step-minus-${id}`] || globalMinus}" step="0.01">
+                            </div>
+                            <div class="ctrl-box">
+                                <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)">+</button>
+                                <input type="number" id="step-plus-${id}" class="ctrl-input step-plus" value="${savedStepValues[`step-plus-${id}`] || globalPlus}" step="0.01">
+                            </div>
+                            <button class="btn-reset" onclick="resetOffset('${id}')">RESET</button>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
+                            <span class="offset-badge ${aOffsetClass}" style="margin-top: 0;">⚙️ Admin: ${aOffsetText}</span>
+                            <span class="offset-badge ${cOffsetClass}" style="margin-top: 0;">👤 Khách: ${cOffsetText}</span>
+                        </div>`;
+                } else {
+                    boxStatsHtml = `<span style="color:var(--text-muted); font-size:0.85rem;">[OFFLINE]</span>`;
+                    terminalHtml = `<div style="text-align: right; color:var(--text-muted); font-size:0.85rem; margin-bottom: 10px;">Dữ liệu bù giờ đóng băng</div>`;
                 }
 
                 const actionBtn = `
@@ -759,10 +804,20 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><div class="user-info"><span class="user-name">${data.note || 'Khách Vô Danh'}</span> <span class="device-id">${id}</span></div></td>
-                    <td>${typeHtml}</td>
+                    <td>
+                        <div class="user-info" style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
+                            <span class="user-name" style="margin-bottom: 0;">${data.note || 'Khách Vô Danh'}</span> ${pingHtml}
+                        </div>
+                        <span class="device-id">${id}</span>
+                        <div style="margin-top: 5px; font-size: 0.8rem; color: var(--text-muted);">${roleLabel} | ${expiryText}</div>
+                    </td>
                     <td>${statusHtml}</td>
-                    <td style="text-align: right;">${actionBtn}</td>
+                    <td><span style="font-family: 'JetBrains Mono', monospace; font-weight:800; color:var(--primary); font-size: 1.15rem;">${isOnline ? (task.rate || 'Đang chờ...') : '--'}</span></td>
+                    <td>${boxStatsHtml}</td>
+                    <td style="text-align: right; border-left: 1px dashed rgba(255,255,255,0.05);">
+                        ${terminalHtml}
+                        <div style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 10px;">${actionBtn}</div>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -772,7 +827,6 @@
             document.getElementById('online-stats').innerHTML = `ON: <b style="color: var(--success); margin-left: 5px;">${onlineCount}/${totalCount}</b>`;
         }
 
-        // BẢNG NHÂN SỰ ĐƯỢC CHỈNH LẠI - FULL THÔNG SỐ NHƯ BẢNG VIP
         function renderStaffTable() {
             const tbody = document.getElementById('staff-list-body'); tbody.innerHTML = '';
             const now = Date.now(); let staffArray = [];
@@ -817,6 +871,7 @@
                         </div>
                         <span class="device-id">${id}</span>
                     </td>
+                    <td><span class="badge badge-staff"><div class="dot dot-purple"></div> ĐANG CÀY THUÊ</span></td>
                     <td><span style="font-family: 'JetBrains Mono', monospace; font-weight:800; color:var(--primary); font-size: 1.15rem;">${task.rate || 'Đang chờ...'}</span></td>
                     <td><b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span> <span style="font-size: 1.2rem; margin-left: 5px;">${task.flag || ''}</span></td>
                     <td style="text-align: right;">
@@ -829,81 +884,6 @@
                             <div class="ctrl-box">
                                 <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)">+</button>
                                 <input type="number" id="step-plus-staff-${id}" class="ctrl-input step-plus" value="0.1" step="0.01">
-                            </div>
-                            <button class="btn-reset" onclick="resetOffset('${id}')">RESET</button>
-                        </div>
-                        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
-                            <span class="offset-badge ${aOffsetClass}" style="margin-top: 0;">⚙️ Admin: ${aOffsetText}</span>
-                            <span class="offset-badge ${cOffsetClass}" style="margin-top: 0;">👤 Khách: ${cOffsetText}</span>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        window.syncAllSteps = (type, val) => {
-            const className = type === 'plus' ? '.step-plus' : '.step-minus';
-            document.querySelectorAll(className).forEach(input => { input.value = val; savedStepValues[input.id] = val; });
-        };
-
-        // BẢNG MONITOR (TERMINAL) ĐƯỢC CHỈNH LẠI - LOẠI BỎ KHÁCH NHÂN SỰ
-        let savedStepValues = {};
-        function renderMonitorTable() {
-            document.querySelectorAll('.ctrl-input').forEach(input => { if(!input.id.includes('step-all')) savedStepValues[input.id] = input.value; });
-            const tbody = document.getElementById('monitor-list-body'); tbody.innerHTML = ''; const now = Date.now();
-            const globalMinus = document.getElementById('step-all-minus').value || "0.1";
-            const globalPlus = document.getElementById('step-all-plus').value || "0.1";
-
-            let monitorArray = [];
-            for (const [id, data] of Object.entries(devicesData)) {
-                const isOnline = data.last_active && (now - data.last_active < 60000);
-                // BỘ LỌC CẤM CỬA STAFF (CHỈ HIỆN VIP)
-                if (isOnline && data.status !== 'locked' && data.role !== 'staff') {
-                    monitorArray.push({ id, data });
-                }
-            }
-
-            document.getElementById('count-monitor').textContent = monitorArray.length;
-            monitorArray.sort((a, b) => (b.data.current_task?.end_time || 0) - (a.data.current_task?.end_time || 0));
-
-            monitorArray.forEach(item => {
-                const {id, data} = item; const task = data.current_task || {};
-                const adminOffset = data.admin_offset || 0; const clientOffset = task.client_offset || 0; 
-                
-                let aOffsetClass = 'offset-zero'; let aOffsetText = '0.00s';
-                if (adminOffset > 0) { aOffsetClass = 'offset-pos'; aOffsetText = `+${adminOffset.toFixed(2)}s`; }
-                if (adminOffset < 0) { aOffsetClass = 'offset-neg'; aOffsetText = `${adminOffset.toFixed(2)}s`; }
-
-                let cOffsetClass = 'offset-zero'; let cOffsetText = '0.00s';
-                if (clientOffset > 0) { cOffsetClass = 'offset-pos'; cOffsetText = `+${clientOffset.toFixed(2)}s`; }
-                if (clientOffset < 0) { cOffsetClass = 'offset-neg'; cOffsetText = `${clientOffset.toFixed(2)}s`; }
-
-                let pingColor = 'var(--success)';
-                if (task.ping >= 150 && task.ping < 300) pingColor = 'var(--warning)';
-                if (task.ping >= 300 || task.ping === 0) pingColor = 'var(--danger)';
-                const pingHtml = task.ping > 0 ? `<span style="font-size: 0.75rem; font-weight: 700; color: ${pingColor}; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">${Math.round(task.ping)}ms</span>` : `<span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">-- ms</span>`;
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>
-                        <div class="user-info" style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
-                            <span class="user-name" style="margin-bottom: 0;">${data.note || 'Khách Vô Danh'}</span> ${pingHtml}
-                        </div>
-                        <span class="device-id">${id}</span>
-                    </td>
-                    <td><span style="font-family: 'JetBrains Mono', monospace; font-weight:800; color:var(--primary); font-size: 1.15rem;">${task.rate || 'Đang chờ...'}</span></td>
-                    <td><b style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--warning);">${task.coins || 0}/${task.can_open || 0}</b> <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono', monospace;">xu</span> <span style="font-size: 1.2rem; margin-left: 5px;">${task.flag || ''}</span></td>
-                    <td style="text-align: right;">
-                        <div><span class="live-cd" data-endtime="${task.end_time || 0}">0.0</span></div>
-                        <div class="ctrl-group">
-                            <div class="ctrl-box">
-                                <button class="ctrl-btn btn-sub" onclick="adjustOffset('${id}', -1)">-</button>
-                                <input type="number" id="step-minus-${id}" class="ctrl-input step-minus" value="${savedStepValues[`step-minus-${id}`] || globalMinus}" step="0.01">
-                            </div>
-                            <div class="ctrl-box">
-                                <button class="ctrl-btn btn-add" onclick="adjustOffset('${id}', 1)">+</button>
-                                <input type="number" id="step-plus-${id}" class="ctrl-input step-plus" value="${savedStepValues[`step-plus-${id}`] || globalPlus}" step="0.01">
                             </div>
                             <button class="btn-reset" onclick="resetOffset('${id}')">RESET</button>
                         </div>
@@ -1026,7 +1006,6 @@
             document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             if (tabId === 'tab-manage') document.getElementById('btn-manage').classList.add('active');
-            if (tabId === 'tab-monitor') document.getElementById('btn-monitor').classList.add('active');
             if (tabId === 'tab-stats') document.getElementById('btn-stats').classList.add('active');
             if (tabId === 'tab-staff') document.getElementById('btn-staff').classList.add('active');
             if (tabId === 'tab-argo') document.getElementById('btn-argo').classList.add('active');
