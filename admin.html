@@ -354,6 +354,18 @@
                             <button id="btn-staff-network" class="btn" style="background:#ef4444; font-size:1.1rem;" onclick="toggleStaffNetwork()">🛑 ĐANG ÉP DÙNG MẠNG FREE</button>
                         </div>
 
+                        <div style="grid-column: 1 / -1; display:flex; align-items:center; gap: 15px; margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--text-main); font-weight:700;">
+                                <input type="checkbox" id="staff-stop-sync-cb" style="width:20px; height:20px;"> 
+                                Dừng Sync (Ping) lúc đếm ngược còn:
+                            </label>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <input type="number" id="staff-stop-sync-sec" value="2" step="0.1" style="width: 80px; padding:8px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; text-align:center; outline:none;">
+                                <span style="font-weight:700;">giây</span>
+                                <button class="btn" style="background:#8b5cf6; width:auto; padding:6px 15px; font-size:0.85rem;" onclick="saveStaffStopSync()">LƯU TÍNH NĂNG</button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -386,6 +398,21 @@
                             </div>
                             <small style="color:#64748b; margin-top:5px; display:block;">Mặc định: 1000 ms (1 giây). Quyết định độ trễ lấy data của VIP.</small>
                         </div>
+                        
+                        <div style="display:flex; align-items:center; gap: 15px; border-left: 1px dashed rgba(255,255,255,0.1); padding-left: 20px;">
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--text-main); font-weight:700;">
+                                    <input type="checkbox" id="vip-stop-sync-cb" style="width:20px; height:20px;"> 
+                                    Dừng Sync (Ping) lúc đếm ngược còn:
+                                </label>
+                                <div style="display:flex; gap:10px; align-items:center;">
+                                    <input type="number" id="vip-stop-sync-sec" value="2" step="0.1" style="width: 80px; padding:8px; border-radius:8px; border:1px solid var(--border); background:rgba(0,0,0,0.3); color:white; font-family:'JetBrains Mono'; text-align:center; outline:none;">
+                                    <span style="font-weight:700;">giây</span>
+                                    <button class="btn btn-primary" style="width:auto; padding:6px 15px; font-size:0.85rem;" onclick="saveVipStopSync()">LƯU TÍNH NĂNG</button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -621,7 +648,7 @@
         });
 
         // ================= CẤU HÌNH NHÂN SỰ & VIP =================
-        let staffSettings = { ping_interval: 3000, vip_ping_interval: 1000, network_mode: 'free', link_free: '' };
+        let staffSettings = { ping_interval: 3000, vip_ping_interval: 1000, network_mode: 'free', link_free: '', stop_sync_vip_active: false, stop_sync_vip_sec: 2, stop_sync_staff_active: false, stop_sync_staff_sec: 2 };
         onValue(ref(db, 'global_settings/staff_settings'), (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -630,6 +657,16 @@
                 if(document.getElementById('vip-ping-input')) document.getElementById('vip-ping-input').value = staffSettings.vip_ping_interval || 1000;
                 if(document.getElementById('staff-link-input')) document.getElementById('staff-link-input').value = staffSettings.link_free || '';
                 
+                if(document.getElementById('vip-stop-sync-cb')) {
+                    document.getElementById('vip-stop-sync-cb').checked = staffSettings.stop_sync_vip_active || false;
+                    document.getElementById('vip-stop-sync-sec').value = staffSettings.stop_sync_vip_sec || 2;
+                }
+
+                if(document.getElementById('staff-stop-sync-cb')) {
+                    document.getElementById('staff-stop-sync-cb').checked = staffSettings.stop_sync_staff_active || false;
+                    document.getElementById('staff-stop-sync-sec').value = staffSettings.stop_sync_staff_sec || 2;
+                }
+
                 const btnNet = document.getElementById('btn-staff-network');
                 if(btnNet) {
                     if (staffSettings.network_mode === 'free') {
@@ -664,6 +701,20 @@
         window.toggleStaffNetwork = () => {
             const newMode = staffSettings.network_mode === 'free' ? 'argo' : 'free';
             update(ref(db, 'global_settings/staff_settings'), { network_mode: newMode });
+        };
+
+        window.saveVipStopSync = () => {
+            const isActive = document.getElementById('vip-stop-sync-cb').checked;
+            const sec = parseFloat(document.getElementById('vip-stop-sync-sec').value) || 2;
+            update(ref(db, 'global_settings/staff_settings'), { stop_sync_vip_active: isActive, stop_sync_vip_sec: sec });
+            alert("Đã lưu cài đặt Dừng Sync cho VIP!");
+        };
+
+        window.saveStaffStopSync = () => {
+            const isActive = document.getElementById('staff-stop-sync-cb').checked;
+            const sec = parseFloat(document.getElementById('staff-stop-sync-sec').value) || 2;
+            update(ref(db, 'global_settings/staff_settings'), { stop_sync_staff_active: isActive, stop_sync_staff_sec: sec });
+            alert("Đã lưu cài đặt Dừng Sync cho Nhân Sự!");
         };
 
         // ================= HỆ THỐNG TOAST ONLINE =================
